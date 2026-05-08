@@ -1,0 +1,348 @@
+import React, { useCallback, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Alert,
+  Image,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { AlertTriangle, Camera, ImagePlus, MapPin, MessageSquareWarning } from 'lucide-react-native';
+import ActionSheet from './ActionSheet';
+import { Colors } from '@/constants/Colors';
+import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/constants/Layout';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/contexts/I18nContext';
+import { useEmergencies, useCreateEmergency, EmergencyWithAuthor } from '@/api/hooks/useEmergencies';
+import { uploadFile } from '@/api/upload';
+import { optimizeImage } from '@/utils/optimizeImage';
+
+export type EmergencySplitTab = 'emergency' | 'claim';
+
+interface Props {
+  chantierId: string;
+  /** Si false, le bouton de creation est cache. */
+  canCreate?: boolean;
+  /** 'claim' = mode reclamation (client). 'emergency' = mode urgence (manager/ouvrier). 'split' = admin (deux sous-tabs). */
+  mode?: 'emergency' | 'claim' | 'split';
+  readonly?: boolean;
+  /** Sous-onglet actif (mode split) controle par le parent — preserve entre main-tab switches. */
+  splitTab?: EmergencySplitTab;
+  onSplitTabChange?: (tab: EmergencySplitTab) => void;
+}
+
+export default function EmergencyList({
+  chantierId,
+  canCreate = true,
+  mode = 'emergency',
+  readonly,
+  splitTab: splitTabProp,
+  onSplitTabChange,
+}: Props) {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme];
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  const { data, isLoading, refetch, isRefetching } = useEmergencies(chantierId);
+  const createMutation = useCreateEmergency();
+
+  const [submitting, setSubmitting] = useState(false);
+  const [showSourceSheet, setShowSourceSheet] = useState(false);
+  const [internalSplitTab, setInternalSplitTab] = useState<EmergencySplitTab>('emergency');
+  const splitTab = splitTabProp ?? internalSplitTab;
+  const setSplitTab = (tab: EmergencySplitTab) => {
+    if (onSplitTabChange) onSplitTabChange(tab);
+    else setInternalSplitTab(tab);
+  };
+  const isPickingRef = useRef(false);
+
+  const formatDateTime = (date: string) => {
+    const d = new Date(date);
+    return (
+      d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ' à ' +
+      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    );
+  };
+
+  const captureAndUpload = useCallback(
+    async (useCamera: boolean) => {
+      if (isPickingRef.current) return;
+      isPickingRef.current = true;
+      setSubmitting(true);
+      try {
+        // Permissions
+        // iOS : launchCameraAsync requiert AUSSI la permission MediaLibrary
+        // pour pouvoir sauvegarder la photo prise. On demande les deux.
+        if (useCamera) {
+          const camPerm = await ImagePicker.requestCameraPermissionsAsync();
+          if (!camPerm.granted) {
+            Alert.alert(t('urgence.cameraDenied'), t('urgence.cameraDeniedBody'));
+            return;
+          }
+          const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (!libPerm.granted) {
+            Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
+            return;
+          }
+        } else {
+          const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (!libPerm.granted) {
+            Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
+            return;
+          }
+        }
+
+        const result = useCamera
+          ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
+          : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false });
+        if (result.canceled || !result.assets[0]) return;
+
+        const asset = result.assets[0];
+        const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
+        const fileName = `emergency-${Date.now()}.jpg`;
+        const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
+
+        // GPS du device au moment de la capture
+        let latitude: number | undefined;
+        let longitude: number | undefined;
+        const locPerm = await Location.requestForegroundPermissionsAsync();
+        if (locPerm.granted) {
+          try {
+            const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            latitude = pos.coords.latitude;
+            longitude = pos.coords.longitude;
+          } catch {
+            // GPS indispo — on enregistre quand meme la photo
+          }
+        }
+
+        await createMutation.mutateAsync({
+          chantier_id: chantierId,
+          photo_url: uploaded.url,
+          latitude,
+          longitude,
+        });
+      } catch (err) {
+        Alert.alert(t('common.error'), err instanceof Error ? err.message : t('urgence.saveFailed'));
+      } finally {
+        setSubmitting(false);
+        isPickingRef.current = false;
+      }
+    },
+    [chantierId, createMutation, t],
+  );
+
+  const handleAddPress = useCallback(() => {
+    setShowSourceSheet(true);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: EmergencyWithAuthor }) => {
+      const lat = item.latitude != null ? Number(item.latitude) : null;
+      const lng = item.longitude != null ? Number(item.longitude) : null;
+      const hasGps = lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng);
+      return (
+        <TouchableOpacity
+          style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, Shadow.sm]}
+          onPress={() => router.push({ pathname: '/emergency/[id]', params: { id: item.id, chantierId, mode: item.type } })}
+          activeOpacity={0.85}
+        >
+          {item.photo_url ? (
+            <Image source={{ uri: item.photo_url }} style={styles.thumb} />
+          ) : (
+            <View style={[styles.thumb, { backgroundColor: colors.itemBackground, alignItems: 'center', justifyContent: 'center' }]}>
+              <AlertTriangle size={IconSize.lg} color={colors.red} />
+            </View>
+          )}
+          <View style={styles.cardInfo}>
+            <Text style={[styles.cardAuthor, { color: colors.text }]}>
+              {item.first_name} {item.last_name}
+            </Text>
+            <Text style={[styles.cardDate, { color: colors.mutedText }]}>{formatDateTime(item.created_at)}</Text>
+            {hasGps ? (
+              <View style={styles.row}>
+                <MapPin size={12} color={colors.primary} />
+                <Text style={[styles.coord, { color: colors.primary }]}>
+                  {lat!.toFixed(5)}, {lng!.toFixed(5)}
+                </Text>
+              </View>
+            ) : (
+              <Text style={[styles.coord, { color: colors.mutedText, fontStyle: 'italic' }]}>{t('urgence.noGps')}</Text>
+            )}
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    [colors, t, router, chantierId],
+  );
+
+  const allItems = data?.data ?? [];
+  const emergencyItems = allItems.filter((it) => it.type === 'emergency');
+  const claimItems = allItems.filter((it) => it.type === 'claim');
+
+  // Filtrage selon le mode :
+  // - 'claim' (client) : seulement les reclamations
+  // - 'emergency' (ouvrier) : seulement les urgences
+  // - 'split' (admin/manager) : selon le sous-onglet
+  const visibleItems =
+    mode === 'split'
+      ? splitTab === 'emergency'
+        ? emergencyItems
+        : claimItems
+      : mode === 'claim'
+        ? claimItems
+        : emergencyItems;
+
+  // Pour l'admin (mode split), bouton de creation = "Signaler une urgence" (rouge).
+  // Le bouton est masque sur le sous-onglet Reclamations (admin n'en cree pas lui-meme).
+  const showCreateBtn =
+    !readonly && canCreate && (mode !== 'split' || splitTab === 'emergency');
+
+  return (
+    <View style={styles.container}>
+      {mode === 'split' ? (
+        <View style={[styles.toggleBar, { backgroundColor: colors.itemBackground }]}>
+          <TouchableOpacity
+            style={[styles.togglePill, splitTab === 'emergency' && { backgroundColor: colors.surface }]}
+            onPress={() => setSplitTab('emergency')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: splitTab === 'emergency' }}
+          >
+            <AlertTriangle size={IconSize.sm} color={splitTab === 'emergency' ? colors.red : colors.text2} />
+            <Text style={[styles.togglePillText, { color: splitTab === 'emergency' ? colors.red : colors.text2 }]}>
+              Urgences{emergencyItems.length > 0 ? ` (${emergencyItems.length})` : ''}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.togglePill, splitTab === 'claim' && { backgroundColor: colors.surface }]}
+            onPress={() => setSplitTab('claim')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: splitTab === 'claim' }}
+          >
+            <MessageSquareWarning size={IconSize.sm} color={splitTab === 'claim' ? colors.red : colors.text2} />
+            <Text style={[styles.togglePillText, { color: splitTab === 'claim' ? colors.red : colors.text2 }]}>
+              Réclamations{claimItems.length > 0 ? ` (${claimItems.length})` : ''}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {showCreateBtn && (
+        <TouchableOpacity
+          style={[styles.addBtn, { backgroundColor: mode === 'claim' ? colors.primary : colors.red }]}
+          onPress={handleAddPress}
+          disabled={submitting}
+          accessibilityRole="button"
+          accessibilityLabel={mode === 'claim' ? t('urgence.makeClaim') : t('urgence.report')}
+        >
+          {submitting ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <>
+              <AlertTriangle size={IconSize.md} color="#FFFFFF" />
+              <Text style={styles.addBtnText}>
+                {mode === 'claim' ? t('urgence.makeClaim') : t('urgence.report')}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      )}
+
+      <FlatList
+        data={visibleItems}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
+        contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}
+        ListEmptyComponent={
+          !isLoading ? (
+            <Text style={[styles.empty, { color: colors.mutedText }]}>
+              {(mode === 'claim' || (mode === 'split' && splitTab === 'claim'))
+                ? t('urgence.emptyClaim')
+                : t('urgence.empty')}
+            </Text>
+          ) : null
+        }
+      />
+
+      <ActionSheet
+        visible={showSourceSheet}
+        title={mode === 'claim' ? t('urgence.newClaim') : t('urgence.newOne')}
+        subtitle={t('urgence.photoFrom')}
+        onClose={() => setShowSourceSheet(false)}
+        options={[
+          {
+            key: 'camera',
+            label: t('photos.camera'),
+            description: t('urgence.pickCameraDesc'),
+            icon: Camera,
+            onPress: () => captureAndUpload(true),
+          },
+          {
+            key: 'gallery',
+            label: t('photos.gallery'),
+            description: t('urgence.pickGalleryDesc'),
+            icon: ImagePlus,
+            onPress: () => captureAndUpload(false),
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: Spacing.lg },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    height: 48,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.md,
+  },
+  addBtnText: { color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  list: { paddingBottom: Spacing.xxxl },
+  card: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderRadius: Radius.lg,
+  },
+  thumb: { width: 72, height: 72, borderRadius: Radius.md },
+  cardInfo: { flex: 1, justifyContent: 'center', gap: 2 },
+  cardAuthor: { fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  cardDate: { fontSize: FontSize.xs },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  coord: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
+  empty: { fontSize: FontSize.base, textAlign: 'center', paddingTop: Spacing.xxxl, fontStyle: 'italic' },
+
+  toggleBar: {
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+    padding: 4,
+    borderRadius: Radius.pill,
+    gap: 4,
+  },
+  togglePill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.pill,
+  },
+  togglePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+});

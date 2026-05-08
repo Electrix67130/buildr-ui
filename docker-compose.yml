@@ -1,0 +1,30 @@
+networks:
+  buildr_network:
+    driver: bridge
+
+services:
+  buildr-ui-web:
+    container_name: buildr-ui-web
+    build:
+      context: .
+      target: development
+    ports:
+      - "19010:19000"   # Metro Bundler
+      - "19011:19001"   # WebSocket debugging
+      - "19012:19002"   # Manifest
+      - "19013:19003"   # Tunnel
+      - "19016:19006"   # Expo DevTools
+      - "8083:8083"     # Metro Bundler
+    environment:
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${REACT_NATIVE_PACKAGER_HOSTNAME:-192.168.1.228}
+      EXPO_PACKAGER_PROXY_URL: ${EXPO_PACKAGER_PROXY_URL:-}
+      EXPO_DEVTOOLS_LISTEN_ADDRESS: ${EXPO_DEVTOOLS_LISTEN_ADDRESS:-0.0.0.0}
+      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-http://192.168.1.228:3001}
+      EXPO_PUBLIC_API_KEY: ${EXPO_PUBLIC_API_KEY:-change-me-in-production}
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    stdin_open: true
+    tty: true
+    networks:
+      - buildr_network
