@@ -1,13 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 
-export type ChantierTab = 'comments' | 'photos' | 'documents' | 'emergencies';
+export type ChantierTab =
+  | 'comments'
+  | 'comments_steps'
+  | 'photos'
+  | 'documents'
+  | 'emergencies'
+  | 'emergencies_claim';
 
 export interface UnreadCounts {
   comments: number;
+  comments_steps: number;
   photos: number;
   documents: number;
   emergencies: number;
+  emergencies_claim: number;
+  /** IDs des étapes avec un message non-lu */
+  unread_step_ids: string[];
+  /** IDs des urgences/réclamations avec activité non-lue */
+  unread_emergency_ids: string[];
 }
 
 export function useUnreadCounts(chantierId?: string) {
@@ -30,6 +42,19 @@ export function useUnreadSummary(enabled: boolean = true) {
     queryFn: () => apiFetch<UnreadSummary>('/chantier-views/unread-summary'),
     enabled,
     refetchInterval: 60000,
+  });
+}
+
+/** Marque un item précis (étape ou urgence) comme vu — efface sa pastille spécifique. */
+export function useMarkItemViewed() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ item_type, item_id }: { item_type: 'step' | 'emergency'; item_id: string }) =>
+      apiFetch<void>('/chantier-views/item', { method: 'POST', body: { item_type, item_id } }),
+    onSettled: () => {
+      // On invalide tous les unread car on ne sait pas dans quel chantier l'item se trouve.
+      qc.invalidateQueries({ queryKey: ['chantier-views'] });
+    },
   });
 }
 

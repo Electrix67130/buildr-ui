@@ -84,6 +84,17 @@ export function useUpdatePassword() {
   });
 }
 
+/**
+ * Suppression definitive de son propre compte. Le mot de passe est redemande cote
+ * serveur : un token vole ne suffit pas a detruire un compte.
+ */
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: (body: { password: string }) =>
+      apiFetch<void>('/users/me', { method: 'DELETE', body }),
+  });
+}
+
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -116,13 +127,30 @@ export function useSwitchOrganization() {
   });
 }
 
+export interface CreateOrganizationInput {
+  name: string;
+  siret?: string | null;
+  legal_form?: string | null;
+  vat_number?: string | null;
+  naf_code?: string | null;
+  address?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  country?: string | null;
+  phone?: string | null;
+  billing_email?: string | null;
+  website?: string | null;
+  insurance_provider?: string | null;
+  insurance_number?: string | null;
+}
+
 export function useCreateOrganization() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (name: string) =>
+    mutationFn: (input: CreateOrganizationInput) =>
       apiFetch<{ id: string; name: string }>('/organizations', {
         method: 'POST',
-        body: { name },
+        body: input,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries();

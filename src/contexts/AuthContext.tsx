@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getAccessToken, clearTokens } from '@/api/client';
-import { useMe, useLogin, useRegister, useLogout } from '@/api/hooks/useAuth';
+import { useMe, useLogin, useRegister, useLogout, useDeleteAccount } from '@/api/hooks/useAuth';
 import { unregisterCurrentPushToken } from '@/hooks/usePushNotifications';
 import type { MeResponse, LoginInput, RegisterInput } from '@/api/types';
 
@@ -12,6 +12,7 @@ interface AuthContextValue {
   login: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
+  const deleteAccountMutation = useDeleteAccount();
 
   // If /auth/me fails (token expired + refresh failed), force logout
   useEffect(() => {
@@ -69,6 +71,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setHasToken(false);
   }, [logoutMutation, queryClient]);
 
+  /**
+   * Supprime definitivement le compte, puis vide la session locale.
+   *
+   * Contrairement au logout, on supprime AVANT de toucher au token push : le serveur
+   * purge deja les push_token, et un echec (mot de passe errone, dernier admin de
+   * l'organisation) doit laisser la session parfaitement intacte. L'erreur remonte
+   * volontairement a l'appelant pour etre affichee.
+   */
+  const deleteAccount = useCallback(
+    async (password: string) => {
+      await deleteAccountMutation.mutateAsync({ password });
+      // Le DELETE distant 401 desormais, mais l'appel remet currentPushToken a null.
+      await unregisterCurrentPushToken();
+      await clearTokens();
+      queryClient.clear();
+      setHasToken(false);
+    },
+    [deleteAccountMutation, queryClient],
+  );
+
   const isLoading = !tokenChecked || (hasToken && meLoading && !meFailed);
 
   return (
@@ -80,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        deleteAccount,
       }}
     >
       {children}

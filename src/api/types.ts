@@ -24,6 +24,22 @@ export interface LoginInput {
   password: string;
 }
 
+export interface RegisterOrgInput {
+  siret?: string | null;
+  legal_form?: string | null;
+  vat_number?: string | null;
+  naf_code?: string | null;
+  address?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  country?: string | null;
+  phone?: string | null;
+  billing_email?: string | null;
+  website?: string | null;
+  insurance_provider?: string | null;
+  insurance_number?: string | null;
+}
+
 export interface RegisterInput {
   email: string;
   password: string;
@@ -33,6 +49,7 @@ export interface RegisterInput {
   role?: 'admin' | 'manager' | 'employee' | 'client' | 'gestionnaire_reseau';
   company_name?: string;
   invitation_token?: string;
+  organization?: RegisterOrgInput;
 }
 
 export interface AuthResponse {

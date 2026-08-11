@@ -218,7 +218,6 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
                 {teamSearch ? 'Aucun résultat.' : 'Aucun utilisateur disponible.'}
               </Text>
             }
-            keyboardShouldPersistTaps="handled"
           />
         </Animated.View>
       </View>

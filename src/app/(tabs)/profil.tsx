@@ -14,7 +14,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'react-native';
-import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell } from 'lucide-react-native';
+import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle } from 'lucide-react-native';
+import { Linking } from 'react-native';
+import { useRouter } from 'expo-router';
+import { DASHBOARD_CREATE_ORG_URL } from '@/constants/Urls';
 import { Modal, Alert } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
@@ -42,9 +45,10 @@ const THEME_OPTIONS: { mode: ThemeMode; key: 'profile.themeLight' | 'profile.the
 ];
 
 export default function ProfilScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const { mode, setMode } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const queryClient = useQueryClient();
@@ -59,7 +63,11 @@ export default function ProfilScreen() {
   const unreadSummary = useUnreadSummary(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
-  const [newOrgName, setNewOrgName] = useState('');
+
+  const handleOpenDashboardCreateOrg = async () => {
+    setShowCreateOrgModal(false);
+    await Linking.openURL(DASHBOARD_CREATE_ORG_URL);
+  };
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -74,8 +82,13 @@ export default function ProfilScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const animatedPasswordModalStyle = useKeyboardAwareModalStyle({ visible: showPasswordModal });
   const animatedCreateOrgModalStyle = useKeyboardAwareModalStyle({ visible: showCreateOrgModal });
+  const animatedDeleteModalStyle = useKeyboardAwareModalStyle({ visible: showDeleteModal });
 
   useEffect(() => {
     if (user) {
@@ -156,6 +169,29 @@ export default function ProfilScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur';
       setPasswordError(msg.includes('Current') ? 'Mot de passe actuel incorrect.' : msg);
+    }
+  };
+
+  /**
+   * Suppression definitive du compte. En cas de succes le contexte vide la session,
+   * ce qui renvoie automatiquement l'utilisateur sur l'ecran de connexion — pas de
+   * navigation manuelle a faire ici.
+   */
+  const handleDeleteAccount = async () => {
+    setDeleteError('');
+    if (!deletePassword) {
+      setDeleteError(t('profile.deleteAccountPassword'));
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deleteAccount(deletePassword);
+    } catch (err) {
+      // Message du serveur affiche tel quel : il porte le cas « dernier administrateur ».
+      setDeleteError(err instanceof Error ? err.message : t('common.error'));
+    } finally {
+      setDeleting(false);
+      setDeletePassword('');
     }
   };
 
@@ -424,10 +460,7 @@ export default function ProfilScreen() {
 
                 <TouchableOpacity
                   style={[styles.createOrgBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '10' }]}
-                  onPress={() => {
-                    setNewOrgName('');
-                    setShowCreateOrgModal(true);
-                  }}
+                  onPress={() => setShowCreateOrgModal(true)}
                   accessibilityLabel="Créer une organisation"
                 >
                   <Plus size={IconSize.md} color={colors.primary} />
@@ -440,6 +473,26 @@ export default function ProfilScreen() {
               {/* Calendars */}
               <Text style={[styles.sectionTitle, { color: colors.text2 }]}>CALENDRIERS</Text>
               <CalendarIntegrations />
+
+              {/* Admin — Informations légales */}
+              {isAdmin && (
+                <>
+                  <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('legal.sectionTitle')}</Text>
+                  <TouchableOpacity
+                    style={[styles.settingsCard, styles.legalRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                    onPress={() => router.push('/organization-legal')}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('legal.openButton')}
+                  >
+                    <FileText size={IconSize.md} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.legalRowTitle, { color: colors.text }]}>{t('legal.openButton')}</Text>
+                      <Text style={[styles.hint, { color: colors.mutedText }]}>{t('legal.openButtonHint')}</Text>
+                    </View>
+                    <ChevronRight size={IconSize.sm} color={colors.mutedText} />
+                  </TouchableOpacity>
+                </>
+              )}
 
               {/* Admin — Conservation des archives */}
               {isAdmin && (
@@ -578,6 +631,19 @@ export default function ProfilScreen() {
                 <LogOut size={IconSize.md} color={colors.red} />
                 <Text style={[styles.logoutText, { color: colors.red }]}>{t('profile.logout')}</Text>
               </TouchableOpacity>
+
+              {/* Suppression de compte — requis par l'App Store (guideline 5.1.1(v)) */}
+              <TouchableOpacity
+                style={styles.deleteAccountBtn}
+                onPress={() => { setDeleteError(''); setDeletePassword(''); setShowDeleteModal(true); }}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.deleteAccount')}
+              >
+                <Trash2 size={IconSize.sm} color={colors.mutedText} />
+                <Text style={[styles.deleteAccountText, { color: colors.mutedText }]}>
+                  {t('profile.deleteAccount')}
+                </Text>
+              </TouchableOpacity>
             </>
           )}
         </ScrollView>
@@ -658,44 +724,84 @@ export default function ProfilScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.label, { color: colors.text2 }]}>Nom de l'organisation</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              value={newOrgName}
-              onChangeText={setNewOrgName}
-              placeholder="Ex. Mon Entreprise"
-              placeholderTextColor={colors.placeholder}
-              autoFocus
-            />
-            <Text style={[styles.hint, { color: colors.mutedText }]}>
-              Tu deviendras admin de cette organisation et elle sera automatiquement activée.
+            <View style={[styles.dashRedirectBubble, { backgroundColor: colors.primary + '15' }]}>
+              <Building2 size={IconSize.lg} color={colors.primary} />
+            </View>
+            <Text style={[styles.dashRedirectTitle, { color: colors.text }]}>
+              La création se fait sur le dashboard
+            </Text>
+            <Text style={[styles.dashRedirectBody, { color: colors.text2 }]}>
+              Pour saisir le SIRET, les infos légales et plus tard la facturation, ouvre Buildr sur le web.
+              L&apos;app mobile restera dédiée au terrain.
             </Text>
 
             <TouchableOpacity
-              style={[
-                styles.saveBtn,
-                { backgroundColor: newOrgName.trim() ? colors.primary : colors.itemBackground, marginTop: Spacing.lg },
-              ]}
-              onPress={() => {
-                if (!newOrgName.trim()) return;
-                createOrg.mutate(newOrgName.trim(), {
-                  onSuccess: () => {
-                    setShowCreateOrgModal(false);
-                    setNewOrgName('');
-                  },
-                  onError: (err) =>
-                    Alert.alert('Erreur', err instanceof Error ? err.message : 'Création échouée'),
-                });
-              }}
-              disabled={!newOrgName.trim() || createOrg.isPending}
+              style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: Spacing.lg, flexDirection: 'row', gap: Spacing.sm }]}
+              onPress={handleOpenDashboardCreateOrg}
+              accessibilityRole="link"
+              accessibilityLabel="Ouvrir le dashboard pour créer l'organisation"
             >
-              {createOrg.isPending ? (
+              <ExternalLink size={IconSize.sm} color="#FFFFFF" />
+              <Text style={[styles.saveBtnText, { color: '#FFFFFF' }]}>Ouvrir le dashboard</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </Modal>
+
+      {/* Delete account modal */}
+      <Modal visible={showDeleteModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <Animated.View style={[styles.modalContent, { backgroundColor: colors.surface }, animatedDeleteModalStyle]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.deleteAccountTitle')}</Text>
+              <TouchableOpacity
+                onPress={() => { setShowDeleteModal(false); setDeleteError(''); setDeletePassword(''); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                <X size={IconSize.lg} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.deleteWarningBubble, { backgroundColor: colors.red + '15' }]}>
+              <AlertTriangle size={IconSize.lg} color={colors.red} />
+            </View>
+            <Text style={[styles.deleteWarningText, { color: colors.text2 }]}>{t('profile.deleteAccountWarning')}</Text>
+
+            <Text style={[styles.label, { color: colors.text2 }]}>{t('profile.deleteAccountPassword')}</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              secureTextEntry
+              autoCapitalize="none"
+              accessibilityLabel={t('profile.deleteAccountPassword')}
+            />
+
+            {deleteError ? (
+              <Text style={[styles.error, { color: colors.red }]}>{deleteError}</Text>
+            ) : null}
+
+            <TouchableOpacity
+              style={[styles.saveBtn, { backgroundColor: colors.red, marginTop: Spacing.lg }]}
+              onPress={handleDeleteAccount}
+              disabled={deleting}
+              accessibilityRole="button"
+              accessibilityLabel={t('profile.deleteAccountConfirm')}
+            >
+              {deleting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={[styles.saveBtnText, { color: newOrgName.trim() ? '#FFFFFF' : colors.mutedText }]}>
-                  Créer
-                </Text>
+                <Text style={styles.saveBtnText}>{t('profile.deleteAccountConfirm')}</Text>
               )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.deleteCancelBtn}
+              onPress={() => { setShowDeleteModal(false); setDeleteError(''); setDeletePassword(''); }}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
+            >
+              <Text style={[styles.deleteCancelText, { color: colors.text2 }]}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -735,6 +841,18 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.sm,
   },
+  legalRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.md },
+  legalRowTitle: { fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  dashRedirectBubble: {
+    height: 56,
+    width: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+  },
+  dashRedirectTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, marginTop: Spacing.md },
+  dashRedirectBody: { fontSize: FontSize.base, lineHeight: 22, marginTop: Spacing.sm },
   row: { flexDirection: 'row', gap: Spacing.md },
   halfField: { flex: 1 },
   label: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, marginTop: Spacing.sm },
@@ -832,6 +950,30 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
   },
   logoutText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
+
+  // Suppression de compte : volontairement discrete (pas de bordure rouge), pour ne pas
+  // rivaliser visuellement avec la deconnexion tout en restant accessible.
+  deleteAccountBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    height: 44,
+    marginTop: Spacing.sm,
+  },
+  deleteAccountText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  deleteWarningBubble: {
+    height: 56,
+    width: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: Spacing.sm,
+  },
+  deleteWarningText: { fontSize: FontSize.base, lineHeight: 22, marginBottom: Spacing.sm },
+  deleteCancelBtn: { alignItems: 'center', justifyContent: 'center', height: 44, marginTop: Spacing.xs },
+  deleteCancelText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
 
   securityBtn: {
     flexDirection: 'row',

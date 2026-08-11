@@ -430,7 +430,6 @@ export default function TemplateForm({ initial, submitting, submitLabel, onSubmi
                 </TouchableOpacity>
               );
             }}
-            keyboardShouldPersistTaps="handled"
           />
         </Animated.View>
       </Pressable>

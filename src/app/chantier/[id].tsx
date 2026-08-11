@@ -52,11 +52,10 @@ export default function ChantierDetailScreen() {
   const { data: unreadCounts } = useUnreadCounts(id);
   const markTabViewed = useMarkTabViewed();
 
-  // Marque l'onglet initial (comments) comme vu au montage du chantier.
-  useEffect(() => {
-    if (id) markTabViewed.mutate({ chantier_id: id, tab: 'comments' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  // Plus de markTabViewed initial : les sous-onglets de Discussions et Urgences
+  // se marquent eux-memes (via leur propre useEffect interne) quand l'utilisateur
+  // les visite. Photos / Documents continuent d'etre marques sur clic d'onglet
+  // (cf. plus bas).
 
   const { data: membersData } = useChantierMembers(id);
   const currentMember = membersData?.data.find((m) => m.user_id === user?.id);
@@ -384,16 +383,19 @@ export default function ChantierDetailScreen() {
           // On masque la pastille sur l'onglet actif : l'utilisateur est en train de regarder
           // le contenu, l'indicateur "il y a du nouveau" est redondant. Ca evite aussi le flash
           // bref entre l'arrivee sur le chantier et le retour du markTabViewed.
+          // Pour Discussions et Urgences, la pastille du tab principal = somme des
+          // sous-onglets. Le marquage "lu" se fait DANS le sous-composant quand on
+          // visite le bon sous-onglet (cf. ChantierDiscussions / EmergencyList).
           const unread = isActive
             ? 0
             : tab.key === 'comments'
-              ? unreadCounts?.comments ?? 0
+              ? (unreadCounts?.comments ?? 0) + (unreadCounts?.comments_steps ?? 0)
               : tab.key === 'photos'
                 ? unreadCounts?.photos ?? 0
                 : tab.key === 'documents'
                   ? unreadCounts?.documents ?? 0
                   : tab.key === 'emergencies'
-                    ? unreadCounts?.emergencies ?? 0
+                    ? (unreadCounts?.emergencies ?? 0) + (unreadCounts?.emergencies_claim ?? 0)
                     : 0;
           return (
             <TouchableOpacity
@@ -401,7 +403,10 @@ export default function ChantierDetailScreen() {
               style={[styles.tab, isActive && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
               onPress={() => {
                 setActiveTab(tab.key);
-                if (id && (tab.key === 'comments' || tab.key === 'photos' || tab.key === 'documents' || tab.key === 'emergencies')) {
+                // Photos / Documents : marquage simple sur clic.
+                // Discussions / Urgences : le sous-composant marque le bon sous-onglet
+                // selon le subTab / splitTab actif.
+                if (id && (tab.key === 'photos' || tab.key === 'documents')) {
                   markTabViewed.mutate({ chantier_id: id, tab: tab.key });
                 }
               }}

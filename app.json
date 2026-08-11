@@ -8,31 +8,33 @@
     "scheme": "buildr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "backgroundColor": "#D97706",
-      "resizeMode": "contain"
-    },
+    "owner": "electrix67",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "fr.getbuildr.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Nous avons besoin d'accéder à vos photos pour les ajouter aux chantiers.",
         "NSCameraUsageDescription": "Nous avons besoin de la caméra pour prendre des photos de chantier.",
-        "NSLocationWhenInUseUsageDescription": "Nous avons besoin de votre position pour localiser les chantiers."
+        "NSLocationWhenInUseUsageDescription": "Nous avons besoin de votre position pour localiser les chantiers.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "fr.getbuildr.app",
       "adaptiveIcon": {
-        "backgroundColor": "#D97706"
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#1C1917"
       },
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -42,7 +44,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./src/assets/images/splash-icon.png",
+          "backgroundColor": "#1C1917",
+          "resizeMode": "contain",
+          "imageWidth": 300
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -74,6 +84,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f49b7b76-5a25-494b-a19b-91e7712198e4"
+      }
     }
   }
 }

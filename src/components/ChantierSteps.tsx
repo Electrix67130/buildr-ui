@@ -57,6 +57,8 @@ interface Props {
   readonly?: boolean;
   /** Compteur de messages par step_id pour afficher un badge sur chaque etape. */
   commentCountByStep?: Record<string, number>;
+  /** Set des step_id qui ont du contenu non-lu (pour pastille visuelle). */
+  unreadStepIds?: Set<string>;
   /** Callback declenche au tap du bouton "Discussion" dans une etape depliee. */
   onOpenStepDiscussion?: (step: ChantierStep) => void;
   /**
@@ -74,6 +76,7 @@ export default function ChantierSteps({
   canToggle,
   readonly = false,
   commentCountByStep,
+  unreadStepIds,
   onOpenStepDiscussion,
   inline = false,
   onAfterReorder,
@@ -394,6 +397,12 @@ export default function ChantierSteps({
             <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}>
               <Text style={[styles.stepNumberText, { color: colors.primary }]}>{idx + 1}</Text>
             </View>
+            {unreadStepIds?.has(step.id) ? (
+              <View
+                style={[styles.unreadDot, { backgroundColor: colors.primary }]}
+                accessibilityLabel="Nouveaux messages sur cette étape"
+              />
+            ) : null}
             <View style={{ flex: 1 }}>
               <Text
                 style={[
@@ -929,6 +938,12 @@ const styles = StyleSheet.create({
     marginRight: Spacing.sm,
   },
   stepNumberText: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 2,
+  },
   stepName: { fontSize: FontSize.base, fontWeight: FontWeight.semibold, flex: 1 },
   stepCount: { fontSize: FontSize.xs, fontWeight: FontWeight.medium },
   substepsBlock: { marginTop: Spacing.sm, gap: 2 },

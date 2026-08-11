@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/const
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useEmergencies, useCreateEmergency, EmergencyWithAuthor } from '@/api/hooks/useEmergencies';
+import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hooks/useChantierViews';
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 
@@ -61,6 +62,22 @@ export default function EmergencyList({
     if (onSplitTabChange) onSplitTabChange(tab);
     else setInternalSplitTab(tab);
   };
+
+  // Pastilles non-lu par sous-onglet (mode split uniquement). En mode non-split
+  // il n'y a qu'un seul flux, le parent gère la pastille principale.
+  const { data: unreadCounts } = useUnreadCounts(chantierId);
+  const markTabViewed = useMarkTabViewed();
+  const unreadEmergency = unreadCounts?.emergencies ?? 0;
+  const unreadClaim = unreadCounts?.emergencies_claim ?? 0;
+  const unreadEmergencyIds = useMemo(
+    () => new Set(unreadCounts?.unread_emergency_ids ?? []),
+    [unreadCounts?.unread_emergency_ids],
+  );
+
+  // Pas de markTabViewed à l'arrivée — la pastille d'une urgence/réclamation
+  // précise s'efface uniquement quand on l'ouvre (cf. onPress du renderItem).
+  const markItemViewed = useMarkItemViewed();
+
   const isPickingRef = useRef(false);
 
   const formatDateTime = (date: string) => {
@@ -149,12 +166,30 @@ export default function EmergencyList({
       const lat = item.latitude != null ? Number(item.latitude) : null;
       const lng = item.longitude != null ? Number(item.longitude) : null;
       const hasGps = lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng);
+      const hasUnread = unreadEmergencyIds.has(item.id);
       return (
         <TouchableOpacity
-          style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, Shadow.sm]}
-          onPress={() => router.push({ pathname: '/emergency/[id]', params: { id: item.id, chantierId, mode: item.type } })}
+          style={[
+            styles.card,
+            {
+              backgroundColor: colors.surface,
+              borderColor: hasUnread ? colors.red : colors.border,
+              borderWidth: hasUnread ? 1.5 : 1,
+            },
+            Shadow.sm,
+          ]}
+          onPress={() => {
+            markItemViewed.mutate({ item_type: 'emergency', item_id: item.id });
+            router.push({ pathname: '/emergency/[id]', params: { id: item.id, chantierId, mode: item.type } });
+          }}
           activeOpacity={0.85}
         >
+          {hasUnread ? (
+            <View
+              style={[styles.unreadDot, { backgroundColor: colors.red }]}
+              accessibilityLabel="Activité non lue"
+            />
+          ) : null}
           {item.photo_url ? (
             <Image source={{ uri: item.photo_url }} style={styles.thumb} />
           ) : (
@@ -181,7 +216,7 @@ export default function EmergencyList({
         </TouchableOpacity>
       );
     },
-    [colors, t, router, chantierId],
+    [colors, t, router, chantierId, unreadEmergencyIds],
   );
 
   const allItems = data?.data ?? [];
@@ -211,14 +246,31 @@ export default function EmergencyList({
       {mode === 'split' ? (
         <View style={[styles.toggleBar, { backgroundColor: colors.itemBackground }]}>
           <TouchableOpacity
-            style={[styles.togglePill, splitTab === 'emergency' && { backgroundColor: colors.surface }]}
             onPress={() => setSplitTab('emergency')}
+            style={[styles.togglePill, splitTab === 'emergency' && { backgroundColor: colors.surface }]}
             accessibilityRole="tab"
             accessibilityState={{ selected: splitTab === 'emergency' }}
           >
-            <AlertTriangle size={IconSize.sm} color={splitTab === 'emergency' ? colors.red : colors.text2} />
-            <Text style={[styles.togglePillText, { color: splitTab === 'emergency' ? colors.red : colors.text2 }]}>
-              Urgences{emergencyItems.length > 0 ? ` (${emergencyItems.length})` : ''}
+            <View style={styles.pillIconWrap}>
+              <AlertTriangle
+                size={IconSize.sm}
+                color={splitTab === 'emergency' ? colors.red : colors.text2}
+              />
+              {splitTab !== 'emergency' && unreadEmergency > 0 ? (
+                <View style={[styles.subUnreadBadge, { backgroundColor: colors.red }]}>
+                  <Text style={styles.subUnreadBadgeText}>
+                    {unreadEmergency > 99 ? '99+' : unreadEmergency}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            <Text
+              style={[
+                styles.togglePillText,
+                { color: splitTab === 'emergency' ? colors.red : colors.text2 },
+              ]}
+            >
+              Incident externe{emergencyItems.length > 0 ? ` (${emergencyItems.length})` : ''}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -227,8 +279,25 @@ export default function EmergencyList({
             accessibilityRole="tab"
             accessibilityState={{ selected: splitTab === 'claim' }}
           >
-            <MessageSquareWarning size={IconSize.sm} color={splitTab === 'claim' ? colors.red : colors.text2} />
-            <Text style={[styles.togglePillText, { color: splitTab === 'claim' ? colors.red : colors.text2 }]}>
+            <View style={styles.pillIconWrap}>
+              <MessageSquareWarning
+                size={IconSize.sm}
+                color={splitTab === 'claim' ? colors.red : colors.text2}
+              />
+              {splitTab !== 'claim' && unreadClaim > 0 ? (
+                <View style={[styles.subUnreadBadge, { backgroundColor: colors.red }]}>
+                  <Text style={styles.subUnreadBadgeText}>
+                    {unreadClaim > 99 ? '99+' : unreadClaim}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            <Text
+              style={[
+                styles.togglePillText,
+                { color: splitTab === 'claim' ? colors.red : colors.text2 },
+              ]}
+            >
               Réclamations{claimItems.length > 0 ? ` (${claimItems.length})` : ''}
             </Text>
           </TouchableOpacity>
@@ -345,4 +414,28 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   togglePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+
+  pillIconWrap: { position: 'relative' },
+  subUnreadBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -10,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subUnreadBadgeText: { color: '#FFFFFF', fontSize: 9, fontWeight: FontWeight.bold },
+
+  unreadDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    zIndex: 1,
+  },
 });

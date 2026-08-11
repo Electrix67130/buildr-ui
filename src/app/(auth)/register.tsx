@@ -1,208 +1,96 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '@/contexts/AuthContext';
-import { ApiError } from '@/api/client';
+import { ExternalLink, Building2 } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
-import { Spacing, Radius, FontSize, FontWeight } from '@/constants/Layout';
+import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { DASHBOARD_SIGNUP_URL } from '@/constants/Urls';
 
+/**
+ * Sur mobile, la création de compte standalone (qui implique la création d'une
+ * organisation et donc plus tard de la facturation) renvoie vers le dashboard web.
+ * Les rejoins par invitation restent gérés ici via /(auth)/invite/[token].
+ */
 export default function RegisterScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { register } = useAuth();
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleRegister = async () => {
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || !phone.trim()) {
-      setError('Veuillez remplir les champs obligatoires.');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-
-    try {
-      await register({
-        email: email.trim(),
-        password,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        phone: phone.trim(),
-        company_name: companyName.trim() || undefined,
-      });
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.statusCode === 409 ? 'Cette adresse email est déjà utilisée.' : String(err.details));
-      } else {
-        setError('Erreur de connexion. Vérifiez votre réseau.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
-            <Text style={[styles.logo, { color: colors.primary }]}>Buildr</Text>
-            <Text style={[styles.subtitle, { color: colors.text2 }]}>Créer un compte</Text>
-          </View>
+      <View style={styles.content}>
+        <View style={[styles.iconBubble, { backgroundColor: colors.primary + '15' }]}>
+          <Building2 size={36} color={colors.primary} />
+        </View>
 
-          <View style={styles.form}>
-            <View style={styles.row}>
-              <View style={styles.halfField}>
-                <Text style={[styles.label, { color: colors.text }]}>Prénom *</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                  placeholder="Julien"
-                  placeholderTextColor={colors.placeholder}
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  accessibilityLabel="Prénom"
-                />
-              </View>
-              <View style={styles.halfField}>
-                <Text style={[styles.label, { color: colors.text }]}>Nom *</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                  placeholder="Dupont"
-                  placeholderTextColor={colors.placeholder}
-                  value={lastName}
-                  onChangeText={setLastName}
-                  accessibilityLabel="Nom"
-                />
-              </View>
-            </View>
+        <Text style={[styles.title, { color: colors.text }]}>Crée ton entreprise sur le dashboard</Text>
+        <Text style={[styles.body, { color: colors.text2 }]}>
+          La création d&apos;une organisation Buildr (SIRET, facturation, équipe) se fait depuis le tableau de
+          bord web. L&apos;app mobile reste dédiée au terrain : photos, étapes, urgences.
+        </Text>
 
-            <Text style={[styles.label, { color: colors.text }]}>Email *</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="votre@email.com"
-              placeholderTextColor={colors.placeholder}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              accessibilityLabel="Adresse email"
-            />
+        <TouchableOpacity
+          style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+          onPress={() => Linking.openURL(DASHBOARD_SIGNUP_URL)}
+          accessibilityRole="link"
+          accessibilityLabel="Ouvrir le dashboard pour créer mon compte"
+        >
+          <ExternalLink size={IconSize.sm} color="#FFFFFF" />
+          <Text style={styles.primaryBtnText}>Ouvrir le dashboard</Text>
+        </TouchableOpacity>
 
-            <Text style={[styles.label, { color: colors.text }]}>Mot de passe *</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="8 caractères minimum"
-              placeholderTextColor={colors.placeholder}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              accessibilityLabel="Mot de passe"
-            />
+        <Text style={[styles.hint, { color: colors.mutedText }]}>
+          Une fois ton compte créé, télécharge à nouveau l&apos;app et connecte-toi ici.
+        </Text>
 
-            <Text style={[styles.label, { color: colors.text }]}>Téléphone *</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="06 12 34 56 78"
-              placeholderTextColor={colors.placeholder}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              accessibilityLabel="Téléphone"
-            />
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-            <Text style={[styles.label, { color: colors.text }]}>Entreprise</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="EIFFAGE, Bouygues..."
-              placeholderTextColor={colors.placeholder}
-              value={companyName}
-              onChangeText={setCompanyName}
-              accessibilityLabel="Nom d'entreprise"
-            />
+        <Text style={[styles.invitationTitle, { color: colors.text }]}>Tu as reçu une invitation ?</Text>
+        <Text style={[styles.body, { color: colors.text2 }]}>
+          Si ton entreprise t&apos;a invité, clique sur le lien reçu par email — il ouvre directement le bon écran.
+        </Text>
 
-            {error ? <Text style={[styles.error, { color: colors.red }]}>{error}</Text> : null}
-
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.primary }]}
-              onPress={handleRegister}
-              disabled={loading}
-              accessibilityRole="button"
-              accessibilityLabel="Créer mon compte"
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.buttonText}>Créer mon compte</Text>
-              )}
-            </TouchableOpacity>
-
-            <Link href="/(auth)/login" asChild>
-              <TouchableOpacity style={styles.linkContainer} accessibilityRole="link">
-                <Text style={[styles.linkText, { color: colors.text2 }]}>
-                  Déjà un compte ?{' '}
-                  <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>Se connecter</Text>
-                </Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <Link href="/(auth)/login" asChild>
+          <TouchableOpacity style={styles.linkContainer} accessibilityRole="link">
+            <Text style={[styles.linkText, { color: colors.text2 }]}>
+              Déjà un compte ?{' '}
+              <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>Se connecter</Text>
+            </Text>
+          </TouchableOpacity>
+        </Link>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  flex: { flex: 1 },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: Spacing.xxl },
-  header: { alignItems: 'center', marginBottom: Spacing.xxxl },
-  logo: { fontSize: FontSize.hero, fontWeight: FontWeight.bold },
-  subtitle: { fontSize: FontSize.lg, marginTop: Spacing.xs },
-  form: { gap: Spacing.sm },
-  row: { flexDirection: 'row', gap: Spacing.md },
-  halfField: { flex: 1 },
-  label: { fontSize: FontSize.base, fontWeight: FontWeight.medium, marginTop: Spacing.sm },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg,
-    fontSize: FontSize.base,
-  },
-  error: { fontSize: FontSize.sm, marginTop: Spacing.xs },
-  button: {
-    height: 48,
-    borderRadius: Radius.md,
+  content: { flex: 1, padding: Spacing.xxl, justifyContent: 'center' },
+  iconBubble: {
+    height: 72,
+    width: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.lg,
+    marginBottom: Spacing.xl,
+    alignSelf: 'flex-start',
   },
-  buttonText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
-  linkContainer: { alignItems: 'center', marginTop: Spacing.xl },
+  title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, marginBottom: Spacing.md },
+  body: { fontSize: FontSize.base, lineHeight: 22, marginBottom: Spacing.lg },
+  primaryBtn: {
+    height: 50,
+    borderRadius: Radius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  primaryBtnText: { color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  hint: { fontSize: FontSize.sm, marginTop: Spacing.md, textAlign: 'center' },
+  divider: { height: 1, marginVertical: Spacing.xl },
+  invitationTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, marginBottom: Spacing.sm },
+  linkContainer: { alignItems: 'center', marginTop: Spacing.lg },
   linkText: { fontSize: FontSize.base },
 });

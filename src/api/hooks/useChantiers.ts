@@ -2,7 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 import { createCrudHooks } from './useCrud';
 import { chantiersApi } from '../services';
-import type { Chantier, ChantierStatus, PaginatedResponse, PaginationParams } from '../types';
+import type {
+  Chantier,
+  ChantierStatus,
+  CreateChantierInput,
+  PaginatedResponse,
+  PaginationParams,
+} from '../types';
 
 // Standard CRUD hooks
 export const chantierHooks = createCrudHooks<Chantier, never, never>('chantiers', chantiersApi);
@@ -113,18 +119,8 @@ export function useUpdateChantier() {
 export function useCreateChantier() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: {
-      name: string;
-      description?: string;
-      address?: string;
-      city?: string;
-      postal_code?: string;
-      latitude?: number;
-      longitude?: number;
-      status?: ChantierStatus;
-      start_date?: string;
-      end_date?: string;
-    }) => apiFetch<Chantier>('/chantiers', { method: 'POST', body }),
+    mutationFn: (body: CreateChantierInput) =>
+      apiFetch<Chantier>('/chantiers', { method: 'POST', body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chantiers'] });
     },

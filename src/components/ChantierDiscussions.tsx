@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ListChecks, MessageSquare, X } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useComments } from '@/api/hooks/useComments';
+import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hooks/useChantierViews';
 import ChantierSteps from './ChantierSteps';
 import CommentThread from './CommentThread';
 import type { ChantierStep } from '@/api/hooks/useChantierSteps';
@@ -44,6 +46,36 @@ export default function ChantierDiscussions({
   // Si le parent fournit subTab, on l'utilise (controlled). Sinon fallback local.
   const [internalSubTab, setInternalSubTab] = useState<DiscussionSubTab>(initialTab);
   const subTab = subTabProp ?? internalSubTab;
+
+  // Pastilles "non lu" par sous-onglet — chaque sous-onglet est marque comme vu
+  // independamment, pour qu'on sache d'ou vient une nouvelle notif.
+  const { data: unreadCounts } = useUnreadCounts(chantierId);
+  const markTabViewed = useMarkTabViewed();
+  const unreadMessages = unreadCounts?.comments ?? 0;
+  const unreadSteps = unreadCounts?.comments_steps ?? 0;
+  const unreadStepIds = useMemo(
+    () => new Set(unreadCounts?.unread_step_ids ?? []),
+    [unreadCounts?.unread_step_ids],
+  );
+
+  // Sous-onglet Messages : on marque comments comme vu (un seul flux, pas de
+  // granularité par-item ici). Sous-onglet Étapes : on NE MARQUE PAS comments_steps
+  // à l'arrivée — la pastille s'efface uniquement quand on ouvre l'étape concernée
+  // (markItemViewed côté handleOpenStep).
+  const markItemViewed = useMarkItemViewed();
+  useEffect(() => {
+    if (!chantierId) return;
+    if (subTab === 'messages' && canViewComments) {
+      markTabViewed.mutate({ chantier_id: chantierId, tab: 'comments' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chantierId, subTab]);
+
+  const handleOpenStep = (step: ChantierStep) => {
+    setOpenStep(step);
+    markItemViewed.mutate({ item_type: 'step', item_id: step.id });
+  };
+
   const setSubTab = (tab: DiscussionSubTab) => {
     if (onSubTabChange) onSubTabChange(tab);
     else setInternalSubTab(tab);
@@ -88,7 +120,16 @@ export default function ChantierDiscussions({
             accessibilityRole="tab"
             accessibilityState={{ selected: subTab === 'steps' }}
           >
-            <ListChecks size={IconSize.sm} color={subTab === 'steps' ? colors.primary : colors.text2} />
+            <View style={styles.pillIconWrap}>
+              <ListChecks size={IconSize.sm} color={subTab === 'steps' ? colors.primary : colors.text2} />
+              {subTab !== 'steps' && unreadSteps > 0 ? (
+                <View style={[styles.subUnreadBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.subUnreadBadgeText}>
+                    {unreadSteps > 99 ? '99+' : unreadSteps}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
             <Text
               style={[
                 styles.togglePillText,
@@ -107,7 +148,16 @@ export default function ChantierDiscussions({
             accessibilityRole="tab"
             accessibilityState={{ selected: subTab === 'messages' }}
           >
-            <MessageSquare size={IconSize.sm} color={subTab === 'messages' ? colors.primary : colors.text2} />
+            <View style={styles.pillIconWrap}>
+              <MessageSquare size={IconSize.sm} color={subTab === 'messages' ? colors.primary : colors.text2} />
+              {subTab !== 'messages' && unreadMessages > 0 ? (
+                <View style={[styles.subUnreadBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.subUnreadBadgeText}>
+                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
             <Text
               style={[
                 styles.togglePillText,
@@ -128,7 +178,8 @@ export default function ChantierDiscussions({
             canToggle={canToggleSteps}
             readonly={readonly}
             commentCountByStep={commentCountByStep}
-            onOpenStepDiscussion={(step) => setOpenStep(step)}
+            unreadStepIds={unreadStepIds}
+            onOpenStepDiscussion={handleOpenStep}
           />
         ) : null}
         {(subTab === 'messages' || !canViewSteps) && canViewComments ? (
@@ -136,30 +187,41 @@ export default function ChantierDiscussions({
         ) : null}
       </View>
 
-      {/* Modal : discussion par etape */}
+      {/* Modal : discussion par etape.
+          Un Modal RN cree un nouveau "root" natif → l'arbre SafeAreaContext de
+          expo-router ne se propage pas dedans. Sans un SafeAreaProvider local,
+          useSafeAreaInsets() retourne 0 et l'UI se colle sous la status bar
+          (X derriere les icones batterie/wifi) et le home indicator (input trop bas).
+          On en ajoute un dans le Modal, puis SafeAreaView edges top/bottom applique
+          les vrais insets mesures. */}
       <Modal visible={!!openStep} transparent={false} animationType="slide" onRequestClose={() => setOpenStep(null)}>
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.modalSubtitle, { color: colors.mutedText }]}>Discussion de l'étape</Text>
-              <Text style={[styles.modalTitle, { color: colors.text }]} numberOfLines={1}>
-                {openStep?.name}
-              </Text>
+        <SafeAreaProvider>
+          <SafeAreaView
+            edges={['top', 'bottom']}
+            style={[styles.modalContainer, { backgroundColor: colors.background }]}
+          >
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.modalSubtitle, { color: colors.mutedText }]}>Discussion de l'étape</Text>
+                <Text style={[styles.modalTitle, { color: colors.text }]} numberOfLines={1}>
+                  {openStep?.name}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setOpenStep(null)}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                accessibilityLabel="Fermer"
+              >
+                <X size={IconSize.lg} color={colors.text} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setOpenStep(null)}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              accessibilityLabel="Fermer"
-            >
-              <X size={IconSize.lg} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flex: 1 }}>
-            {openStep ? (
-              <CommentThread chantierId={chantierId} stepFilter={openStep.id} readonly={readonly} />
-            ) : null}
-          </View>
-        </View>
+            <View style={{ flex: 1 }}>
+              {openStep ? (
+                <CommentThread chantierId={chantierId} stepFilter={openStep.id} readonly={readonly} />
+              ) : null}
+            </View>
+          </SafeAreaView>
+        </SafeAreaProvider>
       </Modal>
     </View>
   );
@@ -185,6 +247,21 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   togglePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+
+  // Pastille "non lu" sur l'icone du sous-onglet
+  pillIconWrap: { position: 'relative' },
+  subUnreadBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -10,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subUnreadBadgeText: { color: '#FFFFFF', fontSize: 9, fontWeight: FontWeight.bold },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   modalContainer: { flex: 1 },
