@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "owner": "electrix67",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "fr.getbuildr.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Nous avons besoin d'accéder à vos photos pour les ajouter aux chantiers.",
