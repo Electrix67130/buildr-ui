@@ -24,6 +24,9 @@ import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hook
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 
+/** Attente maximale d'un point GPS precis avant d'enregistrer sans coordonnees. */
+const GPS_TIMEOUT_MS = 8_000;
+
 export type EmergencySplitTab = 'emergency' | 'claim';
 
 interface Props {
@@ -127,15 +130,25 @@ export default function EmergencyList({
         const fileName = `emergency-${Date.now()}.jpg`;
         const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
 
-        // GPS du device au moment de la capture
+        // GPS du device au moment de la capture. Accuracy.High vise ~10 m :
+        // sur un chantier, il faut pouvoir retrouver le point exact du danger,
+        // pas seulement la parcelle.
         let latitude: number | undefined;
         let longitude: number | undefined;
         const locPerm = await Location.requestForegroundPermissionsAsync();
         if (locPerm.granted) {
           try {
-            const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-            latitude = pos.coords.latitude;
-            longitude = pos.coords.longitude;
+            // Un fix precis peut etre long a obtenir (batiment, tranchee, ciel
+            // masque). On plafonne l'attente : une urgence sans coordonnees vaut
+            // mieux qu'une urgence qui ne part pas.
+            const pos = await Promise.race([
+              Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), GPS_TIMEOUT_MS)),
+            ]);
+            if (pos) {
+              latitude = pos.coords.latitude;
+              longitude = pos.coords.longitude;
+            }
           } catch {
             // GPS indispo — on enregistre quand meme la photo
           }
