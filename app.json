@@ -54,7 +54,8 @@
         "expo-image-picker",
         {
           "photosPermission": "Accéder aux photos pour les ajouter aux chantiers.",
-          "cameraPermission": "Prendre des photos de chantier."
+          "cameraPermission": "Prendre des photos de chantier.",
+          "microphonePermission": false
         }
       ],
       [
