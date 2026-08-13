@@ -67,6 +67,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         await createMutation.mutateAsync({
           chantier_id: chantierId,
           url: uploaded.url,
+          thumbnail_url: uploaded.thumbnail_url,
           file_size: uploaded.file_size,
           mime_type: uploaded.mime_type,
         });

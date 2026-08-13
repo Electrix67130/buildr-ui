@@ -157,6 +157,7 @@ export default function EmergencyList({
         await createMutation.mutateAsync({
           chantier_id: chantierId,
           photo_url: uploaded.url,
+          thumbnail_url: uploaded.thumbnail_url,
           latitude,
           longitude,
         });

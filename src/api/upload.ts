@@ -5,6 +5,8 @@ const API_KEY = process.env.EXPO_PUBLIC_API_KEY || 'change-me-in-production';
 
 interface UploadResult {
   url: string;
+  /** Miniature ~400 px generee par l'API. Absente pour les fichiers non images. */
+  thumbnail_url?: string;
   original_name: string;
   file_size: number;
   mime_type: string;
