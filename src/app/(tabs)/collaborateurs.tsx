@@ -11,6 +11,7 @@ import {
   Alert,
   Keyboard,
   Linking,
+  Image,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
@@ -85,15 +86,19 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
 
   if (!managerId) return null;
 
-  const renderUser = (user: { id: string; first_name: string; last_name: string; email: string; role: string; company_name?: string }, action: React.ReactNode) => {
+  const renderUser = (user: { id: string; first_name: string; last_name: string; email: string; role: string; company_name?: string; avatar_url?: string | null }, action: React.ReactNode) => {
     const roleColor = TEAM_ROLE_COLORS[user.role] || '#6B7280';
     const roleLabel = t(roleLabelKey(user.role));
     return (
       <View key={user.id} style={[teamStyles.card, { backgroundColor: colors.itemBackground, borderColor: colors.border }]}>
         <View style={[teamStyles.avatar, { backgroundColor: roleColor + '20' }]}>
-          <Text style={[teamStyles.avatarText, { color: roleColor }]}>
-            {user.first_name[0]}{user.last_name[0]}
-          </Text>
+          {user.avatar_url ? (
+            <Image source={{ uri: user.avatar_url }} style={teamStyles.avatarImage} />
+          ) : (
+            <Text style={[teamStyles.avatarText, { color: roleColor }]}>
+              {user.first_name[0]}{user.last_name[0]}
+            </Text>
+          )}
         </View>
         <View style={teamStyles.info}>
           <Text style={[teamStyles.name, { color: colors.text }]}>{user.first_name} {user.last_name}</Text>
@@ -243,7 +248,8 @@ const teamStyles = StyleSheet.create({
     borderRadius: Radius.lg,
     marginBottom: Spacing.sm,
   },
-  avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  avatarImage: { width: 40, height: 40, borderRadius: 20 },
   avatarText: { fontSize: FontSize.base, fontWeight: FontWeight.bold },
   info: { flex: 1 },
   name: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
@@ -391,9 +397,13 @@ export default function CollaborateursScreen() {
           accessibilityLabel={`${item.first_name} ${item.last_name}`}
         >
           <View style={[styles.avatar, { backgroundColor: roleColor + '20' }]}>
-            <Text style={[styles.avatarText, { color: roleColor }]}>
-              {item.first_name[0]}{item.last_name[0]}
-            </Text>
+            {item.avatar_url ? (
+              <Image source={{ uri: item.avatar_url }} style={styles.avatarImage} />
+            ) : (
+              <Text style={[styles.avatarText, { color: roleColor }]}>
+                {item.first_name[0]}{item.last_name[0]}
+              </Text>
+            )}
           </View>
           <View style={styles.userInfo}>
             <Text style={[styles.userName, { color: colors.text }]}>
@@ -837,7 +847,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: Radius.lg,
   },
-  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  avatarImage: { width: 44, height: 44, borderRadius: 22 },
   avatarText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   userInfo: { flex: 1 },
   userName: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
