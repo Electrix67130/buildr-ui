@@ -20,3 +20,6 @@ coverage/
 
 expo-env.d.ts
 # @end expo-cli
+# Credentials EAS telechargees en local : mots de passe du keystore en clair
+credentials.json
+*.keystore
