@@ -21,6 +21,7 @@
     },
     "android": {
       "package": "fr.getbuildr.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#1C1917"

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "660831469330",
+    "project_id": "buildr-4f1ed",
+    "storage_bucket": "buildr-4f1ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660831469330:android:5cab5b0f73d05cc5dffdcb",
+        "android_client_info": {
+          "package_name": "fr.getbuildr.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6to9NJM73_-6AMx4vuqpbN8OEbBMSSoU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
