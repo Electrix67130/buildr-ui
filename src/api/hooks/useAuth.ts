@@ -18,7 +18,9 @@ export function useLogin() {
     mutationFn: async (input: LoginInput) => {
       const result = await apiFetch<AuthResponse>('/auth/login', {
         method: 'POST',
-        body: input,
+        // La session mobile est independante de celle du dashboard : se connecter
+        // ici ne deconnecte plus l'utilisateur de son navigateur.
+        body: { ...input, platform: 'mobile' },
         auth: false,
       });
       await setTokens(result.access_token, result.refresh_token);
@@ -35,7 +37,7 @@ export function useRegister() {
     mutationFn: async (input: RegisterInput) => {
       const result = await apiFetch<AuthResponse>('/auth/register', {
         method: 'POST',
-        body: input,
+        body: { ...input, platform: 'mobile' },
         auth: false,
       });
       await setTokens(result.access_token, result.refresh_token);
