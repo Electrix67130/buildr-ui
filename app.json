@@ -8,6 +8,12 @@
     "scheme": "buildr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "url": "https://u.expo.dev/f49b7b76-5a25-494b-a19b-91e7712198e4"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "owner": "electrix67",
     "ios": {
       "supportsTablet": false,

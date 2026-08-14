@@ -8,6 +8,9 @@
     "ios": "expo start --ios",
     "android": "expo start --android",
     "web": "expo start --web",
+    "update:preview": "eas update --channel preview --auto",
+    "update:promote": "eas update:republish --channel production",
+    "update:production": "eas update --channel production --auto",
     "test": "jest",
     "lint": "expo lint",
     "postinstall": "cp node_modules/react-native-image-viewing/dist/components/ImageItem/ImageItem.ios.js node_modules/react-native-image-viewing/dist/components/ImageItem/ImageItem.js 2>/dev/null; cp node_modules/react-native-image-viewing/dist/components/ImageItem/ImageItem.ios.d.ts node_modules/react-native-image-viewing/dist/components/ImageItem/ImageItem.d.ts 2>/dev/null; true"
@@ -33,6 +36,7 @@
     "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
+    "expo-updates": "~29.0.19",
     "expo-web-browser": "~15.0.11",
     "lucide-react-native": "^0.525.0",
     "react": "19.1.0",

@@ -104,6 +104,60 @@ eas build --platform android   # build Android
 
 (EAS doit être configuré avec un compte Expo et `eas.json`.)
 
+## Mises à jour OTA
+
+Le code JavaScript peut être remplacé à distance, sans repasser par l'App Store
+ni le Play Store. Une correction atteint les utilisateurs en quelques minutes au
+lieu de plusieurs jours de review.
+
+**Ce qui passe en OTA** : écrans, logique, styles, traductions, images du bundle.
+
+**Ce qui exige un vrai build** : toute modification native — nouvelle
+permission, nouveau module Expo, changement d'icône ou de nom, montée de version
+du SDK. C'est le rôle de `runtimeVersion: { policy: "appVersion" }` : une mise à
+jour n'est délivrée qu'aux builds portant la même version d'app, donc la même
+couche native. Impossible de casser une app en poussant du JS qui suppose du
+natif absent.
+
+### Le flux, à respecter
+
+```bash
+npm run update:preview     # publie sur le canal preview
+# on installe, on vérifie sur un vrai appareil
+npm run update:promote     # promeut EXACTEMENT ce bundle en production
+```
+
+La promotion republie le bundle déjà testé, elle n'en reconstruit pas un
+nouveau : ce qui part en production est ce qui a été validé.
+
+`npm run update:production` publie directement en production, sans étape de
+vérification. À réserver aux cas où le canal preview n'a pas de sens.
+
+### En cas de problème
+
+Une mauvaise mise à jour part chez tout le monde immédiatement, sans filet de
+review. Pour revenir en arrière, on republie le groupe précédent :
+
+```bash
+eas update:list --branch <branche>          # retrouver le groupe sain
+eas update:republish --group <group-id> --channel production
+```
+
+Les plantages remontent dans `/admin/errors` du dashboard avec la version
+concernée, ce qui permet de savoir qu'une mise à jour a cassé quelque chose sans
+attendre un appel.
+
+### Canaux
+
+| Canal | Profil de build | Usage |
+|---|---|---|
+| `development` | development | build de dev |
+| `preview` | preview, simulator | validation avant promotion |
+| `production` | production | App Store et Play Store |
+
+L'OTA n'est actif que dans les builds **postérieurs** à l'ajout d'`expo-updates` :
+un binaire compilé avant ne sait pas aller chercher de mise à jour.
+
 ## Documentation
 
 - **[`CLAUDE.md`](CLAUDE.md)** — Guidelines projet pour les contributeurs

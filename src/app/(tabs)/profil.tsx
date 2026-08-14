@@ -31,6 +31,7 @@ import { LOCALES, Locale } from '@/i18n/translations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUpdateProfile, useUpdatePassword, useSwitchOrganization, useCreateOrganization, useUpdatePushPreference } from '@/api/hooks/useAuth';
 import { useUnreadSummary } from '@/api/hooks/useChantierViews';
+import * as Updates from 'expo-updates';
 import { Colors } from '@/constants/Colors';
 import AppHeader from '@/components/AppHeader';
 import CalendarIntegrations from '@/components/CalendarIntegrations';
@@ -644,6 +645,18 @@ export default function ProfilScreen() {
                   {t('profile.deleteAccount')}
                 </Text>
               </TouchableOpacity>
+
+              {/* Version affichee pour le support : savoir si un correctif OTA
+                  est bien arrive chez l'utilisateur evite de chercher a l'aveugle. */}
+              <Text style={[styles.versionText, { color: colors.mutedText }]}>
+                Buildr {Updates.runtimeVersion ?? '?'}
+                {' · '}
+                {Updates.isEmbeddedLaunch
+                  ? 'version installee'
+                  : Updates.createdAt
+                    ? `mise a jour du ${Updates.createdAt.toLocaleDateString('fr-FR')}`
+                    : 'mise a jour'}
+              </Text>
             </>
           )}
         </ScrollView>
@@ -828,6 +841,7 @@ const styles = StyleSheet.create({
   avatarImage: { width: 56, height: 56, borderRadius: 28 },
   avatarBadge: { position: 'absolute', bottom: 0, right: 0, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFFFFF' },
   avatarText: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
+  versionText: { fontSize: FontSize.xs, textAlign: 'center', marginTop: Spacing.lg, marginBottom: Spacing.md },
   identityInfo: { flex: 1, gap: Spacing.xs },
   email: { fontSize: FontSize.base, fontWeight: FontWeight.semibold },
   roleBadge: { alignSelf: 'flex-start', paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: Radius.pill },
