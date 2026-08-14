@@ -10,11 +10,17 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { I18nProvider } from '@/contexts/I18nContext';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { installGlobalErrorHandler } from '@/api/errorReport';
 
 // Preload logo pendant le splash screen
 Asset.loadAsync(require('@/assets/images/casque-logo.png'));
 
 SplashScreen.preventAutoHideAsync();
+
+// Remontee des erreurs JavaScript non rattrapees vers error_log. Installe des
+// le chargement du module, avant tout rendu.
+installGlobalErrorHandler();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +76,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* Le plus haut possible : une erreur dans un provider doit encore
+          afficher l'ecran de secours plutot qu'un ecran blanc. */}
+      <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <ThemeProvider>
@@ -86,6 +95,7 @@ export default function RootLayout() {
           </ThemeProvider>
         </I18nProvider>
       </QueryClientProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
