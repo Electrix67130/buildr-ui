@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DASHBOARD_SIGNUP_URL } from '@/constants/Urls';
+import { useTranslation } from '@/contexts/I18nContext';
 
 /**
  * Sur mobile, la création de compte standalone (qui implique la création d'une
@@ -14,6 +15,7 @@ import { DASHBOARD_SIGNUP_URL } from '@/constants/Urls';
  * Les rejoins par invitation restent gérés ici via /(auth)/invite/[token].
  */
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -24,31 +26,30 @@ export default function RegisterScreen() {
           <Building2 size={36} color={colors.primary} />
         </View>
 
-        <Text style={[styles.title, { color: colors.text }]}>Crée ton entreprise sur le dashboard</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('register.createCompany')}</Text>
         <Text style={[styles.body, { color: colors.text2 }]}>
-          La création d&apos;une organisation Buildr (SIRET, facturation, équipe) se fait depuis le tableau de
-          bord web. L&apos;app mobile reste dédiée au terrain : photos, étapes, urgences.
+          {t('register.body')}
         </Text>
 
         <TouchableOpacity
           style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
           onPress={() => Linking.openURL(DASHBOARD_SIGNUP_URL)}
           accessibilityRole="link"
-          accessibilityLabel="Ouvrir le dashboard pour créer mon compte"
+          accessibilityLabel={t('register.openDashboardA11y')}
         >
           <ExternalLink size={IconSize.sm} color="#FFFFFF" />
-          <Text style={styles.primaryBtnText}>Ouvrir le dashboard</Text>
+          <Text style={styles.primaryBtnText}>{t('register.openDashboard')}</Text>
         </TouchableOpacity>
 
         <Text style={[styles.hint, { color: colors.mutedText }]}>
-          Une fois ton compte créé, télécharge à nouveau l&apos;app et connecte-toi ici.
+          {t('register.hint')}
         </Text>
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-        <Text style={[styles.invitationTitle, { color: colors.text }]}>Tu as reçu une invitation ?</Text>
+        <Text style={[styles.invitationTitle, { color: colors.text }]}>{t('register.haveInvite')}</Text>
         <Text style={[styles.body, { color: colors.text2 }]}>
-          Si ton entreprise t&apos;a invité, clique sur le lien reçu par email — il ouvre directement le bon écran.
+          {t('register.inviteBody')}
         </Text>
 
         <Link href="/(auth)/login" asChild>

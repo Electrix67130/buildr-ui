@@ -18,6 +18,7 @@ import { apiFetch, ApiError } from '@/api/client';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrateur',
@@ -26,6 +27,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function InviteScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
@@ -49,7 +51,7 @@ export default function InviteScreen() {
   // Fetch invitation info on mount
   useEffect(() => {
     if (!token) {
-      setInvitationError('Lien d\'invitation invalide.');
+      setInvitationError(t('invite.invalidLink'));
       setLoading(false);
       return;
     }
@@ -65,9 +67,9 @@ export default function InviteScreen() {
       })
       .catch((err) => {
         if (err instanceof ApiError && err.statusCode === 400) {
-          setInvitationError('Cette invitation a expiré.');
+          setInvitationError(t('invite.expired'));
         } else {
-          setInvitationError('Invitation introuvable ou déjà utilisée.');
+          setInvitationError(t('invite.notFound'));
         }
       })
       .finally(() => setLoading(false));
@@ -76,11 +78,11 @@ export default function InviteScreen() {
   const handleSubmit = async () => {
     if (!invitation || !token) return;
     if (!firstName.trim() || !lastName.trim() || !password.trim() || !phone.trim()) {
-      setFormError('Veuillez remplir les champs obligatoires.');
+      setFormError(t('invite.fillRequired'));
       return;
     }
     if (password.length < 8) {
-      setFormError('Le mot de passe doit contenir au moins 8 caractères.');
+      setFormError(t('auth.passwordMin8'));
       return;
     }
 
@@ -101,7 +103,7 @@ export default function InviteScreen() {
       if (err instanceof ApiError) {
         setFormError(String(err.details));
       } else {
-        setFormError('Erreur lors de l\'inscription.');
+        setFormError(t('invite.signupError'));
       }
     } finally {
       setSubmitting(false);
@@ -122,11 +124,11 @@ export default function InviteScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centered}>
-          <Text style={[styles.errorTitle, { color: colors.red }]}>Invitation invalide</Text>
+          <Text style={[styles.errorTitle, { color: colors.red }]}>{t('invite.invalidTitle')}</Text>
           <Text style={[styles.errorText, { color: colors.text2 }]}>{invitationError}</Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.primary }]}>
-              <Text style={styles.backBtnText}>Aller à la connexion</Text>
+              <Text style={styles.backBtnText}>{t('invite.goToLogin')}</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -142,7 +144,7 @@ export default function InviteScreen() {
             <View style={[styles.iconCircle, { backgroundColor: colors.primary + '15' }]}>
               <MailCheck size={IconSize.xxl} color={colors.primary} />
             </View>
-            <Text style={[styles.title, { color: colors.text }]}>Invitation à rejoindre Buildr</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('invite.title')}</Text>
             <Text style={[styles.subtitle, { color: colors.text2 }]}>
               <Text style={{ fontWeight: FontWeight.bold, color: colors.primary }}>
                 {invitation.organization_name}
@@ -153,24 +155,24 @@ export default function InviteScreen() {
           </View>
 
           <View style={styles.form}>
-            <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('auth.email')}</Text>
             <TextInput
               style={[styles.inputDisabled, { backgroundColor: colors.itemBackground, color: colors.text2, borderColor: colors.border }]}
               value={invitation.email}
               editable={false}
-              accessibilityLabel="Email"
+              accessibilityLabel={t('auth.email')}
             />
 
             <View style={styles.row}>
               <View style={styles.halfField}>
-                <Text style={[styles.label, { color: colors.text }]}>Prénom *</Text>
+                <Text style={[styles.label, { color: colors.text }]}>{t('invite.firstNameRequired')}</Text>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
                   placeholder="Julien"
                   placeholderTextColor={colors.placeholder}
                   value={firstName}
                   onChangeText={setFirstName}
-                  accessibilityLabel="Prénom"
+                  accessibilityLabel={t('auth.firstName')}
                 />
               </View>
               <View style={styles.halfField}>
@@ -186,18 +188,18 @@ export default function InviteScreen() {
               </View>
             </View>
 
-            <Text style={[styles.label, { color: colors.text }]}>Mot de passe *</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('invite.passwordRequired')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="8 caractères minimum"
+              placeholder={t('auth.min8chars')}
               placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              accessibilityLabel="Mot de passe"
+              accessibilityLabel={t('auth.password')}
             />
 
-            <Text style={[styles.label, { color: colors.text }]}>Téléphone *</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('invite.phoneRequired')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               placeholder="06 12 34 56 78"
@@ -205,7 +207,7 @@ export default function InviteScreen() {
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
-              accessibilityLabel="Téléphone"
+              accessibilityLabel={t('auth.phone')}
             />
 
             <Text style={[styles.label, { color: colors.text }]}>
@@ -216,12 +218,12 @@ export default function InviteScreen() {
                 isClient ? styles.input : styles.inputDisabled,
                 { backgroundColor: colors.itemBackground, color: isClient ? colors.text : colors.text2, borderColor: colors.border },
               ]}
-              placeholder={isClient ? 'Votre entreprise (ex: EIFFAGE)' : ''}
+              placeholder={isClient ? t('invite.companyPlaceholder') : ''}
               placeholderTextColor={colors.placeholder}
               value={companyName}
               onChangeText={setCompanyName}
               editable={isClient}
-              accessibilityLabel="Entreprise"
+              accessibilityLabel={t('auth.company')}
             />
 
             {formError ? <Text style={[styles.error, { color: colors.red }]}>{formError}</Text> : null}
@@ -231,7 +233,7 @@ export default function InviteScreen() {
               onPress={handleSubmit}
               disabled={submitting}
               accessibilityRole="button"
-              accessibilityLabel="Accepter l'invitation"
+              accessibilityLabel={t('invite.accept')}
             >
               {submitting ? (
                 <ActivityIndicator color="#FFFFFF" />

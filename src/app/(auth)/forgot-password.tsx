@@ -17,8 +17,10 @@ import { apiFetch, ApiError } from '@/api/client';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -29,7 +31,7 @@ export default function ForgotPasswordScreen() {
 
   const handleSubmit = async () => {
     if (!email.trim()) {
-      setError('Veuillez entrer votre adresse email.');
+      setError(t('auth.enterEmail'));
       return;
     }
 
@@ -47,7 +49,7 @@ export default function ForgotPasswordScreen() {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Erreur de connexion. Vérifiez votre réseau.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setLoading(false);
@@ -59,42 +61,42 @@ export default function ForgotPasswordScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <Link href="/(auth)/login" asChild>
-            <TouchableOpacity style={styles.backBtn} accessibilityRole="link" accessibilityLabel="Retour">
+            <TouchableOpacity style={styles.backBtn} accessibilityRole="link" accessibilityLabel={t('a11y.back')}>
               <ArrowLeft size={IconSize.lg} color={colors.text} />
             </TouchableOpacity>
           </Link>
 
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>Mot de passe oublié</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('auth.forgotPasswordTitle')}</Text>
             <Text style={[styles.subtitle, { color: colors.text2 }]}>
-              Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+              {t('auth.forgotSubtitle')}
             </Text>
           </View>
 
           {success ? (
             <View style={[styles.successBox, { backgroundColor: colors.green + '15', borderColor: colors.green + '30' }]}>
               <Text style={[styles.successText, { color: colors.green }]}>
-                Si un compte existe avec cette adresse, un email de réinitialisation a été envoyé. Vérifiez votre boîte de réception.
+                {t('auth.resetEmailSent')}
               </Text>
               <Link href="/(auth)/login" asChild>
                 <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary, marginTop: Spacing.lg }]}>
-                  <Text style={styles.buttonText}>Retour à la connexion</Text>
+                  <Text style={styles.buttonText}>{t('auth.backToLogin')}</Text>
                 </TouchableOpacity>
               </Link>
             </View>
           ) : (
             <View style={styles.form}>
-              <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('auth.email')}</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                placeholder="votre@email.com"
+                placeholder={t('auth.emailPlaceholder')}
                 placeholderTextColor={colors.placeholder}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-                accessibilityLabel="Adresse email"
+                accessibilityLabel={t('a11y.emailAddress')}
               />
 
               {error ? <Text style={[styles.error, { color: colors.red }]}>{error}</Text> : null}
@@ -108,7 +110,7 @@ export default function ForgotPasswordScreen() {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.buttonText}>Envoyer le lien</Text>
+                  <Text style={styles.buttonText}>{t('auth.sendLink')}</Text>
                 )}
               </TouchableOpacity>
             </View>

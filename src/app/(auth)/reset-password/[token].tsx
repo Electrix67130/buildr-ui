@@ -16,8 +16,10 @@ import { apiFetch, ApiError } from '@/api/client';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function ResetPasswordScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { token } = useLocalSearchParams<{ token: string }>();
@@ -30,15 +32,15 @@ export default function ResetPasswordScreen() {
 
   const handleReset = async () => {
     if (!password.trim()) {
-      setError('Veuillez entrer un nouveau mot de passe.');
+      setError(t('auth.enterNewPassword'));
       return;
     }
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      setError(t('auth.passwordMin8'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t('auth.passwordsMismatch'));
       return;
     }
 
@@ -55,12 +57,12 @@ export default function ResetPasswordScreen() {
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.message.includes('expired')) {
-          setError('Le lien a expiré. Veuillez refaire une demande.');
+          setError(t('auth.linkExpired'));
         } else {
           setError(err.message);
         }
       } else {
-        setError('Erreur de connexion. Vérifiez votre réseau.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setLoading(false);
@@ -73,42 +75,42 @@ export default function ResetPasswordScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Text style={[styles.logo, { color: colors.primary }]}>Buildr</Text>
-            <Text style={[styles.title, { color: colors.text }]}>Nouveau mot de passe</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('auth.newPassword')}</Text>
           </View>
 
           {success ? (
             <View style={[styles.successBox, { backgroundColor: colors.green + '15', borderColor: colors.green + '30' }]}>
               <Text style={[styles.successText, { color: colors.green }]}>
-                Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+                {t('auth.resetSuccess')}
               </Text>
               <Link href="/(auth)/login" asChild>
                 <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary, marginTop: Spacing.lg }]}>
-                  <Text style={styles.buttonText}>Se connecter</Text>
+                  <Text style={styles.buttonText}>{t('auth.signIn')}</Text>
                 </TouchableOpacity>
               </Link>
             </View>
           ) : (
             <View style={styles.form}>
-              <Text style={[styles.label, { color: colors.text }]}>Nouveau mot de passe</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('auth.newPassword')}</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                placeholder="8 caractères minimum"
+                placeholder={t('auth.min8chars')}
                 placeholderTextColor={colors.placeholder}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
-                accessibilityLabel="Nouveau mot de passe"
+                accessibilityLabel={t('auth.newPassword')}
               />
 
-              <Text style={[styles.label, { color: colors.text }]}>Confirmer le mot de passe</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('auth.confirmPassword')}</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                placeholder="Retapez le mot de passe"
+                placeholder={t('auth.retypePassword')}
                 placeholderTextColor={colors.placeholder}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
-                accessibilityLabel="Confirmer le mot de passe"
+                accessibilityLabel={t('auth.confirmPassword')}
               />
 
               {error ? <Text style={[styles.error, { color: colors.red }]}>{error}</Text> : null}
@@ -122,7 +124,7 @@ export default function ResetPasswordScreen() {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.buttonText}>Réinitialiser</Text>
+                  <Text style={styles.buttonText}>{t('auth.resetAction')}</Text>
                 )}
               </TouchableOpacity>
             </View>

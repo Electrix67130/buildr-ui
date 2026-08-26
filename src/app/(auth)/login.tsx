@@ -18,8 +18,10 @@ import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import BuildrLogo from '@/components/BuildrLogo';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { login } = useAuth();
@@ -31,7 +33,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Veuillez remplir tous les champs.');
+      setError(t('auth.fillAllFields'));
       return;
     }
 
@@ -42,9 +44,9 @@ export default function LoginScreen() {
       await login({ email: email.trim(), password });
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.statusCode === 401 ? 'Email ou mot de passe incorrect.' : String(err.details));
+        setError(err.statusCode === 401 ? t('auth.invalidCredentials') : String(err.details));
       } else {
-        setError('Erreur de connexion. Vérifiez votre réseau.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setLoading(false);
@@ -57,24 +59,24 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <BuildrLogo size={80} color={colors.primary} />
-            <Text style={[styles.subtitle, { color: colors.text2 }]}>Gestion de chantiers</Text>
+            <Text style={[styles.subtitle, { color: colors.text2 }]}>{t('auth.tagline')}</Text>
           </View>
 
           <View style={styles.form}>
-            <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('auth.email')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              placeholder="votre@email.com"
+              placeholder={t('auth.emailPlaceholder')}
               placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              accessibilityLabel="Adresse email"
+              accessibilityLabel={t('a11y.emailAddress')}
             />
 
-            <Text style={[styles.label, { color: colors.text }]}>Mot de passe</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('auth.password')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               placeholder="••••••••"
@@ -82,14 +84,14 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              accessibilityLabel="Mot de passe"
+              accessibilityLabel={t('auth.password')}
             />
 
             {error ? <Text style={[styles.error, { color: colors.red }]}>{error}</Text> : null}
 
             <Link href="/(auth)/forgot-password" asChild>
               <TouchableOpacity style={styles.forgotContainer} accessibilityRole="link">
-                <Text style={[styles.forgotText, { color: colors.primary }]}>Mot de passe oublié ?</Text>
+                <Text style={[styles.forgotText, { color: colors.primary }]}>{t('auth.forgotPasswordQ')}</Text>
               </TouchableOpacity>
             </Link>
 
@@ -98,7 +100,7 @@ export default function LoginScreen() {
               onPress={handleLogin}
               disabled={loading}
               accessibilityRole="button"
-              accessibilityLabel="Se connecter"
+              accessibilityLabel={t('auth.signIn')}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
