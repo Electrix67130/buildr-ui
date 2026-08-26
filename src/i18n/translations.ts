@@ -64,6 +64,7 @@ export type TranslationKeys =
   | 'templates.title' | 'templates.titleNew' | 'templates.titleEdit' | 'templates.titlePick'
   | 'templates.nameLabel' | 'templates.namePlaceholder' | 'templates.descriptionPlaceholder'
   | 'templates.defaultStatus' | 'templates.stepsLabel' | 'templates.stepNamePlaceholder'
+  | 'templates.reorderStep'
   | 'templates.substepNamePlaceholder' | 'templates.addStep' | 'templates.addSubstep'
   | 'templates.createBtn' | 'templates.empty' | 'templates.emptyHint' | 'templates.emptyPick'
   | 'templates.pickStep1' | 'templates.pickStep2' | 'templates.pickCreateChantier'
@@ -232,6 +233,7 @@ const fr: Dictionary = {
   'templates.descriptionPlaceholder': 'Description par défaut du chantier',
   'templates.defaultStatus': 'Statut par défaut',
   'templates.stepsLabel': 'Étapes',
+  'templates.reorderStep': "Réordonner l'étape",
   'templates.stepNamePlaceholder': "Nom de l'étape",
   'templates.substepNamePlaceholder': 'Nom de la sous-étape',
   'templates.addStep': 'Ajouter une étape',
@@ -444,6 +446,7 @@ const en: Dictionary = {
   'templates.descriptionPlaceholder': 'Default site description',
   'templates.defaultStatus': 'Default status',
   'templates.stepsLabel': 'Steps',
+  'templates.reorderStep': "Reorder step",
   'templates.stepNamePlaceholder': 'Step name',
   'templates.substepNamePlaceholder': 'Substep name',
   'templates.addStep': 'Add a step',
@@ -656,6 +659,7 @@ const de: Dictionary = {
   'templates.descriptionPlaceholder': 'Standard-Baustellenbeschreibung',
   'templates.defaultStatus': 'Standardstatus',
   'templates.stepsLabel': 'Schritte',
+  'templates.reorderStep': "Schritt umsortieren",
   'templates.stepNamePlaceholder': 'Schrittname',
   'templates.substepNamePlaceholder': 'Unterschrittname',
   'templates.addStep': 'Schritt hinzufügen',
@@ -868,6 +872,7 @@ const es: Dictionary = {
   'templates.descriptionPlaceholder': 'Descripción por defecto de la obra',
   'templates.defaultStatus': 'Estado por defecto',
   'templates.stepsLabel': 'Etapas',
+  'templates.reorderStep': "Reordenar la etapa",
   'templates.stepNamePlaceholder': 'Nombre de la etapa',
   'templates.substepNamePlaceholder': 'Nombre de la subetapa',
   'templates.addStep': 'Añadir etapa',
@@ -1080,6 +1085,7 @@ const it: Dictionary = {
   'templates.descriptionPlaceholder': 'Descrizione predefinita del cantiere',
   'templates.defaultStatus': 'Stato predefinito',
   'templates.stepsLabel': 'Fasi',
+  'templates.reorderStep': "Riordina la fase",
   'templates.stepNamePlaceholder': 'Nome della fase',
   'templates.substepNamePlaceholder': 'Nome della sotto-fase',
   'templates.addStep': 'Aggiungi fase',
@@ -1292,6 +1298,7 @@ const pt: Dictionary = {
   'templates.descriptionPlaceholder': 'Descrição predefinida da obra',
   'templates.defaultStatus': 'Estado predefinido',
   'templates.stepsLabel': 'Etapas',
+  'templates.reorderStep': "Reordenar a etapa",
   'templates.stepNamePlaceholder': 'Nome da etapa',
   'templates.substepNamePlaceholder': 'Nome da subetapa',
   'templates.addStep': 'Adicionar uma etapa',
@@ -1504,6 +1511,7 @@ const tr: Dictionary = {
   'templates.descriptionPlaceholder': 'Varsayılan şantiye açıklaması',
   'templates.defaultStatus': 'Varsayılan durum',
   'templates.stepsLabel': 'Adımlar',
+  'templates.reorderStep': "Adımı yeniden sırala",
   'templates.stepNamePlaceholder': 'Adım adı',
   'templates.substepNamePlaceholder': 'Alt adım adı',
   'templates.addStep': 'Bir adım ekle',
@@ -1716,6 +1724,7 @@ const pl: Dictionary = {
   'templates.descriptionPlaceholder': 'Domyślny opis budowy',
   'templates.defaultStatus': 'Domyślny status',
   'templates.stepsLabel': 'Etapy',
+  'templates.reorderStep': "Zmień kolejność etapu",
   'templates.stepNamePlaceholder': 'Nazwa etapu',
   'templates.substepNamePlaceholder': 'Nazwa podetapu',
   'templates.addStep': 'Dodaj etap',

@@ -15,9 +15,10 @@ import {
   findNodeHandle,
   UIManager,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { Plus, Trash2, ChevronUp, ChevronDown, X, UserPlus, Search } from 'lucide-react-native';
+import { Plus, Trash2, ChevronUp, ChevronDown, X, UserPlus, Search, GripVertical } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -129,6 +130,66 @@ export default function TemplateForm({ initial, submitting, submitLabel, onSubmi
   const updateStepName = (idx: number, val: string) =>
     setSteps((prev) => prev.map((s, i) => (i === idx ? { ...s, name: val } : s)));
   const removeStep = (idx: number) => setSteps((prev) => prev.filter((_, i) => i !== idx));
+  // --- Glisser-deposer des etapes ---------------------------------------
+  // Le formulaire vit dans un ScrollView et les cartes ont des hauteurs
+  // variables (le nombre de sous-etapes change). D'ou deux choix :
+  //  - le geste n'est arme que sur la poignee, et seulement apres un appui
+  //    long : ailleurs, un glissement vertical doit rester un defilement ;
+  //  - la position de depot se calcule sur les hauteurs reellement mesurees
+  //    (onLayout), pas sur une hauteur supposee constante.
+  // Les fleches haut/bas restent : elles servent au clavier, aux lecteurs
+  // d'ecran, et a qui trouve le glisser peu commode sur petit ecran.
+  const dragY = useSharedValue(0);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dropIdx, setDropIdx] = useState<number | null>(null);
+  const dropRef = useRef<number | null>(null);
+  const stepHeights = useRef<number[]>([]);
+
+  const dragStyle = useAnimatedStyle(() => ({ transform: [{ translateY: dragY.value }] }));
+
+  /** Index de depot pour un deplacement de `dy` pixels depuis `from`. */
+  const computeDrop = (from: number, dy: number) => {
+    const h = stepHeights.current;
+    let target = from;
+    if (dy > 0) {
+      let acc = 0;
+      for (let i = from + 1; i < h.length; i++) {
+        const card = h[i] ?? 0;
+        // On bascule quand la moitie de la carte suivante est franchie.
+        if (dy > acc + card / 2) {
+          target = i;
+          acc += card;
+        } else break;
+      }
+    } else if (dy < 0) {
+      let acc = 0;
+      for (let i = from - 1; i >= 0; i--) {
+        const card = h[i] ?? 0;
+        if (-dy > acc + card / 2) {
+          target = i;
+          acc += card;
+        } else break;
+      }
+    }
+    dropRef.current = target;
+    setDropIdx(target);
+  };
+
+  const commitDrop = (from: number) => {
+    const to = dropRef.current;
+    if (to !== null && to !== from) {
+      setSteps((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(from, 1);
+        next.splice(to, 0, moved);
+        return next;
+      });
+    }
+    dropRef.current = null;
+    setDropIdx(null);
+    setDragIdx(null);
+  };
+
   const moveStep = (idx: number, dir: -1 | 1) => {
     const to = idx + dir;
     if (to < 0 || to >= steps.length) return;
@@ -220,12 +281,51 @@ export default function TemplateForm({ initial, submitting, submitLabel, onSubmi
       </View>
 
       <Text style={[styles.label, { color: colors.text2, marginTop: Spacing.xl }]}>{t('templates.stepsLabel')}</Text>
-      {steps.map((step, idx) => (
-        <View
+      {steps.map((step, idx) => {
+        const isDragged = dragIdx === idx;
+        const isDropTarget = dragIdx !== null && dropIdx === idx && !isDragged;
+        const pan = Gesture.Pan()
+          // Appui long avant activation : sans ce delai, le geste volerait le
+          // defilement des le premier pixel parcouru sur la poignee.
+          .activateAfterLongPress(200)
+          .onStart(() => {
+            runOnJS(setDragIdx)(idx);
+            runOnJS(computeDrop)(idx, 0);
+          })
+          .onUpdate((e) => {
+            dragY.value = e.translationY;
+            runOnJS(computeDrop)(idx, e.translationY);
+          })
+          .onEnd(() => {
+            dragY.value = 0;
+            runOnJS(commitDrop)(idx);
+          })
+          .onFinalize(() => {
+            dragY.value = 0;
+          });
+
+        return (
+        <Animated.View
           key={idx}
-          style={[styles.stepCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          onLayout={(e) => {
+            // marginTop compris : le calcul du depot raisonne en pas visuels.
+            stepHeights.current[idx] = e.nativeEvent.layout.height + Spacing.sm;
+          }}
+          style={[
+            styles.stepCard,
+            {
+              backgroundColor: colors.surface,
+              borderColor: isDropTarget ? colors.primary : colors.border,
+            },
+            isDragged && [dragStyle, styles.stepCardDragging, { borderColor: colors.primary }],
+          ]}
         >
           <View style={styles.stepHeader}>
+            <GestureDetector gesture={pan}>
+              <View style={styles.dragHandle} accessibilityLabel={t('templates.reorderStep')}>
+                <GripVertical size={IconSize.sm} color={colors.mutedText} />
+              </View>
+            </GestureDetector>
             <Text style={[styles.stepNumber, { color: colors.primary }]}>{idx + 1}.</Text>
             <TextInput
               style={[styles.stepInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
@@ -283,8 +383,9 @@ export default function TemplateForm({ initial, submitting, submitLabel, onSubmi
             <Plus size={14} color={colors.primary} />
             <Text style={[styles.addSubstepText, { color: colors.primary }]}>{t('templates.addSubstep')}</Text>
           </TouchableOpacity>
-        </View>
-      ))}
+        </Animated.View>
+        );
+      })}
 
       <TouchableOpacity
         style={[styles.addStepBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '15' }]}
@@ -468,6 +569,9 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   stepHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  // Zone tactile de la poignee : l'icone seule serait trop petite pour le doigt.
+  dragHandle: { paddingVertical: Spacing.xs, paddingRight: Spacing.xs },
+  stepCardDragging: { zIndex: 10, elevation: 6, opacity: 0.95 },
   stepNumber: { fontSize: FontSize.base, fontWeight: FontWeight.bold, minWidth: 22 },
   stepInput: {
     flex: 1,
