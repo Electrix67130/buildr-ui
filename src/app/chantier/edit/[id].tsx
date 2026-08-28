@@ -19,14 +19,17 @@ import CityAutocomplete from '@/components/CityAutocomplete';
 import DateRangePicker from '@/components/DateRangePicker';
 import KeyboardAwareScroll from '@/components/KeyboardAwareScroll';
 import type { ChantierStatus } from '@/api/types';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
-const STATUS_OPTIONS: { value: ChantierStatus; label: string }[] = [
-  { value: 'a_venir', label: 'À venir' },
-  { value: 'en_cours', label: 'En cours' },
-  { value: 'termine', label: 'Terminé' },
+const STATUS_OPTIONS: { value: ChantierStatus; labelKey: TranslationKeys }[] = [
+  { value: 'a_venir', labelKey: 'chantier.statusUpcoming' },
+  { value: 'en_cours', labelKey: 'chantier.statusInProgress' },
+  { value: 'termine', labelKey: 'chantier.statusCompleted' },
 ];
 
 export default function EditChantierScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
@@ -67,7 +70,7 @@ export default function EditChantierScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError('Le nom du chantier est obligatoire.');
+      setError(t('chantier.nameRequired'));
       return;
     }
     if (!id) return;
@@ -95,7 +98,7 @@ export default function EditChantierScreen() {
       if (err instanceof ApiError) {
         setError(String(err.details));
       } else {
-        setError('Erreur lors de la modification.');
+        setError(t('chantier.editError'));
       }
     }
   };
@@ -116,20 +119,20 @@ export default function EditChantierScreen() {
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Retour">
           <ArrowLeft size={IconSize.lg} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.topTitle, { color: colors.text }]}>Modifier le chantier</Text>
+        <Text style={[styles.topTitle, { color: colors.text }]}>{t('chantier.edit')}</Text>
         <View style={{ width: IconSize.lg }} />
       </View>
 
       <KeyboardAwareScroll contentContainerStyle={styles.scrollContent}>
-          <Text style={[styles.label, { color: colors.text }]}>Nom du chantier *</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.nameRequiredLabel')}</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
             value={name}
             onChangeText={setName}
-            accessibilityLabel="Nom du chantier"
+            accessibilityLabel={t('chantier.nameLabel')}
           />
 
-          <Text style={[styles.label, { color: colors.text }]}>Description</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.description')}</Text>
           <TextInput
             style={[styles.inputMultiline, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
             value={description}
@@ -139,7 +142,7 @@ export default function EditChantierScreen() {
             accessibilityLabel="Description"
           />
 
-          <Text style={[styles.label, { color: colors.text }]}>Statut</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.status')}</Text>
           <View style={styles.statusRow}>
             {STATUS_OPTIONS.map((opt) => {
               const isActive = status === opt.value;
@@ -158,7 +161,7 @@ export default function EditChantierScreen() {
                   accessibilityState={{ selected: isActive }}
                 >
                   <Text style={[styles.statusText, { color: isActive ? colors.primary : colors.text2 }]}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </Text>
                 </TouchableOpacity>
               );
@@ -190,7 +193,7 @@ export default function EditChantierScreen() {
             onPress={handleSave}
             disabled={updateMutation.isPending}
             accessibilityRole="button"
-            accessibilityLabel="Enregistrer les modifications"
+            accessibilityLabel={t('chantier.saveChanges')}
           >
             {updateMutation.isPending ? (
               <ActivityIndicator color="#FFFFFF" />

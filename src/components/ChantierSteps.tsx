@@ -49,6 +49,7 @@ import {
   ChantierStep,
   ChantierSubstep,
 } from '@/api/hooks/useChantierSteps';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface Props {
   chantierId: string;
@@ -81,6 +82,7 @@ export default function ChantierSteps({
   inline = false,
   onAfterReorder,
 }: Props) {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -167,8 +169,8 @@ export default function ChantierSteps({
 
   const confirmDeleteStep = (step: ChantierStep) => {
     Alert.alert(
-      'Supprimer cette étape ?',
-      `« ${step.name} » et ses ${step.substeps.length} sous-étape(s) seront supprimées définitivement.`,
+      t('steps.confirmDeleteStep'),
+      t('steps.deleteStepBody', { name: step.name, count: step.substeps.length }),
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => deleteStep.mutate(step.id) },
@@ -177,7 +179,7 @@ export default function ChantierSteps({
   };
 
   const confirmDeleteSubstep = (sub: ChantierSubstep) => {
-    Alert.alert('Supprimer cette sous-étape ?', `« ${sub.name} » sera supprimée définitivement.`, [
+    Alert.alert(t('steps.confirmDeleteSubstep'), t('steps.deleteSubstepBody', { name: sub.name }), [
       { text: 'Annuler', style: 'cancel' },
       { text: 'Supprimer', style: 'destructive', onPress: () => deleteSubstep.mutate(sub.id) },
     ]);
@@ -275,7 +277,7 @@ export default function ChantierSteps({
               onPress={() => moveSubstep(step, idx, -1)}
               disabled={isFirst}
               style={[styles.iconBtn, { opacity: isFirst ? 0.3 : 1 }]}
-              accessibilityLabel="Monter la sous-étape"
+              accessibilityLabel={t('steps.moveSubstepUp')}
             >
               <ChevronUp size={16} color={colors.mutedText} />
             </TouchableOpacity>
@@ -283,7 +285,7 @@ export default function ChantierSteps({
               onPress={() => moveSubstep(step, idx, 1)}
               disabled={isLast}
               style={[styles.iconBtn, { opacity: isLast ? 0.3 : 1 }]}
-              accessibilityLabel="Descendre la sous-étape"
+              accessibilityLabel={t('steps.moveSubstepDown')}
             >
               <ChevronDown size={16} color={colors.mutedText} />
             </TouchableOpacity>
@@ -293,14 +295,14 @@ export default function ChantierSteps({
                 setDraftName(item.name);
               }}
               style={styles.iconBtn}
-              accessibilityLabel="Renommer la sous-étape"
+              accessibilityLabel={t('steps.renameSubstep')}
             >
               <Pencil size={14} color={colors.mutedText} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => confirmDeleteSubstep(item)}
               style={styles.iconBtn}
-              accessibilityLabel="Supprimer la sous-étape"
+              accessibilityLabel={t('steps.deleteSubstep')}
             >
               <Trash2 size={14} color={colors.red} />
             </TouchableOpacity>
@@ -400,7 +402,7 @@ export default function ChantierSteps({
             {unreadStepIds?.has(step.id) ? (
               <View
                 style={[styles.unreadDot, { backgroundColor: colors.primary }]}
-                accessibilityLabel="Nouveaux messages sur cette étape"
+                accessibilityLabel={t('steps.newMessages')}
               />
             ) : null}
             <View style={{ flex: 1 }}>
@@ -447,7 +449,7 @@ export default function ChantierSteps({
               {step.substeps.length > 0 ? (
                 step.substeps.map((sub, idx) => renderSubstepRow(sub, idx, step))
               ) : (
-                <Text style={[styles.emptySubsteps, { color: colors.mutedText }]}>Aucune sous-étape</Text>
+                <Text style={[styles.emptySubsteps, { color: colors.mutedText }]}>{t('steps.noSubstep')}</Text>
               )}
 
               {onOpenStepDiscussion ? (
@@ -455,7 +457,7 @@ export default function ChantierSteps({
                   style={[styles.discussionBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary }]}
                   onPress={() => onOpenStepDiscussion(step)}
                   accessibilityRole="button"
-                  accessibilityLabel="Ouvrir la discussion de cette étape"
+                  accessibilityLabel={t('steps.openDiscussion')}
                 >
                   <MessageCircle size={14} color={colors.primary} />
                   <Text style={[styles.discussionBtnText, { color: colors.primary }]}>
@@ -473,7 +475,7 @@ export default function ChantierSteps({
                   }}
                 >
                   <Plus size={14} color={colors.primary} />
-                  <Text style={[styles.addSubstepText, { color: colors.primary }]}>Ajouter une sous-étape</Text>
+                  <Text style={[styles.addSubstepText, { color: colors.primary }]}>{t('steps.addSubstep')}</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -498,7 +500,7 @@ export default function ChantierSteps({
       }}
     >
       <Plus size={IconSize.md} color="#FFFFFF" />
-      <Text style={styles.addStepText}>Ajouter une étape</Text>
+      <Text style={styles.addStepText}>{t('templates.addStep')}</Text>
     </TouchableOpacity>
   ) : null;
 
@@ -513,10 +515,10 @@ export default function ChantierSteps({
               style={[styles.reorderTrigger, { borderColor: colors.border, backgroundColor: colors.surface }]}
               onPress={() => setReorderModalOpen(true)}
               accessibilityRole="button"
-              accessibilityLabel="Réorganiser les étapes"
+              accessibilityLabel={t('steps.reorder')}
             >
               <ListOrdered size={IconSize.sm} color={colors.primary} />
-              <Text style={[styles.reorderTriggerText, { color: colors.primary }]}>Réorganiser les étapes</Text>
+              <Text style={[styles.reorderTriggerText, { color: colors.primary }]}>{t('steps.reorder')}</Text>
             </TouchableOpacity>
           ) : null}
           {orderedSteps.length > 0 ? (
@@ -562,12 +564,12 @@ export default function ChantierSteps({
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   {addingStep
-                    ? 'Nouvelle étape'
+                    ? t('steps.newStep')
                     : editingStep
                     ? 'Renommer l\'étape'
                     : addingSubstepFor
-                    ? 'Nouvelle sous-étape'
-                    : 'Renommer la sous-étape'}
+                    ? t('steps.newSubstep')
+                    : t('steps.renameSubstep')}
                 </Text>
                 <TouchableOpacity
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -625,7 +627,7 @@ export default function ChantierSteps({
             <Animated.View style={[styles.modal, { backgroundColor: colors.surface }, animatedCommentModalStyle]}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
-                  {commentTarget?.kind === 'step' ? 'Valider l\'étape' : 'Valider la sous-étape'}
+                  {commentTarget?.kind === 'step' ? t('steps.validateStep') : t('steps.validateSubstep')}
                 </Text>
                 <TouchableOpacity
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -648,7 +650,7 @@ export default function ChantierSteps({
                 style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
                 value={draftComment}
                 onChangeText={setDraftComment}
-                placeholder="Ex. Fait avec l'équipe d'Ahmed, plomberie OK"
+                placeholder={t('steps.commentExample')}
                 placeholderTextColor={colors.placeholder}
                 multiline
                 numberOfLines={3}
@@ -681,13 +683,13 @@ export default function ChantierSteps({
         >
           <View style={[styles.reorderContainer, { backgroundColor: colors.background }]}>
             <View style={[styles.reorderHeader, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
-              <Text style={[styles.reorderTitle, { color: colors.text }]}>Réorganiser les étapes</Text>
+              <Text style={[styles.reorderTitle, { color: colors.text }]}>{t('steps.reorder')}</Text>
               <TouchableOpacity
                 onPress={() => setReorderModalOpen(false)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 accessibilityLabel="Fermer"
               >
-                <Text style={[styles.reorderDone, { color: colors.primary }]}>Terminé</Text>
+                <Text style={[styles.reorderDone, { color: colors.primary }]}>{t('chantier.statusCompleted')}</Text>
               </TouchableOpacity>
             </View>
             <DraggableFlatList
@@ -867,7 +869,7 @@ export default function ChantierSteps({
           <Animated.View style={[styles.modal, { backgroundColor: colors.surface }, animatedCommentModalStyle]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {commentTarget?.kind === 'step' ? 'Valider l\'étape' : 'Valider la sous-étape'}
+                {commentTarget?.kind === 'step' ? t('steps.validateStep') : t('steps.validateSubstep')}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -889,7 +891,7 @@ export default function ChantierSteps({
               style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               value={draftComment}
               onChangeText={setDraftComment}
-              placeholder="Ex. Fait avec l'équipe d'Ahmed, plomberie OK"
+              placeholder={t('steps.commentExample')}
               placeholderTextColor={colors.placeholder}
               multiline
               numberOfLines={3}

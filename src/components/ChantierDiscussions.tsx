@@ -10,6 +10,7 @@ import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hook
 import ChantierSteps from './ChantierSteps';
 import CommentThread from './CommentThread';
 import type { ChantierStep } from '@/api/hooks/useChantierSteps';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export type DiscussionSubTab = 'steps' | 'messages';
 
@@ -38,6 +39,7 @@ export default function ChantierDiscussions({
   subTab: subTabProp,
   onSubTabChange,
 }: Props) {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -100,7 +102,7 @@ export default function ChantierDiscussions({
   if (!canViewComments && !canViewSteps) {
     return (
       <View style={styles.empty}>
-        <Text style={{ color: colors.mutedText }}>Vous n'avez pas accès à cette section.</Text>
+        <Text style={{ color: colors.mutedText }}>{t('discussions.noAccess')}</Text>
       </View>
     );
   }
@@ -202,7 +204,7 @@ export default function ChantierDiscussions({
           >
             <View style={[styles.modalHeader, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.modalSubtitle, { color: colors.mutedText }]}>Discussion de l'étape</Text>
+                <Text style={[styles.modalSubtitle, { color: colors.mutedText }]}>{t('discussions.stepThread')}</Text>
                 <Text style={[styles.modalTitle, { color: colors.text }]} numberOfLines={1}>
                   {openStep?.name}
                 </Text>

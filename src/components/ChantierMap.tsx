@@ -5,6 +5,8 @@ import { Colors } from '@/constants/Colors';
 import { FontSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import type { Chantier, ChantierStatus } from '@/api/types';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const STATUS_COLORS: Record<ChantierStatus, string> = {
   a_venir: '#2563EB',
@@ -12,10 +14,10 @@ const STATUS_COLORS: Record<ChantierStatus, string> = {
   termine: '#16A34A',
 };
 
-const STATUS_LABELS: Record<ChantierStatus, string> = {
-  a_venir: 'À venir',
-  en_cours: 'En cours',
-  termine: 'Terminé',
+const STATUS_LABEL_KEYS: Record<ChantierStatus, TranslationKeys> = {
+  a_venir: 'chantier.statusUpcoming',
+  en_cours: 'chantier.statusInProgress',
+  termine: 'chantier.statusCompleted',
 };
 
 interface Props {
@@ -24,6 +26,7 @@ interface Props {
 }
 
 const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -46,7 +49,8 @@ const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
   const markersJs = useMemo(() => {
     return mappableChantiers.map((c) => {
       const color = STATUS_COLORS[c.status];
-      const label = STATUS_LABELS[c.status];
+      const label = t(STATUS_LABEL_KEYS[c.status]);
+      const openLabel = t('chantier.openChantier');
       const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
       const name = esc(c.name);
       const addr = esc([c.address, c.city].filter(Boolean).join(', '));
@@ -60,7 +64,7 @@ const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
           });
           L.marker([${c.latitude}, ${c.longitude}], {icon: icon})
             .addTo(map)
-            .bindPopup('<div style="font-family:-apple-system,sans-serif;"><b>${name}</b><br/><span style="color:#78716C;font-size:12px;">${addr}</span><br/><span style="color:${color};font-weight:bold;font-size:12px;">${label}</span><br/><button onclick="window.ReactNativeWebView.postMessage(\\'${c.id}\\')" style="margin-top:6px;background:#D97706;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;width:100%;">Ouvrir le chantier →</button></div>');
+            .bindPopup('<div style="font-family:-apple-system,sans-serif;"><b>${name}</b><br/><span style="color:#78716C;font-size:12px;">${addr}</span><br/><span style="color:${color};font-weight:bold;font-size:12px;">${label}</span><br/><button onclick="window.ReactNativeWebView.postMessage(\\'${c.id}\\')" style="margin-top:6px;background:#D97706;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;width:100%;">${openLabel}</button></div>');
         })();
       `;
     }).join('\n');
@@ -88,9 +92,9 @@ const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
     </head>
     <body>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#2563EB;"></div> À venir</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#D97706;"></div> En cours</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#16A34A;"></div> Terminé</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2563EB;"></div> ${t('chantier.statusUpcoming')}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D97706;"></div> ${t('chantier.statusInProgress')}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#16A34A;"></div> ${t('chantier.statusCompleted')}</div>
       </div>
       <div id="map"></div>
       <script>
@@ -108,7 +112,7 @@ const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
     return (
       <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
         <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-          Aucun chantier avec des coordonnées GPS.
+          {t('chantier.noGpsChantier')}
         </Text>
       </View>
     );

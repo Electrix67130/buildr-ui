@@ -28,14 +28,17 @@ import CityAutocomplete from '@/components/CityAutocomplete';
 import DateRangePicker from '@/components/DateRangePicker';
 import KeyboardAwareScroll from '@/components/KeyboardAwareScroll';
 import type { ChantierStatus } from '@/api/types';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
-const STATUS_OPTIONS: { value: ChantierStatus; label: string }[] = [
-  { value: 'a_venir', label: 'À venir' },
-  { value: 'en_cours', label: 'En cours' },
-  { value: 'termine', label: 'Terminé' },
+const STATUS_OPTIONS: { value: ChantierStatus; labelKey: TranslationKeys }[] = [
+  { value: 'a_venir', labelKey: 'chantier.statusUpcoming' },
+  { value: 'en_cours', labelKey: 'chantier.statusInProgress' },
+  { value: 'termine', labelKey: 'chantier.statusCompleted' },
 ];
 
 export default function CreateChantierScreen() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
@@ -74,7 +77,7 @@ export default function CreateChantierScreen() {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError('Le nom du chantier est obligatoire.');
+      setError(t('chantier.nameRequired'));
       return;
     }
 
@@ -99,7 +102,7 @@ export default function CreateChantierScreen() {
       if (err instanceof ApiError) {
         setError(String(err.details));
       } else {
-        setError('Erreur lors de la création. Vérifiez votre réseau.');
+        setError(t('chantier.createError'));
       }
     }
   };
@@ -120,17 +123,17 @@ export default function CreateChantierScreen() {
       </View>
 
       <KeyboardAwareScroll contentContainerStyle={styles.scrollContent}>
-          <Text style={[styles.label, { color: colors.text }]}>Nom du chantier *</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.nameRequiredLabel')}</Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-            placeholder="Ex: Rénovation Place Stanislas"
+            placeholder={t('chantier.namePlaceholder')}
             placeholderTextColor={colors.placeholder}
             value={name}
             onChangeText={setName}
-            accessibilityLabel="Nom du chantier"
+            accessibilityLabel={t('chantier.nameLabel')}
           />
 
-          <Text style={[styles.label, { color: colors.text }]}>Statut</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.status')}</Text>
           <View style={styles.statusRow}>
             {STATUS_OPTIONS.map((opt) => {
               const isActive = status === opt.value;
@@ -149,19 +152,19 @@ export default function CreateChantierScreen() {
                   accessibilityState={{ selected: isActive }}
                 >
                   <Text style={[styles.statusText, { color: isActive ? colors.primary : colors.text2 }]}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.text }]}>Manager</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('collab.role.manager')}</Text>
           <TouchableOpacity
             style={[styles.pickerField, { backgroundColor: colors.itemBackground, borderColor: managerId ? '#7C3AED' : colors.border }]}
             onPress={() => { Keyboard.dismiss(); setManagerSearch(''); setShowManagerPicker(true); }}
             accessibilityRole="button"
-            accessibilityLabel="Choisir un manager"
+            accessibilityLabel={t('chantier.chooseManager')}
           >
             {selectedManager ? (
               <View style={styles.pickerSelected}>
@@ -179,7 +182,7 @@ export default function CreateChantierScreen() {
               </View>
             ) : (
               <View style={styles.pickerPlaceholder}>
-                <Text style={[styles.pickerText, { color: colors.placeholder }]}>Aucun manager (optionnel)</Text>
+                <Text style={[styles.pickerText, { color: colors.placeholder }]}>{t('chantier.noManagerOptional')}</Text>
                 <ChevronDown size={18} color={colors.placeholder} />
               </View>
             )}
@@ -203,10 +206,10 @@ export default function CreateChantierScreen() {
             onAddressSelect={(addr, lat, lng) => { setAddress(addr); setLatitude(lat); setLongitude(lng); }}
           />
 
-          <Text style={[styles.label, { color: colors.text }]}>Description</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('chantier.description')}</Text>
           <TextInput
             style={[styles.inputMultiline, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-            placeholder="Description du chantier..."
+            placeholder={t('chantier.descriptionPlaceholder')}
             placeholderTextColor={colors.placeholder}
             value={description}
             onChangeText={setDescription}
@@ -222,12 +225,12 @@ export default function CreateChantierScreen() {
             onPress={handleCreate}
             disabled={createMutation.isPending}
             accessibilityRole="button"
-            accessibilityLabel="Créer le chantier"
+            accessibilityLabel={t('chantier.createSubmit')}
           >
             {createMutation.isPending ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>Créer le chantier</Text>
+              <Text style={styles.buttonText}>{t('chantier.createSubmit')}</Text>
             )}
           </TouchableOpacity>
       </KeyboardAwareScroll>
@@ -237,7 +240,7 @@ export default function CreateChantierScreen() {
         <Pressable style={styles.modalOverlay} onPress={() => setShowManagerPicker(false)}>
           <AnimatedPressable style={[styles.modalContent, { backgroundColor: colors.surface }, animatedManagerPickerStyle]} onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Choisir un manager</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('chantier.chooseManager')}</Text>
               <TouchableOpacity onPress={() => setShowManagerPicker(false)}>
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
@@ -247,7 +250,7 @@ export default function CreateChantierScreen() {
               <Search size={16} color={colors.placeholder} />
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
-                placeholder="Rechercher un manager..."
+                placeholder={t('chantier.searchManager')}
                 placeholderTextColor={colors.placeholder}
                 value={managerSearch}
                 onChangeText={setManagerSearch}
@@ -263,7 +266,7 @@ export default function CreateChantierScreen() {
               <View style={[styles.managerAvatar, { backgroundColor: colors.itemBackground }]}>
                 <UserX size={18} color={colors.text2} />
               </View>
-              <Text style={[styles.managerName, { color: colors.text2 }]}>Aucun manager</Text>
+              <Text style={[styles.managerName, { color: colors.text2 }]}>{t('chantier.noManager')}</Text>
             </TouchableOpacity>
 
             <FlatList
@@ -293,14 +296,14 @@ export default function CreateChantierScreen() {
                     </View>
                     {isSelected && (
                       <View style={[styles.selectedBadge, { backgroundColor: '#7C3AED' }]}>
-                        <Text style={styles.selectedBadgeText}>Sélectionné</Text>
+                        <Text style={styles.selectedBadgeText}>{t('chantier.selected')}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
                 );
               }}
               ListEmptyComponent={
-                <Text style={[styles.emptySearch, { color: colors.mutedText }]}>Aucun manager trouvé.</Text>
+                <Text style={[styles.emptySearch, { color: colors.mutedText }]}>{t('chantier.noManagerFound')}</Text>
               }
               keyboardShouldPersistTaps="handled"
             />
