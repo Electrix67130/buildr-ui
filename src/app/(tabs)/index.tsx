@@ -88,25 +88,25 @@ export default function ChantiersScreen() {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     Alert.alert(
-      `Supprimer ${ids.length} chantier${ids.length > 1 ? 's' : ''} ?`,
-      'Action irréversible : toutes leurs données (photos, documents, étapes…) seront supprimées.',
+      t('chantier.bulkDeleteTitle', { count: ids.length }),
+      t('chantier.bulkDeleteBody'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
               exitSelection();
             } catch (err) {
-              Alert.alert('Erreur', err instanceof Error ? err.message : 'Suppression partielle');
+              Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.bulkDeletePartial'));
             }
           },
         },
       ],
     );
-  }, [selectedIds, deleteMutation, exitSelection]);
+  }, [selectedIds, deleteMutation, exitSelection, t]);
 
   const renderItem = useCallback(
     ({ item }: { item: Chantier }) => {
@@ -156,7 +156,7 @@ export default function ChantiersScreen() {
           {t('chantier.empty')}
         </Text>
         <Text style={[styles.emptyHint, { color: colors.mutedText }]}>
-          {isSearching ? 'Essayez un autre terme de recherche.' : 'Appuyez sur + pour créer votre premier chantier.'}
+          {isSearching ? t('chantier.emptySearchHint') : t('chantier.emptyCreateHint')}
         </Text>
       </View>
     );
@@ -196,7 +196,7 @@ export default function ChantiersScreen() {
           exiting={FadeOutUp.duration(180)}
           style={[styles.selectionBar, { backgroundColor: colors.primary + '15', borderBottomColor: colors.primary }]}
         >
-          <TouchableOpacity onPress={exitSelection} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityLabel="Annuler la sélection">
+          <TouchableOpacity onPress={exitSelection} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityLabel={t('selection.cancel')}>
             <X size={IconSize.lg} color={colors.text} />
           </TouchableOpacity>
           <Animated.Text
@@ -204,7 +204,7 @@ export default function ChantiersScreen() {
             entering={FadeInDown.duration(140)}
             style={[styles.selectionCount, { color: colors.text }]}
           >
-            {selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}
+            {t('selection.count', { count: selectedIds.size })}
           </Animated.Text>
           <TouchableOpacity
             style={[
@@ -213,11 +213,11 @@ export default function ChantiersScreen() {
             ]}
             onPress={handleBulkDelete}
             disabled={selectedIds.size === 0 || deleteMutation.isPending}
-            accessibilityLabel="Supprimer la sélection"
+            accessibilityLabel={t('selection.delete')}
           >
             <Trash2 size={IconSize.sm} color={selectedIds.size === 0 ? colors.mutedText : '#FFFFFF'} />
             <Text style={[styles.selectionDeleteText, { color: selectedIds.size === 0 ? colors.mutedText : '#FFFFFF' }]}>
-              Supprimer
+              {t('common.delete')}
             </Text>
           </TouchableOpacity>
         </Animated.View>

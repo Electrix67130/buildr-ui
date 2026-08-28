@@ -12,18 +12,21 @@ import { getSignedFileUrl } from '@/api/fileAccess';
 import { shareFile } from '@/utils/shareFile';
 import { optimizeImage } from '@/utils/optimizeImage';
 import type { DocumentType, Document } from '@/api/types';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
-const DOC_TYPES: { key: DocumentType; label: string; icon: typeof File; color: string; description: string }[] = [
-  { key: 'dict', label: 'DICT', icon: FileCheck, color: '#7C3AED', description: 'Déclaration d\'Intention de Commencement de Travaux' },
-  { key: 'dt', label: 'DT', icon: FileClock, color: '#2563EB', description: 'Déclaration de Travaux' },
-  { key: 'bon_de_commande', label: 'Bon de commande', icon: ShoppingCart, color: '#D97706', description: 'Bon de commande fournisseur' },
-  { key: 'plan', label: 'Plan', icon: Map, color: '#059669', description: 'Plans et schémas techniques' },
-  { key: 'arrete', label: 'Arrêté', icon: Scale, color: '#DC2626', description: 'Arrêté municipal ou préfectoral' },
-  { key: 'facture', label: 'Facture', icon: Receipt, color: '#0891B2', description: 'Facture client ou fournisseur' },
-  { key: 'autre', label: 'Autre', icon: File, color: '#6B7280', description: 'Autre document' },
+// Le tableau est defini hors composant : il porte des cles de traduction, le rendu appelle t().
+const DOC_TYPES: { key: DocumentType; labelKey: TranslationKeys; icon: typeof File; color: string; descKey: TranslationKeys }[] = [
+  { key: 'dict', labelKey: 'documents.type.dict', icon: FileCheck, color: '#7C3AED', descKey: 'documents.type.dictDesc' },
+  { key: 'dt', labelKey: 'documents.type.dt', icon: FileClock, color: '#2563EB', descKey: 'documents.type.dtDesc' },
+  { key: 'bon_de_commande', labelKey: 'documents.type.order', icon: ShoppingCart, color: '#D97706', descKey: 'documents.type.orderDesc' },
+  { key: 'plan', labelKey: 'documents.type.plan', icon: Map, color: '#059669', descKey: 'documents.type.planDesc' },
+  { key: 'arrete', labelKey: 'documents.type.decree', icon: Scale, color: '#DC2626', descKey: 'documents.type.decreeDesc' },
+  { key: 'facture', labelKey: 'documents.type.invoice', icon: Receipt, color: '#0891B2', descKey: 'documents.type.invoiceDesc' },
+  { key: 'autre', labelKey: 'documents.type.other', icon: File, color: '#6B7280', descKey: 'documents.type.otherDesc' },
 ];
 
-const DOC_TYPE_MAP = Object.fromEntries(DOC_TYPES.map((t) => [t.key, t]));
+const DOC_TYPE_MAP = Object.fromEntries(DOC_TYPES.map((dt) => [dt.key, dt]));
 
 interface Props {
   chantierId: string;
@@ -31,6 +34,7 @@ interface Props {
 }
 
 const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
+  const { t, locale } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -55,8 +59,8 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
         const MAX_SIZE = 10 * 1024 * 1024;
         if (asset.size && asset.size > MAX_SIZE) {
           Alert.alert(
-            'Fichier trop volumineux',
-            `Ce fichier fait ${(asset.size / (1024 * 1024)).toFixed(1)} Mo. La taille maximale autorisée est 10 Mo.\n\nConseil : si c'est un PDF, vous pouvez le compresser via des services comme ilovepdf.com avant de l'importer.`,
+            t('documents.tooLarge'),
+            t('documents.tooLargeBody', { size: (asset.size / (1024 * 1024)).toFixed(1) }),
           );
           return;
         }
@@ -64,12 +68,12 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
         setShowTypeModal(true);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur';
-      if (!msg.includes('Different document picking in progress')) Alert.alert('Erreur', msg);
+      const msg = err instanceof Error ? err.message : t('common.error');
+      if (!msg.includes('Different document picking in progress')) Alert.alert(t('common.error'), msg);
     } finally {
       isPickingRef.current = false;
     }
-  }, []);
+  }, [t]);
 
   const handlePickFromGallery = useCallback(async () => {
     if (isPickingRef.current) return;
@@ -77,10 +81,7 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert(
-          'Accès à la galerie refusé',
-          'Autorise l\'accès aux photos dans les réglages de l\'app pour pouvoir importer depuis la galerie.',
-        );
+        Alert.alert(t('urgence.galleryDenied'), t('documents.galleryDeniedBody'));
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -100,12 +101,12 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
       });
       setShowTypeModal(true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur';
-      Alert.alert('Erreur', msg);
+      const msg = err instanceof Error ? err.message : t('common.error');
+      Alert.alert(t('common.error'), msg);
     } finally {
       isPickingRef.current = false;
     }
-  }, []);
+  }, [t]);
 
 
   const handleSelectType = useCallback(async (type: DocumentType) => {
@@ -152,9 +153,9 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
 
   const formatSize = (bytes?: number) => {
     if (!bytes) return '';
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+    if (bytes < 1024) return t('documents.sizeB', { size: bytes });
+    if (bytes < 1024 * 1024) return t('documents.sizeKb', { size: (bytes / 1024).toFixed(0) });
+    return t('documents.sizeMb', { size: (bytes / (1024 * 1024)).toFixed(1) });
   };
 
   const renderItem = useCallback(
@@ -179,17 +180,17 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
           <View style={styles.docInfo}>
             <Text style={[styles.docName, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
             <Text style={[styles.docMeta, { color: colors.mutedText }]}>
-              {docType?.label ?? item.type}
+              {docType ? t(docType.labelKey) : item.type}
               {item.file_size ? `  ·  ${formatSize(item.file_size)}` : ''}
             </Text>
             <Text style={[styles.docAuthor, { color: colors.mutedText }]}>
-              {item.first_name} {item.last_name} — {new Date(item.created_at).toLocaleDateString('fr-FR')}
+              {item.first_name} {item.last_name} — {new Date(item.created_at).toLocaleDateString(locale)}
             </Text>
           </View>
         </TouchableOpacity>
       );
     },
-    [colors],
+    [colors, locale, t],
   );
 
   return (
@@ -201,20 +202,20 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
             onPress={handlePickFromGallery}
             disabled={createMutation.isPending}
             accessibilityRole="button"
-            accessibilityLabel="Importer depuis la galerie"
+            accessibilityLabel={t('documents.importGallery')}
           >
             <ImagePlus size={IconSize.md} color="#FFFFFF" />
-            <Text style={styles.actionText}>Galerie</Text>
+            <Text style={styles.actionText}>{t('photos.gallery')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: colors.primary }]}
             onPress={handlePickFile}
             disabled={createMutation.isPending}
             accessibilityRole="button"
-            accessibilityLabel="Importer un fichier"
+            accessibilityLabel={t('documents.importFile')}
           >
             <Upload size={IconSize.md} color="#FFFFFF" />
-            <Text style={styles.actionText}>Fichier</Text>
+            <Text style={styles.actionText}>{t('documents.file')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -228,7 +229,7 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}
         ListEmptyComponent={
           !isLoading ? (
-            <Text style={[styles.empty, { color: colors.mutedText }]}>Aucun document.</Text>
+            <Text style={[styles.empty, { color: colors.mutedText }]}>{t('documents.empty')}</Text>
           ) : null
         }
       />
@@ -250,7 +251,7 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
                     <View style={styles.actionSheetInfo}>
                       <Text style={[styles.actionSheetName, { color: colors.text }]} numberOfLines={2}>{selectedDoc.name}</Text>
                       <Text style={[styles.actionSheetMeta, { color: colors.mutedText }]}>
-                        {docType?.label} · {formatSize(selectedDoc.file_size)} · {selectedDoc.first_name} {selectedDoc.last_name}
+                        {docType ? t(docType.labelKey) : selectedDoc.type} · {formatSize(selectedDoc.file_size)} · {selectedDoc.first_name} {selectedDoc.last_name}
                       </Text>
                     </View>
                   </View>
@@ -259,18 +260,18 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
 
                   <TouchableOpacity style={styles.actionRow} onPress={handleOpen} accessibilityRole="button">
                     <ExternalLink size={IconSize.lg} color={colors.primary} />
-                    <Text style={[styles.actionLabel, { color: colors.text }]}>Ouvrir le document</Text>
+                    <Text style={[styles.actionLabel, { color: colors.text }]}>{t('documents.openDoc')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.actionRow} onPress={handleShare} accessibilityRole="button">
                     <Share2 size={IconSize.lg} color={colors.primary} />
-                    <Text style={[styles.actionLabel, { color: colors.text }]}>Partager / Télécharger</Text>
+                    <Text style={[styles.actionLabel, { color: colors.text }]}>{t('documents.shareDownload')}</Text>
                   </TouchableOpacity>
 
                   {!readonly && (
                     <TouchableOpacity style={styles.actionRow} onPress={handleDelete} accessibilityRole="button">
                       <Trash2 size={IconSize.lg} color={colors.red} />
-                      <Text style={[styles.actionLabel, { color: colors.red }]}>Supprimer</Text>
+                      <Text style={[styles.actionLabel, { color: colors.red }]}>{t('common.delete')}</Text>
                     </TouchableOpacity>
                   )}
                 </>
@@ -286,7 +287,7 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
           <View style={[styles.typeModalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.typeModalHeader}>
               <View>
-                <Text style={[styles.typeModalTitle, { color: colors.text }]}>Type de document</Text>
+                <Text style={[styles.typeModalTitle, { color: colors.text }]}>{t('documents.typeTitle')}</Text>
                 {pendingFile && (
                   <Text style={[styles.typeModalFile, { color: colors.mutedText }]} numberOfLines={1}>{pendingFile.name}</Text>
                 )}
@@ -303,14 +304,14 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
                   style={[styles.typeRow, { borderBottomColor: colors.border }]}
                   onPress={() => handleSelectType(dt.key)}
                   accessibilityRole="button"
-                  accessibilityLabel={dt.label}
+                  accessibilityLabel={t(dt.labelKey)}
                 >
                   <View style={[styles.typeRowIcon, { backgroundColor: dt.color + '15' }]}>
                     <Icon size={IconSize.lg} color={dt.color} />
                   </View>
                   <View style={styles.typeRowText}>
-                    <Text style={[styles.typeRowLabel, { color: colors.text }]}>{dt.label}</Text>
-                    <Text style={[styles.typeRowDesc, { color: colors.mutedText }]}>{dt.description}</Text>
+                    <Text style={[styles.typeRowLabel, { color: colors.text }]}>{t(dt.labelKey)}</Text>
+                    <Text style={[styles.typeRowDesc, { color: colors.mutedText }]}>{t(dt.descKey)}</Text>
                   </View>
                 </TouchableOpacity>
               );

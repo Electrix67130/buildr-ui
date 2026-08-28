@@ -12,6 +12,7 @@ import { optimizeImage } from '@/utils/optimizeImage';
 import { shareFile } from '@/utils/shareFile';
 import { getSignedFileUrl } from '@/api/fileAccess';
 import type { Photo } from '@/api/types';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const COLUMN_COUNT = 3;
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
+  const { t, locale } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -39,18 +41,18 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
       if (useCamera) {
         const camPerm = await ImagePicker.requestCameraPermissionsAsync();
         if (!camPerm.granted) {
-          Alert.alert('Caméra refusée', 'Autorise la caméra dans les réglages.');
+          Alert.alert(t('urgence.cameraDenied'), t('urgence.cameraDeniedBody'));
           return;
         }
         const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!libPerm.granted) {
-          Alert.alert('Galerie refusée', "Autorise l'accès aux photos dans les réglages.");
+          Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
           return;
         }
       } else {
         const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!libPerm.granted) {
-          Alert.alert('Galerie refusée', "Autorise l'accès aux photos dans les réglages.");
+          Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
           return;
         }
       }
@@ -73,9 +75,9 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         });
       }
     } catch (err) {
-      Alert.alert('Erreur', err instanceof Error ? err.message : 'Échec');
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     }
-  }, [chantierId, createMutation]);
+  }, [chantierId, createMutation, t]);
 
   const handleDelete = useCallback((id: string) => {
     deleteMutation.mutate(id);
@@ -91,7 +93,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
           delayLongPress={200}
           activeOpacity={0.8}
           accessibilityRole="image"
-          accessibilityLabel={item.caption || 'Photo de chantier'}
+          accessibilityLabel={item.caption || t('photos.ofSite')}
         >
           <Image source={{ uri: item.thumbnail_url || item.url }} style={styles.photoImage} />
         </TouchableOpacity>
@@ -100,7 +102,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
             style={styles.deleteIcon}
             onPress={() => handleDelete(item.id)}
             accessibilityRole="button"
-            accessibilityLabel="Supprimer la photo"
+            accessibilityLabel={t('photos.delete')}
           >
             <View style={styles.deleteIconBg}>
               <Trash2 size={14} color="#FFFFFF" />
@@ -109,7 +111,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         )}
       </View>
     ),
-    [colors, handleDelete],
+    [colors, handleDelete, readonly, t],
   );
 
   const renderHeader = () => readonly ? null : (
@@ -118,19 +120,19 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         style={[styles.actionBtn, { backgroundColor: colors.primary }]}
         onPress={() => pickImage(true)}
         accessibilityRole="button"
-        accessibilityLabel="Prendre une photo"
+        accessibilityLabel={t('photos.take')}
       >
         <Camera size={IconSize.md} color="#FFFFFF" />
-        <Text style={styles.actionText}>Caméra</Text>
+        <Text style={styles.actionText}>{t('photos.camera')}</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.actionBtn, { backgroundColor: colors.primary }]}
         onPress={() => pickImage(false)}
         accessibilityRole="button"
-        accessibilityLabel="Choisir une photo"
+        accessibilityLabel={t('photos.choose')}
       >
         <ImagePlus size={IconSize.md} color="#FFFFFF" />
-        <Text style={styles.actionText}>Galerie</Text>
+        <Text style={styles.actionText}>{t('photos.gallery')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -147,7 +149,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
             style={styles.closeIcon}
             onPress={() => setSelectedPhoto(null)}
             accessibilityRole="button"
-            accessibilityLabel="Fermer"
+            accessibilityLabel={t('common.close')}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
             <X size={IconSize.lg} color={colors.text} />
@@ -160,7 +162,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
               setFullscreenIndex(idx >= 0 ? idx : 0);
             }}
             accessibilityRole="image"
-            accessibilityLabel="Agrandir la photo"
+            accessibilityLabel={t('photos.zoom')}
           >
             <Image source={{ uri: selectedPhoto.url }} style={styles.fullImage} resizeMode="contain" />
           </TouchableOpacity>
@@ -172,7 +174,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
               <Text style={[styles.photoCaption, { color: colors.text2 }]}>{selectedPhoto.caption}</Text>
             )}
             <Text style={[styles.photoDate, { color: colors.mutedText }]}>
-              {new Date(selectedPhoto.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date(selectedPhoto.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
             </Text>
           </View>
           <View style={styles.detailActions}>
@@ -186,19 +188,19 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
                 } catch { /* silent */ }
               }}
               accessibilityRole="button"
-              accessibilityLabel="Partager ou télécharger la photo"
+              accessibilityLabel={t('photos.share')}
             >
               <Share2 size={IconSize.md} color="#FFFFFF" />
-              <Text style={styles.detailBtnText}>Partager</Text>
+              <Text style={styles.detailBtnText}>{t('common.share')}</Text>
             </TouchableOpacity>
             {!readonly && <TouchableOpacity
               style={[styles.detailBtn, { backgroundColor: colors.red }]}
               onPress={() => handleDelete(selectedPhoto.id)}
               accessibilityRole="button"
-              accessibilityLabel="Supprimer la photo"
+              accessibilityLabel={t('photos.delete')}
             >
               <Trash2 size={IconSize.md} color="#FFFFFF" />
-              <Text style={styles.detailBtnText}>Supprimer</Text>
+              <Text style={styles.detailBtnText}>{t('common.delete')}</Text>
             </TouchableOpacity>}
           </View>
         </View>
@@ -229,7 +231,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}
         ListEmptyComponent={
           !isLoading ? (
-            <Text style={[styles.empty, { color: colors.mutedText }]}>Aucune photo. Utilisez la caméra ou la galerie.</Text>
+            <Text style={[styles.empty, { color: colors.mutedText }]}>{t('photos.empty')}</Text>
           ) : null
         }
       />

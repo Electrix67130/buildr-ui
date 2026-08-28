@@ -12,8 +12,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import SearchBar from '@/components/SearchBar';
 import AppHeader from '@/components/AppHeader';
 import type { Chantier } from '@/api/types';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function ArchivesScreen() {
+  const { t, locale } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -44,12 +46,12 @@ export default function ArchivesScreen() {
 
   const handleUnarchive = useCallback(
     (id: string, name: string) => {
-      Alert.alert('Désarchiver', `Remettre "${name}" dans les chantiers actifs ?`, [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Désarchiver', onPress: () => unarchiveMutation.mutate(id) },
+      Alert.alert(t('chantier.unarchive'), t('chantier.unarchiveConfirm', { name }), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('chantier.unarchive'), onPress: () => unarchiveMutation.mutate(id) },
       ]);
     },
-    [unarchiveMutation],
+    [unarchiveMutation, t],
   );
 
   const handleEnterSelection = useCallback(
@@ -65,52 +67,52 @@ export default function ArchivesScreen() {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     Alert.alert(
-      `Supprimer ${ids.length} chantier${ids.length > 1 ? 's' : ''} ?`,
-      'Action irréversible : toutes leurs données (photos, documents, étapes…) seront supprimées.',
+      t('chantier.bulkDeleteTitle', { count: ids.length }),
+      t('chantier.bulkDeleteBody'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
               exitSelection();
             } catch (err) {
-              Alert.alert('Erreur', err instanceof Error ? err.message : 'Suppression partielle');
+              Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.bulkDeletePartial'));
             }
           },
         },
       ],
     );
-  }, [selectedIds, deleteMutation, exitSelection]);
+  }, [selectedIds, deleteMutation, exitSelection, t]);
 
   const handleBulkUnarchive = useCallback(() => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     Alert.alert(
-      `Désarchiver ${ids.length} chantier${ids.length > 1 ? 's' : ''} ?`,
-      'Ils repasseront dans la liste active.',
+      t('chantier.bulkUnarchiveTitle', { count: ids.length }),
+      t('chantier.bulkUnarchiveBody'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Désarchiver',
+          text: t('chantier.unarchive'),
           onPress: async () => {
             try {
               await Promise.all(ids.map((id) => unarchiveMutation.mutateAsync(id)));
               exitSelection();
             } catch (err) {
-              Alert.alert('Erreur', err instanceof Error ? err.message : 'Action partielle');
+              Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.bulkPartial'));
             }
           },
         },
       ],
     );
-  }, [selectedIds, unarchiveMutation, exitSelection]);
+  }, [selectedIds, unarchiveMutation, exitSelection, t]);
 
   const formatDate = (date?: string) => {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const getDeleteCountdown = (autoDeleteAt?: string) => {
@@ -118,8 +120,8 @@ export default function ArchivesScreen() {
     const diff = new Date(autoDeleteAt).getTime() - Date.now();
     const years = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
     const months = Math.floor((diff % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
-    if (years > 0) return `${years} an${years > 1 ? 's' : ''} ${months} mois`;
-    return `${months} mois`;
+    if (years > 0) return t('duration.yearsMonths', { years, months });
+    return t('duration.months', { months });
   };
 
   const renderItem = useCallback(
@@ -143,7 +145,7 @@ export default function ArchivesScreen() {
           delayLongPress={350}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel={`Voir ${item.name}`}
+          accessibilityLabel={t('chantier.viewA11y', { name: item.name })}
           accessibilityState={selectionMode ? { selected: isSelected } : undefined}
         >
           <View style={styles.cardHeader}>
@@ -155,7 +157,7 @@ export default function ArchivesScreen() {
                 onPress={(e) => { e.stopPropagation(); handleUnarchive(item.id, item.name); }}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Désarchiver ${item.name}`}
+                accessibilityLabel={t('chantier.unarchiveA11y', { name: item.name })}
               >
                 <ArchiveRestore size={IconSize.lg} color={colors.primary} />
               </TouchableOpacity>
@@ -174,14 +176,14 @@ export default function ArchivesScreen() {
           <View style={styles.row}>
             <Calendar size={IconSize.sm} color={colors.text2} />
             <Text style={[styles.detail, { color: colors.text2 }]}>
-              Archivé le {formatDate(item.archived_at)}
+              {t('archives.archivedOnDate', { date: formatDate(item.archived_at) })}
             </Text>
           </View>
 
           <View style={styles.row}>
             <Clock size={IconSize.sm} color={colors.red} />
             <Text style={[styles.detail, { color: colors.red }]}>
-              Suppression auto dans {getDeleteCountdown(item.auto_delete_at)}
+              {t('chantier.autoDeleteIn', { duration: getDeleteCountdown(item.auto_delete_at) })}
             </Text>
           </View>
         </TouchableOpacity>
@@ -214,7 +216,7 @@ export default function ArchivesScreen() {
         </Animated.View>
       );
     },
-    [colors, handleUnarchive, handleEnterSelection, isAdmin, router, selectionMode, selectedIds, toggleSelection],
+    [colors, handleUnarchive, handleEnterSelection, isAdmin, router, selectionMode, selectedIds, toggleSelection, locale, t],
   );
 
   return (
@@ -228,7 +230,7 @@ export default function ArchivesScreen() {
           exiting={FadeOutUp.duration(180)}
           style={[styles.selectionBar, { backgroundColor: colors.primary + '15', borderBottomColor: colors.primary }]}
         >
-          <TouchableOpacity onPress={exitSelection} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityLabel="Annuler la sélection">
+          <TouchableOpacity onPress={exitSelection} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityLabel={t('selection.cancel')}>
             <X size={IconSize.lg} color={colors.text} />
           </TouchableOpacity>
           <Animated.Text
@@ -236,7 +238,7 @@ export default function ArchivesScreen() {
             entering={FadeInDown.duration(140)}
             style={[styles.selectionCount, { color: colors.text }]}
           >
-            {selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}
+            {t('selection.count', { count: selectedIds.size })}
           </Animated.Text>
           <View style={styles.selectionActions}>
             <TouchableOpacity
@@ -246,7 +248,7 @@ export default function ArchivesScreen() {
               ]}
               onPress={handleBulkUnarchive}
               disabled={selectedIds.size === 0 || unarchiveMutation.isPending}
-              accessibilityLabel="Désarchiver la sélection"
+              accessibilityLabel={t('selection.unarchive')}
             >
               <ArchiveRestore size={IconSize.sm} color={selectedIds.size === 0 ? colors.mutedText : '#FFFFFF'} />
             </TouchableOpacity>
@@ -257,7 +259,7 @@ export default function ArchivesScreen() {
               ]}
               onPress={handleBulkDelete}
               disabled={selectedIds.size === 0 || deleteMutation.isPending}
-              accessibilityLabel="Supprimer la sélection"
+              accessibilityLabel={t('selection.delete')}
             >
               <Trash2 size={IconSize.sm} color={selectedIds.size === 0 ? colors.mutedText : '#FFFFFF'} />
             </TouchableOpacity>
@@ -270,7 +272,7 @@ export default function ArchivesScreen() {
           exiting={FadeOutUp.duration(180)}
           style={styles.searchContainer}
         >
-          <SearchBar value={search} onChangeText={setSearch} placeholder="Rechercher dans les archives..." />
+          <SearchBar value={search} onChangeText={setSearch} placeholder={t('archives.search')} />
         </Animated.View>
       )}
 
@@ -285,10 +287,10 @@ export default function ArchivesScreen() {
           !isLoading ? (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: colors.mutedText }]}>
-                {search ? 'Aucune archive trouvée.' : 'Aucun chantier archivé.'}
+                {search ? t('archives.noResult') : t('archives.empty')}
               </Text>
               <Text style={[styles.emptyHint, { color: colors.mutedText }]}>
-                Les chantiers terminés peuvent être archivés depuis leur page de détail.
+                {t('archives.emptyHint')}
               </Text>
             </View>
           ) : null

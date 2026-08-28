@@ -17,18 +17,22 @@ import ChantierDiscussions, { DiscussionSubTab } from '@/components/ChantierDisc
 import EmergencyList, { EmergencySplitTab } from '@/components/EmergencyList';
 import { useChantierMembers } from '@/api/hooks/useMembers';
 import { useUnreadCounts, useMarkTabViewed } from '@/api/hooks/useChantierViews';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
+// Les onglets portent une cle de traduction, pas un libelle : le rendu appelle t().
 const TABS = [
-  { key: 'comments', label: 'Discussions', icon: MessageSquare },
-  { key: 'photos', label: 'Photos', icon: Camera },
-  { key: 'documents', label: 'Documents', icon: FileText },
-  { key: 'emergencies', label: 'Urgences', icon: AlertTriangle },
-  { key: 'team', label: 'Équipe', icon: Users },
-] as const;
+  { key: 'comments', labelKey: 'detail.discussions', icon: MessageSquare },
+  { key: 'photos', labelKey: 'detail.photos', icon: Camera },
+  { key: 'documents', labelKey: 'detail.documents', icon: FileText },
+  { key: 'emergencies', labelKey: 'urgence.tabTitle', icon: AlertTriangle },
+  { key: 'team', labelKey: 'detail.team', icon: Users },
+] as const satisfies readonly { key: string; labelKey: TranslationKeys; icon: unknown }[];
 
 type TabKey = (typeof TABS)[number]['key'];
 
 export default function ChantierDetailScreen() {
+  const { t, locale } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
@@ -95,18 +99,20 @@ export default function ChantierDetailScreen() {
         : 'emergency';
 
   const visibleTabs = TABS
-    .filter((t) => {
-      if (t.key === 'team') return canViewTeam;
+    .filter((tab) => {
+      if (tab.key === 'team') return canViewTeam;
       // L'onglet "Discussions" contient deux sous-onglets (messages + etapes) : on le cache
       // uniquement si le user n'a acces ni aux messages ni aux etapes.
-      if (t.key === 'comments') return canViewComments || canViewSteps;
-      if (t.key === 'photos') return canViewPhotos;
-      if (t.key === 'documents') return canViewDocuments;
-      if (t.key === 'emergencies') return canViewEmergencies;
+      if (tab.key === 'comments') return canViewComments || canViewSteps;
+      if (tab.key === 'photos') return canViewPhotos;
+      if (tab.key === 'documents') return canViewDocuments;
+      if (tab.key === 'emergencies') return canViewEmergencies;
       return true;
     })
-    .map((t) =>
-      t.key === 'emergencies' && emergencyMode === 'claim' ? { ...t, label: 'Réclamations' } : t,
+    .map((tab) =>
+      tab.key === 'emergencies' && emergencyMode === 'claim'
+        ? { ...tab, labelKey: 'chantier.claims' as const }
+        : tab,
     );
 
   const openInMaps = async () => {
@@ -164,36 +170,36 @@ export default function ChantierDetailScreen() {
       await setRetentionMutation.mutateAsync({ id, years: parsedRetention });
       setShowRetentionModal(false);
     } catch (err) {
-      Alert.alert('Erreur', err instanceof Error ? err.message : 'Modification impossible');
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.updateFailed'));
     }
   };
 
   const formatCountdown = (autoDeleteAt?: string) => {
     if (!autoDeleteAt) return '';
     const diff = new Date(autoDeleteAt).getTime() - Date.now();
-    if (diff <= 0) return 'imminente';
+    if (diff <= 0) return t('duration.imminent');
     const years = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
     const months = Math.floor((diff % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
-    if (years > 0) return `${years} an${years > 1 ? 's' : ''} ${months} mois`;
-    return `${months} mois`;
+    if (years > 0) return t('duration.yearsMonths', { years, months });
+    return t('duration.months', { months });
   };
 
   const handleDelete = () => {
     if (!id || !chantier) return;
     Alert.alert(
-      'Supprimer définitivement',
-      `Cette action est irréversible. Le chantier « ${chantier.name} » et toutes ses données (photos, documents, commentaires, étapes…) seront supprimés.\n\nContinuer ?`,
+      t('chantier.deletePermanently'),
+      t('chantier.deleteBody', { name: chantier.name }),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteMutation.mutateAsync(id);
               router.back();
             } catch (err) {
-              Alert.alert('Erreur', err instanceof Error ? err.message : 'Suppression impossible');
+              Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.deleteFailed'));
             }
           },
         },
@@ -215,12 +221,12 @@ export default function ChantierDetailScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Retour">
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel={t('a11y.back')}>
             <ArrowLeft size={IconSize.lg} color={colors.text} />
           </TouchableOpacity>
         </View>
         <View style={styles.loadingContainer}>
-          <Text style={[styles.emptyText, { color: colors.mutedText }]}>Chantier introuvable.</Text>
+          <Text style={[styles.emptyText, { color: colors.mutedText }]}>{t('chantier.notFound')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -228,14 +234,14 @@ export default function ChantierDetailScreen() {
 
   const formatDate = (date?: string) => {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(date).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Retour">
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel={t('a11y.back')}>
           <ArrowLeft size={IconSize.lg} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.topTitle, { color: colors.text }]} numberOfLines={1}>
@@ -249,7 +255,7 @@ export default function ChantierDetailScreen() {
                   onPress={async () => { if (!id) return; await unarchiveMutation.mutateAsync(id); }}
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   accessibilityRole="button"
-                  accessibilityLabel="Désarchiver"
+                  accessibilityLabel={t('chantier.unarchive')}
                 >
                   <ArchiveRestore size={IconSize.lg} color={colors.primary} />
                 </TouchableOpacity>
@@ -259,7 +265,7 @@ export default function ChantierDetailScreen() {
                     onPress={() => router.push(`/chantier/edit/${id}`)}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                     accessibilityRole="button"
-                    accessibilityLabel="Modifier le chantier"
+                    accessibilityLabel={t('chantier.edit')}
                   >
                     <Pencil size={IconSize.lg} color={colors.primary} />
                   </TouchableOpacity>
@@ -267,7 +273,7 @@ export default function ChantierDetailScreen() {
                     onPress={handleArchive}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                     accessibilityRole="button"
-                    accessibilityLabel="Archiver"
+                    accessibilityLabel={t('chantier.archive')}
                   >
                     <Archive size={IconSize.lg} color={colors.text2} />
                   </TouchableOpacity>
@@ -277,7 +283,7 @@ export default function ChantierDetailScreen() {
                 onPress={handleDelete}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 accessibilityRole="button"
-                accessibilityLabel="Supprimer définitivement"
+                accessibilityLabel={t('chantier.deletePermanently')}
               >
                 <Trash2 size={IconSize.lg} color={colors.red} />
               </TouchableOpacity>
@@ -295,7 +301,7 @@ export default function ChantierDetailScreen() {
         <View style={styles.infoToggleRow}>
           <StatusBadge status={chantier.status} />
           <Text style={[styles.infoToggleText, { color: colors.text2 }]}>
-            {showInfo ? 'Masquer les détails' : 'Afficher les détails'}
+            {showInfo ? t('chantier.hideDetails') : t('chantier.showDetails')}
           </Text>
           {showInfo
             ? <ChevronUp size={IconSize.md} color={colors.text2} />
@@ -329,7 +335,7 @@ export default function ChantierDetailScreen() {
                 }}
                 style={[styles.copyAddressBtn, { backgroundColor: addressCopied ? colors.green + '20' : colors.primary + '15' }]}
                 accessibilityRole="button"
-                accessibilityLabel="Copier l'adresse"
+                accessibilityLabel={t('chantier.copyAddress')}
               >
                 {addressCopied ? (
                   <Check size={IconSize.sm} color={colors.green} />
@@ -345,10 +351,10 @@ export default function ChantierDetailScreen() {
               style={[styles.mapsButton, { backgroundColor: colors.primary + '15', borderColor: colors.primary }]}
               onPress={openInMaps}
               accessibilityRole="button"
-              accessibilityLabel="Ouvrir dans Google Maps"
+              accessibilityLabel={t('chantier.openGoogleMaps')}
             >
               <Navigation size={IconSize.sm} color={colors.primary} />
-              <Text style={[styles.mapsText, { color: colors.primary }]}>Itinéraire</Text>
+              <Text style={[styles.mapsText, { color: colors.primary }]}>{t('chantier.openMaps')}</Text>
             </TouchableOpacity>
           )}
 
@@ -356,17 +362,17 @@ export default function ChantierDetailScreen() {
             <View style={[styles.retentionRow, { borderTopColor: colors.border }]}>
               <Clock size={IconSize.sm} color={colors.red} />
               <Text style={[styles.retentionText, { color: colors.red }]}>
-                Suppression auto dans {formatCountdown(chantier.auto_delete_at)}
+                {t('chantier.autoDeleteIn', { duration: formatCountdown(chantier.auto_delete_at) })}
               </Text>
               {isAdmin && (
                 <TouchableOpacity
                   onPress={openRetentionModal}
                   style={[styles.retentionEditBtn, { backgroundColor: colors.primary + '15' }]}
                   accessibilityRole="button"
-                  accessibilityLabel="Modifier la durée de conservation"
+                  accessibilityLabel={t('chantier.editRetention')}
                 >
                   <Pencil size={IconSize.sm} color={colors.primary} />
-                  <Text style={[styles.retentionEditText, { color: colors.primary }]}>Modifier</Text>
+                  <Text style={[styles.retentionEditText, { color: colors.primary }]}>{t('common.edit')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -422,7 +428,7 @@ export default function ChantierDetailScreen() {
                 ) : null}
               </View>
               <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.text2 }]}>
-                {tab.label}
+                {t(tab.labelKey)}
               </Text>
             </TouchableOpacity>
           );
@@ -462,9 +468,9 @@ export default function ChantierDetailScreen() {
       <Modal visible={showRetentionModal} transparent animationType="fade" onRequestClose={() => setShowRetentionModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, { backgroundColor: colors.surface }, Shadow.lg]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Durée de conservation</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('chantier.retention')}</Text>
             <Text style={[styles.modalHint, { color: colors.text2 }]}>
-              Le chantier sera supprimé automatiquement N années après son archivage. (1-10 ans)
+              {t('chantier.retentionHint')}
             </Text>
 
             <View style={styles.modalInputRow}>
@@ -484,15 +490,15 @@ export default function ChantierDetailScreen() {
                 placeholder="1-10"
                 placeholderTextColor={colors.placeholder}
                 autoFocus
-                accessibilityLabel="Nombre d'années"
+                accessibilityLabel={t('chantier.yearsCount')}
               />
               <Text style={[styles.modalUnit, { color: colors.text2 }]}>
-                {parsedRetention === 1 ? 'an' : 'ans'}
+                {parsedRetention === 1 ? t('duration.year') : t('duration.years')}
               </Text>
             </View>
 
             {retentionInput !== '' && !retentionValid && (
-              <Text style={[styles.modalError, { color: colors.red }]}>Saisis un nombre entre 1 et 10.</Text>
+              <Text style={[styles.modalError, { color: colors.red }]}>{t('profile.retentionRange')}</Text>
             )}
 
             <View style={styles.modalActions}>
@@ -500,9 +506,9 @@ export default function ChantierDetailScreen() {
                 style={[styles.modalBtn, { borderColor: colors.border }]}
                 onPress={() => setShowRetentionModal(false)}
                 accessibilityRole="button"
-                accessibilityLabel="Annuler"
+                accessibilityLabel={t('common.cancel')}
               >
-                <Text style={[styles.modalBtnText, { color: colors.text2 }]}>Annuler</Text>
+                <Text style={[styles.modalBtnText, { color: colors.text2 }]}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -513,14 +519,14 @@ export default function ChantierDetailScreen() {
                 onPress={handleSaveRetention}
                 disabled={!retentionValid || setRetentionMutation.isPending}
                 accessibilityRole="button"
-                accessibilityLabel="Enregistrer"
+                accessibilityLabel={t('common.save')}
               >
                 {setRetentionMutation.isPending ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <>
                     <Save size={IconSize.sm} color="#FFFFFF" />
-                    <Text style={[styles.modalBtnText, { color: '#FFFFFF' }]}>Enregistrer</Text>
+                    <Text style={[styles.modalBtnText, { color: '#FFFFFF' }]}>{t('common.save')}</Text>
                   </>
                 )}
               </TouchableOpacity>
