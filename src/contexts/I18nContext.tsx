@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TRANSLATIONS, Locale, TranslationKeys } from '@/i18n/translations';
+import { TRANSLATIONS, LOCALES, Locale, TranslationKeys } from '@/i18n/translations';
 
 interface I18nContextValue {
   locale: Locale;
@@ -10,7 +10,12 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 const STORAGE_KEY = 'app_locale';
-const VALID: Locale[] = ['fr', 'en', 'de', 'es', 'it'];
+// Derive de LOCALES plutot que reecrit a la main : la liste ecrite en dur avait
+// arrete d'evoluer a cinq langues alors que le selecteur en propose huit. Un
+// utilisateur qui choisissait le portugais, le turc ou le polonais le gardait
+// pour la session, puis retombait en francais au redemarrage — sa langue etait
+// stockee, mais relue puis rejetee ici.
+const VALID: Locale[] = LOCALES.map((l) => l.code);
 
 // Locale courante dupliquee hors de React. Elle sert aux quelques appelants qui
 // ne peuvent pas consommer le contexte : un utilitaire hors composant, et
