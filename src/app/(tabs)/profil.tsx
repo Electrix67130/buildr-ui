@@ -153,11 +153,11 @@ export default function ProfilScreen() {
   const handleChangePassword = async () => {
     setPasswordError('');
     if (newPassword.length < 8) {
-      setPasswordError('Le mot de passe doit contenir au moins 8 caractères.');
+      setPasswordError(t('auth.passwordMin8'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('Les mots de passe ne correspondent pas.');
+      setPasswordError(t('auth.passwordsMismatch'));
       return;
     }
     try {
@@ -166,10 +166,10 @@ export default function ProfilScreen() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      Alert.alert('Mot de passe modifié', 'Votre mot de passe a été mis à jour avec succès.');
+      Alert.alert(t('profile.passwordChanged'), t('profile.passwordChangedBody'));
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur';
-      setPasswordError(msg.includes('Current') ? 'Mot de passe actuel incorrect.' : msg);
+      setPasswordError(msg.includes('Current') ? t('profile.wrongCurrentPassword') : msg);
     }
   };
 
@@ -321,7 +321,7 @@ export default function ProfilScreen() {
                   />
                 </View>
                 {user.role !== 'admin' && user.role !== 'client' && (
-                  <Text style={[styles.hint, { color: colors.mutedText }]}>Seul un administrateur peut modifier le nom de l'entreprise.</Text>
+                  <Text style={[styles.hint, { color: colors.mutedText }]}>{t('profile.onlyAdminCompany')}</Text>
                 )}
 
                 {hasChanges && (
@@ -350,17 +350,17 @@ export default function ProfilScreen() {
               </View>
 
               {/* Security */}
-              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>SÉCURITÉ</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.securitySection')}</Text>
               <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TouchableOpacity
                   style={[styles.securityBtn, { borderColor: colors.border }]}
                   onPress={() => setShowPasswordModal(true)}
                   accessibilityRole="button"
-                  accessibilityLabel="Changer le mot de passe"
+                  accessibilityLabel={t('profile.changePassword')}
                 >
                   <KeyRound size={IconSize.md} color={colors.primary} />
                   <Text style={[styles.securityBtnText, { color: colors.text }]}>
-                    Changer le mot de passe
+                    {t('profile.changePassword')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -377,7 +377,7 @@ export default function ProfilScreen() {
                       Notifications push
                     </Text>
                     <Text style={[styles.notifHint, { color: colors.mutedText }]}>
-                      Recevoir une alerte sur ce mobile pour les nouveaux commentaires, photos, urgences…
+                      {t('profile.pushHint')}
                     </Text>
                   </View>
                   <Switch
@@ -386,7 +386,7 @@ export default function ProfilScreen() {
                     disabled={updatePushPref.isPending}
                     trackColor={{ false: colors.border, true: colors.primary }}
                     thumbColor="#FFFFFF"
-                    accessibilityLabel="Activer les notifications push"
+                    accessibilityLabel={t('profile.enablePush')}
                   />
                 </View>
               </View>
@@ -411,14 +411,14 @@ export default function ProfilScreen() {
                         </Text>
                         <Text style={[styles.orgRole, { color: colors.mutedText }]}>
                           {m.role === 'admin'
-                            ? 'Admin'
+                            ? t('collab.role.admin')
                             : m.role === 'manager'
-                              ? 'Manager'
+                              ? t('collab.role.manager')
                               : m.role === 'employee'
-                                ? 'Employé'
+                                ? t('collab.role.employee')
                                 : m.role === 'client'
-                                  ? 'Client'
-                                  : 'Gestionnaire réseau'}
+                                  ? t('collab.role.client')
+                                  : t('collab.role.gestionnaireReseau')}
                         </Text>
                       </View>
                       {orgUnread > 0 ? (
@@ -439,7 +439,7 @@ export default function ProfilScreen() {
                           onPress={() => {
                             switchOrg.mutate(m.organization_id, {
                               onError: (err) =>
-                                Alert.alert('Erreur', err instanceof Error ? err.message : 'Impossible de changer'),
+                                Alert.alert('Erreur', err instanceof Error ? err.message : t('profile.cannotSwitch')),
                             });
                           }}
                           disabled={switchOrg.isPending}
@@ -450,7 +450,7 @@ export default function ProfilScreen() {
                           ) : (
                             <>
                               <ArrowRightLeft size={14} color="#FFFFFF" />
-                              <Text style={styles.orgSwitchText}>Changer de compte</Text>
+                              <Text style={styles.orgSwitchText}>{t('profile.switchAccount')}</Text>
                             </>
                           )}
                         </TouchableOpacity>
@@ -462,11 +462,11 @@ export default function ProfilScreen() {
                 <TouchableOpacity
                   style={[styles.createOrgBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '10' }]}
                   onPress={() => setShowCreateOrgModal(true)}
-                  accessibilityLabel="Créer une organisation"
+                  accessibilityLabel={t('profile.createOrg')}
                 >
                   <Plus size={IconSize.md} color={colors.primary} />
                   <Text style={[styles.createOrgText, { color: colors.primary }]}>
-                    Créer une organisation
+                    {t('profile.createOrg')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -500,7 +500,7 @@ export default function ProfilScreen() {
                 <>
                   <Text style={[styles.sectionTitle, { color: colors.text2 }]}>ARCHIVES</Text>
                   <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Text style={[styles.label, { color: colors.text2 }]}>Conserver les chantiers archivés pendant</Text>
+                    <Text style={[styles.label, { color: colors.text2 }]}>{t('profile.retentionLabel')}</Text>
                     <View style={styles.retentionInputRow}>
                       <TextInput
                         style={[
@@ -517,7 +517,7 @@ export default function ProfilScreen() {
                         maxLength={2}
                         placeholder="1-10"
                         placeholderTextColor={colors.placeholder}
-                        accessibilityLabel="Durée de conservation en années"
+                        accessibilityLabel={t('profile.retentionA11y')}
                       />
                       <Text style={[styles.retentionUnit, { color: colors.text2 }]}>
                         {parsedRetention === 1 ? 'an' : 'ans'}
@@ -537,7 +537,7 @@ export default function ProfilScreen() {
                         onPress={handleSaveRetention}
                         disabled={!retentionChanged || updateOrg.isPending}
                         accessibilityRole="button"
-                        accessibilityLabel="Enregistrer la durée de conservation"
+                        accessibilityLabel={t('profile.retentionSave')}
                       >
                         {updateOrg.isPending ? (
                           <ActivityIndicator color="#FFFFFF" />
@@ -550,11 +550,11 @@ export default function ProfilScreen() {
                     </View>
                     {retentionInput && !retentionValid && (
                       <Text style={[styles.hint, { color: colors.red }]}>
-                        Saisis un nombre entre 1 et 10.
+                        {t('profile.retentionRange')}
                       </Text>
                     )}
                     <Text style={[styles.hint, { color: colors.mutedText }]}>
-                      S'applique aux futurs archivages. Les chantiers déjà archivés gardent leur date de suppression initiale (modifiable depuis chaque chantier archivé).
+                      {t('profile.retentionHint')}
                     </Text>
                   </View>
                 </>
@@ -652,10 +652,10 @@ export default function ProfilScreen() {
                 Buildr {Updates.runtimeVersion ?? '?'}
                 {' · '}
                 {Updates.isEmbeddedLaunch
-                  ? 'version installee'
+                  ? t('profile.versionInstalled')
                   : Updates.createdAt
                     ? `mise a jour du ${Updates.createdAt.toLocaleDateString('fr-FR')}`
-                    : 'mise a jour'}
+                    : t('profile.versionUpdated')}
               </Text>
             </>
           )}
@@ -667,30 +667,30 @@ export default function ProfilScreen() {
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalContent, { backgroundColor: colors.surface }, animatedPasswordModalStyle]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Changer le mot de passe</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.changePassword')}</Text>
               <TouchableOpacity onPress={() => { setShowPasswordModal(false); setPasswordError(''); }} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.label, { color: colors.text2 }]}>Mot de passe actuel</Text>
+            <Text style={[styles.label, { color: colors.text2 }]}>{t('profile.currentPassword')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               secureTextEntry
-              accessibilityLabel="Mot de passe actuel"
+              accessibilityLabel={t('profile.currentPassword')}
             />
 
-            <Text style={[styles.label, { color: colors.text2 }]}>Nouveau mot de passe</Text>
+            <Text style={[styles.label, { color: colors.text2 }]}>{t('auth.newPassword')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry
-              placeholder="8 caractères minimum"
+              placeholder={t('auth.min8chars')}
               placeholderTextColor={colors.placeholder}
-              accessibilityLabel="Nouveau mot de passe"
+              accessibilityLabel={t('auth.newPassword')}
             />
 
             <Text style={[styles.label, { color: colors.text2 }]}>Confirmer</Text>
@@ -699,7 +699,7 @@ export default function ProfilScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
-              accessibilityLabel="Confirmer le mot de passe"
+              accessibilityLabel={t('auth.confirmPassword')}
             />
 
             {passwordError ? (
@@ -716,7 +716,7 @@ export default function ProfilScreen() {
               {updatePassword.isPending ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.saveBtnText}>Modifier le mot de passe</Text>
+                <Text style={styles.saveBtnText}>{t('profile.updatePassword')}</Text>
               )}
             </TouchableOpacity>
           </Animated.View>
@@ -741,21 +741,20 @@ export default function ProfilScreen() {
               <Building2 size={IconSize.lg} color={colors.primary} />
             </View>
             <Text style={[styles.dashRedirectTitle, { color: colors.text }]}>
-              La création se fait sur le dashboard
+              {t('profile.orgOnDashboard')}
             </Text>
             <Text style={[styles.dashRedirectBody, { color: colors.text2 }]}>
-              Pour saisir le SIRET, les infos légales et plus tard la facturation, ouvre Buildr sur le web.
-              L&apos;app mobile restera dédiée au terrain.
+              {t('profile.orgOnDashboardBody')}
             </Text>
 
             <TouchableOpacity
               style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: Spacing.lg, flexDirection: 'row', gap: Spacing.sm }]}
               onPress={handleOpenDashboardCreateOrg}
               accessibilityRole="link"
-              accessibilityLabel="Ouvrir le dashboard pour créer l'organisation"
+              accessibilityLabel={t('profile.openDashboardOrgA11y')}
             >
               <ExternalLink size={IconSize.sm} color="#FFFFFF" />
-              <Text style={[styles.saveBtnText, { color: '#FFFFFF' }]}>Ouvrir le dashboard</Text>
+              <Text style={[styles.saveBtnText, { color: '#FFFFFF' }]}>{t('register.openDashboard')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>

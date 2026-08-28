@@ -5,7 +5,7 @@ import { TRANSLATIONS, Locale, TranslationKeys } from '@/i18n/translations';
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: TranslationKeys) => string;
+  t: (key: TranslationKeys, vars?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -29,7 +29,15 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: TranslationKeys) => TRANSLATIONS[locale][key] ?? TRANSLATIONS.fr[key] ?? key,
+    (key: TranslationKeys, vars?: Record<string, string | number>) => {
+      const raw = TRANSLATIONS[locale][key] ?? TRANSLATIONS.fr[key] ?? key;
+      // Interpolation {nom} : une traduction doit pouvoir placer la variable ou
+      // sa langue l'exige, ce qu'un gabarit assemble dans le code interdit.
+      if (!vars) return raw;
+      return raw.replace(/\{(\w+)\}/g, (m, name) =>
+        name in vars ? String(vars[name]) : m,
+      );
+    },
     [locale],
   );
 

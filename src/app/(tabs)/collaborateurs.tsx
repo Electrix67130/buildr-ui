@@ -130,7 +130,7 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
                 </View>
               )}
               <View>
-                <Text style={[teamStyles.title, { color: colors.text }]}>Équipe</Text>
+                <Text style={[teamStyles.title, { color: colors.text }]}>{t('tabs.team')}</Text>
                 {manager && (
                   <Text style={[teamStyles.sub, { color: colors.mutedText }]}>
                     {manager.first_name} {manager.last_name}
@@ -220,7 +220,7 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
             }}
             ListEmptyComponent={
               <Text style={[teamStyles.empty, { color: colors.mutedText }]}>
-                {teamSearch ? 'Aucun résultat.' : 'Aucun utilisateur disponible.'}
+                {teamSearch ? t('team.noResult') : t('collab.noUserAvailable')}
               </Text>
             }
           />
@@ -297,8 +297,8 @@ export default function CollaborateursScreen() {
   const handleDeleteUser = useCallback(
     (userId: string, name: string) => {
       Alert.alert(
-        'Supprimer définitivement',
-        `Cette action est irréversible. ${name} sera supprimé(e) de l'organisation, retiré(e) de tous les chantiers et son compte sera détruit.\n\nContinuer ?`,
+        t('profile.deleteAccountConfirm'),
+        t('collab.deleteBody', { name }),
         [
           { text: 'Annuler', style: 'cancel' },
           {
@@ -435,7 +435,7 @@ export default function CollaborateursScreen() {
             style={[styles.inviteBtn, { backgroundColor: colors.primary }]}
             onPress={() => setShowInviteModal(true)}
             accessibilityRole="button"
-            accessibilityLabel="Inviter un collaborateur"
+            accessibilityLabel={t('collab.inviteColleague')}
           >
             <UserPlus size={IconSize.md} color="#FFFFFF" />
             <Text style={styles.inviteBtnText}>Inviter</Text>
@@ -444,7 +444,7 @@ export default function CollaborateursScreen() {
       </AppHeader>
 
       <View style={styles.searchContainer}>
-        <SearchBar value={search} onChangeText={setSearch} placeholder="Rechercher un collaborateur..." />
+        <SearchBar value={search} onChangeText={setSearch} placeholder={t('collab.search')} />
       </View>
 
       <View style={styles.filterContainer}>
@@ -515,7 +515,7 @@ export default function CollaborateursScreen() {
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         ListEmptyComponent={
           !usersLoading ? (
-            <Text style={[styles.empty, { color: colors.mutedText }]}>Aucun collaborateur trouvé.</Text>
+            <Text style={[styles.empty, { color: colors.mutedText }]}>{t('collab.empty')}</Text>
           ) : null
         }
         refreshControl={
@@ -606,7 +606,7 @@ export default function CollaborateursScreen() {
                       <Phone size={IconSize.md} color={colors.green} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.contactLabel, { color: colors.text2 }]}>Téléphone</Text>
+                      <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.phone')}</Text>
                       <Text style={[styles.contactValue, { color: colors.text }]}>{selectedUser.phone}</Text>
                     </View>
                     <TouchableOpacity
@@ -619,7 +619,7 @@ export default function CollaborateursScreen() {
                       ]}
                       onPress={() => copyToClipboard(selectedUser.phone!, 'phone')}
                       accessibilityRole="button"
-                      accessibilityLabel="Copier le téléphone"
+                      accessibilityLabel={t('team.copyPhone')}
                     >
                       {copiedField === 'phone' ? (
                         <Check size={IconSize.sm} color={colors.green} />
@@ -633,7 +633,7 @@ export default function CollaborateursScreen() {
                 {/* Admin-only sections */}
                 {isAdmin && (
                   <>
-                    <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>RÔLE GLOBAL</Text>
+                    <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>{t('collab.globalRole')}</Text>
                     <View style={styles.roleRow}>
                       {(['admin', 'manager', 'employee', 'client'] as const).map((role) => {
                         const isActive = selectedUser.role === role;
@@ -671,7 +671,7 @@ export default function CollaborateursScreen() {
                       {selectedUser.is_active === false ? (
                         <>
                           <UserCheck size={IconSize.md} color={colors.green} />
-                          <Text style={[styles.actionLabel, { color: colors.green }]}>Réactiver le compte</Text>
+                          <Text style={[styles.actionLabel, { color: colors.green }]}>{t('collab.reactivate')}</Text>
                         </>
                       ) : (
                         <>
@@ -684,7 +684,7 @@ export default function CollaborateursScreen() {
                     </TouchableOpacity>
 
                     <Text style={[styles.modalHint, { color: colors.mutedText }]}>
-                      Un compte désactivé ne peut plus se connecter ni être assigné à un chantier.
+                      {t('collab.deactivateHint')}
                     </Text>
 
                     {selectedUser.id !== currentUser?.id && (
@@ -699,24 +699,24 @@ export default function CollaborateursScreen() {
                         >
                           <Trash2 size={IconSize.md} color={colors.red} />
                           <Text style={[styles.actionLabel, { color: colors.red }]}>
-                            Supprimer définitivement
+                            {t('profile.deleteAccountConfirm')}
                           </Text>
                         </TouchableOpacity>
                         <Text style={[styles.modalHint, { color: colors.mutedText }]}>
-                          Action irréversible : supprime le compte, retire la personne de tous les chantiers et de l'organisation.
+                          {t('collab.deleteHint')}
                         </Text>
                       </>
                     )}
 
                     {selectedUser.role === 'manager' && (
                       <>
-                        <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>ÉQUIPE</Text>
+                        <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>{t('collab.teamSection')}</Text>
                         <TouchableOpacity
                           style={[styles.actionRow, { borderColor: '#7C3AED' }]}
                           onPress={() => { setShowTeamModal(selectedUser.id); setSelectedUser(null); refetchUsers(); }}
                         >
                           <Users size={IconSize.md} color="#7C3AED" />
-                          <Text style={[styles.actionLabel, { color: '#7C3AED' }]}>Gérer l'équipe</Text>
+                          <Text style={[styles.actionLabel, { color: '#7C3AED' }]}>{t('collab.manageTeam')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -744,7 +744,7 @@ export default function CollaborateursScreen() {
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalContent, { backgroundColor: colors.surface }, animatedInviteModalStyle]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Inviter un collaborateur</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('collab.inviteColleague')}</Text>
               <TouchableOpacity onPress={() => setShowInviteModal(false)} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button">
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
@@ -759,10 +759,10 @@ export default function CollaborateursScreen() {
               onChangeText={setInviteEmail}
               keyboardType="email-address"
               autoCapitalize="none"
-              accessibilityLabel="Email du collaborateur"
+              accessibilityLabel={t('collab.emailLabel')}
             />
 
-            <Text style={[styles.label, { color: colors.text }]}>Rôle</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('collab.role')}</Text>
             <View style={styles.roleRow}>
               {(['employee', 'client', 'gestionnaire_reseau'] as const).map((role) => (
                 <TouchableOpacity

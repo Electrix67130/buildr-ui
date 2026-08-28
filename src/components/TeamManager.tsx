@@ -11,14 +11,16 @@ import { useChantierMembers, useAddMember, useRemoveMember, useUpdateMember, use
 import { chantierHooks } from '@/api/hooks/useChantiers';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ChantierMemberRole, ChantierMember } from '@/api/types';
+import { useTranslation } from '@/contexts/I18nContext';
+import type { TranslationKeys } from '@/i18n/translations';
 
 type MemberWithUser = ChantierMember & { first_name: string; last_name: string; email: string; phone?: string; company_name?: string; user_role?: 'admin' | 'manager' | 'employee' | 'client' | 'gestionnaire_reseau' };
 
-const ROLE_LABELS: Record<ChantierMemberRole, string> = {
-  manager: 'Manager',
-  ouvrier: 'Ouvrier',
-  client: 'Client',
-  gestionnaire_reseau: 'Gestionnaire réseau',
+const ROLE_LABEL_KEYS: Record<ChantierMemberRole, TranslationKeys> = {
+  manager: 'collab.role.manager',
+  ouvrier: 'team.role.ouvrier',
+  client: 'collab.role.client',
+  gestionnaire_reseau: 'collab.role.gestionnaireReseau',
 };
 
 const ROLE_COLORS: Record<ChantierMemberRole, string> = {
@@ -28,13 +30,15 @@ const ROLE_COLORS: Record<ChantierMemberRole, string> = {
   gestionnaire_reseau: '#0891B2',
 };
 
-const PERMISSION_LABELS: { key: keyof ChantierMember; label: string; desc: string }[] = [
-  { key: 'can_view_comments', label: 'Voir les discussions', desc: 'Accès au fil de commentaires' },
-  { key: 'can_view_photos', label: 'Voir les photos', desc: 'Accès à la galerie photos' },
-  { key: 'can_view_documents', label: 'Voir les documents', desc: 'Accès aux plans, factures, DICT, etc.' },
-  { key: 'can_view_steps', label: 'Voir les étapes', desc: 'Accès à l\'avancement des étapes du chantier' },
-  { key: 'can_view_team', label: 'Voir l\'équipe', desc: 'Accès à la liste des membres du chantier' },
-  { key: 'can_edit', label: 'Modifier le chantier', desc: 'Ajouter photos/documents, supprimer contenu' },
+// Cles i18n plutot que libelles : la liste est parcourue au rendu, ou `t` est
+// disponible, donc rien n'oblige a figer le francais ici.
+const PERMISSION_LABELS: { key: keyof ChantierMember; labelKey: TranslationKeys; descKey: TranslationKeys }[] = [
+  { key: 'can_view_comments', labelKey: 'perm.viewDiscussions', descKey: 'perm.viewDiscussionsDesc' },
+  { key: 'can_view_photos', labelKey: 'perm.viewPhotos', descKey: 'perm.viewPhotosDesc' },
+  { key: 'can_view_documents', labelKey: 'perm.viewDocuments', descKey: 'perm.viewDocumentsDesc' },
+  { key: 'can_view_steps', labelKey: 'perm.viewSteps', descKey: 'perm.viewStepsDesc' },
+  { key: 'can_view_team', labelKey: 'perm.viewTeam', descKey: 'perm.viewTeamDesc' },
+  { key: 'can_edit', labelKey: 'perm.editChantier', descKey: 'perm.editChantierDesc' },
 ];
 
 type ExternalPerms = Pick<
@@ -72,6 +76,7 @@ interface Props {
 }
 
 const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { user } = useAuth();
@@ -196,7 +201,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
           </View>
           <View style={[styles.roleBadge, { backgroundColor: roleColor + '20', borderColor: roleColor }]}>
             <Shield size={IconSize.sm} color={roleColor} />
-            <Text style={[styles.roleText, { color: roleColor }]}>{ROLE_LABELS[item.role]}</Text>
+            <Text style={[styles.roleText, { color: roleColor }]}>{t(ROLE_LABEL_KEYS[item.role])}</Text>
           </View>
           {canManage && (
             <TouchableOpacity
@@ -220,7 +225,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
           onPress={() => setShowAddModal(true)}
         >
           <UserPlus size={IconSize.md} color="#FFFFFF" />
-          <Text style={styles.addText}>Ajouter un membre</Text>
+          <Text style={styles.addText}>{t('team.addMember')}</Text>
         </TouchableOpacity>
       )}
 
@@ -233,7 +238,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}
         ListEmptyComponent={
           !isLoading ? (
-            <Text style={[styles.empty, { color: colors.mutedText }]}>Aucun membre dans ce chantier.</Text>
+            <Text style={[styles.empty, { color: colors.mutedText }]}>{t('team.noMemberInChantier')}</Text>
           ) : null
         }
       />
@@ -244,7 +249,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalContent, { backgroundColor: colors.surface }, animatedModalStyle]}>
               <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>Ajouter un membre</Text>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>{t('team.addMember')}</Text>
                 <TouchableOpacity onPress={() => { setShowAddModal(false); setAddSearch(''); }} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                   <X size={IconSize.lg} color={colors.text} />
                 </TouchableOpacity>
@@ -253,7 +258,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 <Search size={16} color={colors.placeholder} />
                 <TextInput
                   style={[styles.searchInput, { color: colors.text }]}
-                  placeholder="Rechercher un utilisateur..."
+                  placeholder={t('team.searchUser')}
                   placeholderTextColor={colors.placeholder}
                   value={addSearch}
                   onChangeText={setAddSearch}
@@ -271,11 +276,11 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                     : ['client'];
 
                   const globalRoleLabel =
-                    item.role === 'admin' ? 'Administrateur'
-                    : item.role === 'manager' ? 'Manager'
-                    : item.role === 'employee' ? 'Employé'
-                    : item.role === 'gestionnaire_reseau' ? 'Gestionnaire réseau'
-                    : 'Client';
+                    item.role === 'admin' ? t('collab.role.adminLong')
+                    : item.role === 'manager' ? t('collab.role.manager')
+                    : item.role === 'employee' ? t('collab.role.employee')
+                    : item.role === 'gestionnaire_reseau' ? t('collab.role.gestionnaireReseau')
+                    : t('collab.role.client');
 
                   return (
                     <View style={[styles.userItem, { borderColor: colors.border }]}>
@@ -296,7 +301,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                             onPress={() => handleAdd(item.id, role, item.first_name, item.last_name)}
                           >
                             <Text style={[styles.rolePickerText, { color: ROLE_COLORS[role] }]}>
-                              {ROLE_LABELS[role]}
+                              {t(ROLE_LABEL_KEYS[role])}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -306,7 +311,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 }}
                 ListEmptyComponent={
                   <Text style={[styles.empty, { color: colors.mutedText }]}>
-                    {addSearch ? 'Aucun résultat.' : 'Tous les utilisateurs sont déjà membres.'}
+                    {addSearch ? t('team.noResult') : t('team.allAlreadyMembers')}
                   </Text>
                 }
                 keyboardShouldPersistTaps="handled"
@@ -340,7 +345,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                             <Text style={[styles.modalSub, { color: colors.text2 }]}>{viewingMember.company_name}</Text>
                           )}
                           <View style={[styles.contactRoleBadge, { backgroundColor: roleColor + '15' }]}>
-                            <Text style={[styles.contactRoleText, { color: roleColor }]}>{ROLE_LABELS[viewingMember.role]}</Text>
+                            <Text style={[styles.contactRoleText, { color: roleColor }]}>{t(ROLE_LABEL_KEYS[viewingMember.role])}</Text>
                           </View>
                         </View>
                       </View>
@@ -390,7 +395,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                           <Phone size={IconSize.md} color="#059669" />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={[styles.contactLabel, { color: colors.text2 }]}>Téléphone</Text>
+                          <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.phone')}</Text>
                           <Text style={[styles.contactValue, { color: colors.text }]}>{viewingMember.phone}</Text>
                         </View>
                         <TouchableOpacity
@@ -403,7 +408,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                           ]}
                           onPress={() => copyToClipboard(viewingMember.phone!, 'phone')}
                           accessibilityRole="button"
-                          accessibilityLabel="Copier le téléphone"
+                          accessibilityLabel={t('team.copyPhone')}
                         >
                           {copiedField === 'phone' ? (
                             <Check size={IconSize.sm} color={colors.green} />
@@ -420,7 +425,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         onPress={() => { setViewingMember(null); setEditingMember(viewingMember); }}
                       >
                         <Pencil size={IconSize.md} color={colors.primary} />
-                        <Text style={[styles.contactActionText, { color: colors.primary }]}>Gérer les permissions</Text>
+                        <Text style={[styles.contactActionText, { color: colors.primary }]}>{t('team.managePermissions')}</Text>
                       </TouchableOpacity>
                     )}
 
@@ -434,7 +439,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         }}
                       >
                         <Trash2 size={IconSize.md} color={colors.red} />
-                        <Text style={[styles.contactActionText, { color: colors.red }]}>Retirer du chantier</Text>
+                        <Text style={[styles.contactActionText, { color: colors.red }]}>{t('team.removeFromChantier')}</Text>
                       </TouchableOpacity>
                     )}
                   </>
@@ -462,7 +467,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 </TouchableOpacity>
               </View>
 
-              <Text style={[styles.sectionLabel, { color: colors.text2 }]}>RÔLE SUR LE CHANTIER</Text>
+              <Text style={[styles.sectionLabel, { color: colors.text2 }]}>{t('team.roleOnChantier')}</Text>
               <View style={styles.roleRow}>
                 {(() => {
                   const allowed: ChantierMemberRole[] =
@@ -490,7 +495,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         }}
                       >
                         <Text style={[styles.roleOptionText, { color: isActive ? ROLE_COLORS[role] : colors.text2 }]}>
-                          {ROLE_LABELS[role]}
+                          {t(ROLE_LABEL_KEYS[role])}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -503,12 +508,12 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 const value = !!editingMember[p.key];
                 const desc =
                   editingMember.role === 'gestionnaire_reseau' && p.key === 'can_view_documents'
-                    ? 'Accès aux DICT uniquement'
-                    : p.desc;
+                    ? t('perm.dictOnly')
+                    : t(p.descKey);
                 return (
                   <View key={p.key} style={[styles.permissionRow, { borderBottomColor: colors.border }]}>
                     <View style={styles.permissionInfo}>
-                      <Text style={[styles.permissionLabel, { color: colors.text }]}>{p.label}</Text>
+                      <Text style={[styles.permissionLabel, { color: colors.text }]}>{t(p.labelKey)}</Text>
                       <Text style={[styles.permissionDesc, { color: colors.mutedText }]}>{desc}</Text>
                     </View>
                     <Switch
@@ -536,7 +541,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
               <View style={styles.modalHeader}>
                 <View>
                   <Text style={[styles.modalTitle, { color: colors.text }]}>
-                    Permissions {pendingExternalAdd.role === 'client' ? 'du client' : 'du gestionnaire réseau'}
+                    {pendingExternalAdd.role === 'client' ? t('team.permsOfClient') : t('team.permsOfNetworkManager')}
                   </Text>
                   <Text style={[styles.modalSub, { color: colors.mutedText }]}>
                     {pendingExternalAdd.first_name} {pendingExternalAdd.last_name}
@@ -556,12 +561,12 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 const value = !!pendingExternalAdd.perms[key];
                 const desc =
                   pendingExternalAdd.role === 'gestionnaire_reseau' && p.key === 'can_view_documents'
-                    ? 'Accès aux DICT uniquement'
-                    : p.desc;
+                    ? t('perm.dictOnly')
+                    : t(p.descKey);
                 return (
                   <View key={p.key} style={[styles.permissionRow, { borderBottomColor: colors.border }]}>
                     <View style={styles.permissionInfo}>
-                      <Text style={[styles.permissionLabel, { color: colors.text }]}>{p.label}</Text>
+                      <Text style={[styles.permissionLabel, { color: colors.text }]}>{t(p.labelKey)}</Text>
                       <Text style={[styles.permissionDesc, { color: colors.mutedText }]}>{desc}</Text>
                     </View>
                     <Switch
@@ -585,7 +590,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 disabled={addMutation.isPending}
               >
                 <Text style={styles.confirmBtnText}>
-                  {pendingExternalAdd.role === 'client' ? 'Ajouter le client' : 'Ajouter le gestionnaire réseau'}
+                  {pendingExternalAdd.role === 'client' ? t('team.addClient') : t('team.addNetworkManager')}
                 </Text>
               </TouchableOpacity>
             </View>
