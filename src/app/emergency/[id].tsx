@@ -48,7 +48,7 @@ export default function EmergencyDetailScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -117,7 +117,7 @@ export default function EmergencyDetailScreen() {
       await createComment.mutateAsync({ emergency_id: id, content: trimmed });
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 200);
     } catch (err) {
-      Alert.alert(t('common.error'), err instanceof Error ? err.message : 'Send failed');
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     }
   }, [draft, id, createComment, t]);
 
@@ -179,11 +179,10 @@ export default function EmergencyDetailScreen() {
 
   const formatTime = (date: string) => {
     const d = new Date(date);
-    return (
-      d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) +
-      ' à ' +
-      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-    );
+    return t('comments.dateAtTime', {
+      date: d.toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
+      time: d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
+    });
   };
 
   if (!emergency) {
@@ -248,7 +247,7 @@ export default function EmergencyDetailScreen() {
                 <TouchableOpacity
                   onPress={() => setPhotoFullscreen(true)}
                   activeOpacity={0.9}
-                  accessibilityLabel="Agrandir la photo"
+                  accessibilityLabel={t('photos.zoom')}
                 >
                   <Image source={{ uri: emergency.photo_url }} style={styles.photo} resizeMode="cover" />
                 </TouchableOpacity>
@@ -277,7 +276,7 @@ export default function EmergencyDetailScreen() {
               )}
 
               <View style={styles.discussionLabel}>
-                <Text style={[styles.discussionLabelText, { color: colors.text2 }]}>DISCUSSION</Text>
+                <Text style={[styles.discussionLabelText, { color: colors.text2 }]}>{t('comments.sectionLabel')}</Text>
               </View>
             </View>
           }
@@ -296,7 +295,7 @@ export default function EmergencyDetailScreen() {
               >
                 <View style={styles.bubbleHeader}>
                   <Text style={[styles.author, { color: colors.primary }]}>
-                    {isOwn ? 'Vous' : `${item.first_name} ${item.last_name}`}
+                    {isOwn ? t('comments.you') : `${item.first_name} ${item.last_name}`}
                   </Text>
                   <Text style={[styles.time, { color: colors.mutedText }]}>
                     {formatTime(item.created_at)}
@@ -308,7 +307,7 @@ export default function EmergencyDetailScreen() {
           }}
           ListEmptyComponent={
             !commentsLoading ? (
-              <Text style={[styles.empty, { color: colors.mutedText }]}>Aucun message pour le moment.</Text>
+              <Text style={[styles.empty, { color: colors.mutedText }]}>{t('comments.emptyMessages')}</Text>
             ) : null
           }
         />
@@ -320,12 +319,12 @@ export default function EmergencyDetailScreen() {
               styles.input,
               { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border },
             ]}
-            placeholder="Écrire un commentaire..."
+            placeholder={t('comments.placeholder')}
             placeholderTextColor={colors.placeholder}
             value={draft}
             onChangeText={setDraft}
             multiline
-            accessibilityLabel="Écrire un commentaire"
+            accessibilityLabel={t('comments.write')}
           />
           <TouchableOpacity
             style={[
@@ -335,7 +334,7 @@ export default function EmergencyDetailScreen() {
             onPress={handleSend}
             disabled={!draft.trim() || createComment.isPending}
             accessibilityRole="button"
-            accessibilityLabel="Envoyer"
+            accessibilityLabel={t('common.send')}
           >
             <Send size={IconSize.md} color={draft.trim() ? '#FFFFFF' : colors.mutedText} />
           </TouchableOpacity>
@@ -358,11 +357,11 @@ export default function EmergencyDetailScreen() {
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
                 <TouchableOpacity style={styles.actionRow} onPress={handleStartEdit}>
                   <Pencil size={IconSize.lg} color={colors.primary} />
-                  <Text style={[styles.actionLabel, { color: colors.text }]}>Modifier</Text>
+                  <Text style={[styles.actionLabel, { color: colors.text }]}>{t('common.edit')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionRow} onPress={handleDeleteComment}>
                   <Trash2 size={IconSize.lg} color={colors.red} />
-                  <Text style={[styles.actionLabel, { color: colors.red }]}>Supprimer</Text>
+                  <Text style={[styles.actionLabel, { color: colors.red }]}>{t('common.delete')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -375,7 +374,7 @@ export default function EmergencyDetailScreen() {
         <View style={styles.modalOverlay}>
           <Reanimated.View style={[styles.editSheet, { backgroundColor: colors.surface }, animatedEditModalStyle]}>
             <View style={styles.editHeader}>
-              <Text style={[styles.editTitle, { color: colors.text }]}>Modifier le commentaire</Text>
+              <Text style={[styles.editTitle, { color: colors.text }]}>{t('comments.editTitle')}</Text>
               <TouchableOpacity
                 onPress={() => {
                   setIsEditing(false);
@@ -395,7 +394,7 @@ export default function EmergencyDetailScreen() {
               onChangeText={setEditText}
               multiline
               autoFocus
-              accessibilityLabel="Modifier le commentaire"
+              accessibilityLabel={t('comments.editTitle')}
             />
             <TouchableOpacity
               style={[
@@ -405,7 +404,7 @@ export default function EmergencyDetailScreen() {
               onPress={handleSaveEdit}
               disabled={!editText.trim() || updateComment.isPending}
               accessibilityRole="button"
-              accessibilityLabel="Sauvegarder"
+              accessibilityLabel={t('common.save')}
             >
               <Text
                 style={[
@@ -413,7 +412,7 @@ export default function EmergencyDetailScreen() {
                   { color: editText.trim() ? '#FFFFFF' : colors.mutedText },
                 ]}
               >
-                Sauvegarder
+                {t('common.save')}
               </Text>
             </TouchableOpacity>
           </Reanimated.View>

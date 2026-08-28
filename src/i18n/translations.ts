@@ -299,7 +299,21 @@ export type TranslationKeys =
   | 'archives.archivedOnDate'
   | 'archives.noResult'
   | 'chantier.emptySearchHint'
-  | 'chantier.emptyCreateHint';
+  | 'chantier.emptyCreateHint'
+  | 'common.send'
+  | 'comments.you'
+  | 'comments.write'
+  | 'comments.emptyMessages'
+  | 'comments.sectionLabel'
+  | 'comments.dateAtTime'
+  | 'date.selectDates'
+  | 'date.selectStartEnd'
+  | 'date.pickStart'
+  | 'date.pickEnd'
+  | 'date.chooseEnd'
+  | 'date.prevMonth'
+  | 'date.nextMonth'
+  | 'date.selectDate';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -726,6 +740,20 @@ const fr: Dictionary = {
   "archives.noResult": "Aucune archive trouvée.",
   "chantier.emptySearchHint": "Essayez un autre terme de recherche.",
   "chantier.emptyCreateHint": "Appuyez sur + pour créer votre premier chantier.",
+  "common.send": "Envoyer",
+  "comments.you": "Vous",
+  "comments.write": "Écrire un commentaire",
+  "comments.emptyMessages": "Aucun message pour le moment.",
+  "comments.sectionLabel": "DISCUSSION",
+  "comments.dateAtTime": "{date} à {time}",
+  "date.selectDates": "Sélectionner les dates",
+  "date.selectStartEnd": "Sélectionner début et fin",
+  "date.pickStart": "Sélectionnez la date de début",
+  "date.pickEnd": "Sélectionnez la date de fin",
+  "date.chooseEnd": "→ choisir la fin",
+  "date.prevMonth": "Mois précédent",
+  "date.nextMonth": "Mois suivant",
+  "date.selectDate": "Sélectionner une date",
 };
 
 const en: Dictionary = {
@@ -1151,6 +1179,20 @@ const en: Dictionary = {
   "archives.noResult": "No archives found.",
   "chantier.emptySearchHint": "Try a different search term.",
   "chantier.emptyCreateHint": "Tap + to create your first site.",
+  "common.send": "Send",
+  "comments.you": "You",
+  "comments.write": "Write a comment",
+  "comments.emptyMessages": "No messages yet.",
+  "comments.sectionLabel": "DISCUSSION",
+  "comments.dateAtTime": "{date} at {time}",
+  "date.selectDates": "Select the dates",
+  "date.selectStartEnd": "Select a start and an end",
+  "date.pickStart": "Pick the start date",
+  "date.pickEnd": "Pick the end date",
+  "date.chooseEnd": "→ choose the end",
+  "date.prevMonth": "Previous month",
+  "date.nextMonth": "Next month",
+  "date.selectDate": "Select a date",
 };
 
 const de: Dictionary = {
@@ -1576,6 +1618,20 @@ const de: Dictionary = {
   "archives.noResult": "Keine Archive gefunden.",
   "chantier.emptySearchHint": "Versuche einen anderen Suchbegriff.",
   "chantier.emptyCreateHint": "Tippe auf +, um deine erste Baustelle anzulegen.",
+  "common.send": "Senden",
+  "comments.you": "Du",
+  "comments.write": "Kommentar schreiben",
+  "comments.emptyMessages": "Noch keine Nachrichten.",
+  "comments.sectionLabel": "DISKUSSION",
+  "comments.dateAtTime": "{date} um {time}",
+  "date.selectDates": "Zeitraum auswählen",
+  "date.selectStartEnd": "Beginn und Ende auswählen",
+  "date.pickStart": "Startdatum wählen",
+  "date.pickEnd": "Enddatum wählen",
+  "date.chooseEnd": "→ Ende wählen",
+  "date.prevMonth": "Vorheriger Monat",
+  "date.nextMonth": "Nächster Monat",
+  "date.selectDate": "Datum auswählen",
 };
 
 const es: Dictionary = {
@@ -2001,6 +2057,20 @@ const es: Dictionary = {
   "archives.noResult": "No se ha encontrado ningún archivo.",
   "chantier.emptySearchHint": "Prueba con otro término de búsqueda.",
   "chantier.emptyCreateHint": "Pulsa + para crear tu primera obra.",
+  "common.send": "Enviar",
+  "comments.you": "Tú",
+  "comments.write": "Escribir un comentario",
+  "comments.emptyMessages": "Aún no hay mensajes.",
+  "comments.sectionLabel": "CONVERSACIÓN",
+  "comments.dateAtTime": "{date} a las {time}",
+  "date.selectDates": "Seleccionar las fechas",
+  "date.selectStartEnd": "Seleccionar inicio y fin",
+  "date.pickStart": "Elige la fecha de inicio",
+  "date.pickEnd": "Elige la fecha de fin",
+  "date.chooseEnd": "→ elegir el fin",
+  "date.prevMonth": "Mes anterior",
+  "date.nextMonth": "Mes siguiente",
+  "date.selectDate": "Seleccionar una fecha",
 };
 
 const it: Dictionary = {
@@ -2426,6 +2496,20 @@ const it: Dictionary = {
   "archives.noResult": "Nessun archivio trovato.",
   "chantier.emptySearchHint": "Prova con un altro termine di ricerca.",
   "chantier.emptyCreateHint": "Tocca + per creare il tuo primo cantiere.",
+  "common.send": "Invia",
+  "comments.you": "Tu",
+  "comments.write": "Scrivi un commento",
+  "comments.emptyMessages": "Nessun messaggio al momento.",
+  "comments.sectionLabel": "DISCUSSIONE",
+  "comments.dateAtTime": "{date} alle {time}",
+  "date.selectDates": "Seleziona le date",
+  "date.selectStartEnd": "Seleziona inizio e fine",
+  "date.pickStart": "Scegli la data di inizio",
+  "date.pickEnd": "Scegli la data di fine",
+  "date.chooseEnd": "→ scegli la fine",
+  "date.prevMonth": "Mese precedente",
+  "date.nextMonth": "Mese successivo",
+  "date.selectDate": "Seleziona una data",
 };
 
 const pt: Dictionary = {
@@ -2851,6 +2935,20 @@ const pt: Dictionary = {
   "archives.noResult": "Nenhum arquivo encontrado.",
   "chantier.emptySearchHint": "Tente outro termo de pesquisa.",
   "chantier.emptyCreateHint": "Toque em + para criar a sua primeira obra.",
+  "common.send": "Enviar",
+  "comments.you": "Você",
+  "comments.write": "Escrever um comentário",
+  "comments.emptyMessages": "Ainda não há mensagens.",
+  "comments.sectionLabel": "CONVERSA",
+  "comments.dateAtTime": "{date} às {time}",
+  "date.selectDates": "Selecionar as datas",
+  "date.selectStartEnd": "Selecionar início e fim",
+  "date.pickStart": "Escolha a data de início",
+  "date.pickEnd": "Escolha a data de fim",
+  "date.chooseEnd": "→ escolher o fim",
+  "date.prevMonth": "Mês anterior",
+  "date.nextMonth": "Mês seguinte",
+  "date.selectDate": "Selecionar uma data",
 };
 
 const tr: Dictionary = {
@@ -3276,6 +3374,20 @@ const tr: Dictionary = {
   "archives.noResult": "Arşiv bulunamadı.",
   "chantier.emptySearchHint": "Başka bir arama terimi deneyin.",
   "chantier.emptyCreateHint": "İlk şantiyenizi oluşturmak için + simgesine dokunun.",
+  "common.send": "Gönder",
+  "comments.you": "Siz",
+  "comments.write": "Yorum yaz",
+  "comments.emptyMessages": "Henüz mesaj yok.",
+  "comments.sectionLabel": "TARTIŞMA",
+  "comments.dateAtTime": "{date} {time}",
+  "date.selectDates": "Tarihleri seç",
+  "date.selectStartEnd": "Başlangıç ve bitiş seç",
+  "date.pickStart": "Başlangıç tarihini seçin",
+  "date.pickEnd": "Bitiş tarihini seçin",
+  "date.chooseEnd": "→ bitişi seçin",
+  "date.prevMonth": "Önceki ay",
+  "date.nextMonth": "Sonraki ay",
+  "date.selectDate": "Bir tarih seç",
 };
 
 const pl: Dictionary = {
@@ -3701,6 +3813,20 @@ const pl: Dictionary = {
   "archives.noResult": "Nie znaleziono archiwów.",
   "chantier.emptySearchHint": "Spróbuj innego hasła.",
   "chantier.emptyCreateHint": "Dotknij +, aby utworzyć pierwszą budowę.",
+  "common.send": "Wyślij",
+  "comments.you": "Ty",
+  "comments.write": "Napisz komentarz",
+  "comments.emptyMessages": "Brak wiadomości.",
+  "comments.sectionLabel": "DYSKUSJA",
+  "comments.dateAtTime": "{date}, {time}",
+  "date.selectDates": "Wybierz daty",
+  "date.selectStartEnd": "Wybierz początek i koniec",
+  "date.pickStart": "Wybierz datę początkową",
+  "date.pickEnd": "Wybierz datę końcową",
+  "date.chooseEnd": "→ wybierz koniec",
+  "date.prevMonth": "Poprzedni miesiąc",
+  "date.nextMonth": "Następny miesiąc",
+  "date.selectDate": "Wybierz datę",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };
