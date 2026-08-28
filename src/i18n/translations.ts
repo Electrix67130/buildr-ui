@@ -313,7 +313,36 @@ export type TranslationKeys =
   | 'date.chooseEnd'
   | 'date.prevMonth'
   | 'date.nextMonth'
-  | 'date.selectDate';
+  | 'date.selectDate'
+  | 'common.unknownError'
+  | 'common.labelWithCount'
+  | 'urgence.unreadActivity'
+  | 'urgence.externalIncident'
+  | 'calendar.intro'
+  | 'calendar.google'
+  | 'calendar.outlook'
+  | 'calendar.apple'
+  | 'calendar.oauthHint'
+  | 'calendar.appleHint'
+  | 'calendar.connectFailed'
+  | 'calendar.urlCopied'
+  | 'calendar.urlCopiedBody'
+  | 'calendar.disconnectTitle'
+  | 'calendar.disconnectBody'
+  | 'calendar.disconnect'
+  | 'calendar.connect'
+  | 'calendar.getUrl'
+  | 'calendar.disconnectA11y'
+  | 'calendar.connectA11y'
+  | 'error.boundaryTitle'
+  | 'error.boundaryBody'
+  | 'error.retry'
+  | 'share.unavailable'
+  | 'share.downloadFailed'
+  | 'share.dialogTitle'
+  | 'legal.siretInvalid'
+  | 'legal.companyNotFound'
+  | 'legal.lookupNetworkError';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -754,6 +783,35 @@ const fr: Dictionary = {
   "date.prevMonth": "Mois précédent",
   "date.nextMonth": "Mois suivant",
   "date.selectDate": "Sélectionner une date",
+  "common.unknownError": "Erreur inconnue",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Activité non lue",
+  "urgence.externalIncident": "Incident externe",
+  "calendar.intro": "Synchronise les dates de tes chantiers avec ton calendrier.",
+  "calendar.google": "Google Agenda",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Calendrier Apple",
+  "calendar.oauthHint": "OAuth — événements envoyés automatiquement",
+  "calendar.appleHint": "URL d’abonnement à coller dans Calendrier",
+  "calendar.connectFailed": "Connexion échouée",
+  "calendar.urlCopied": "URL copiée",
+  "calendar.urlCopiedBody": "Sur Mac, ouvre Calendrier : Fichier → Nouvel abonnement à un calendrier, puis colle l’URL.\n\nSur iPhone : Réglages → Calendrier → Comptes → Ajouter un compte → Autre → Calendrier avec abonnement.",
+  "calendar.disconnectTitle": "Déconnecter ?",
+  "calendar.disconnectBody": "Les événements de chantier déjà créés dans ton calendrier y resteront, mais ils ne seront plus mis à jour.",
+  "calendar.disconnect": "Déconnecter",
+  "calendar.connect": "Connecter",
+  "calendar.getUrl": "Obtenir l’URL",
+  "calendar.disconnectA11y": "Déconnecter {provider}",
+  "calendar.connectA11y": "Connecter {provider}",
+  "error.boundaryTitle": "Une erreur est survenue",
+  "error.boundaryBody": "L’application a rencontré un problème inattendu. Il a été signalé automatiquement.",
+  "error.retry": "Réessayer",
+  "share.unavailable": "Le partage n’est pas disponible sur cet appareil",
+  "share.downloadFailed": "Échec du téléchargement du fichier",
+  "share.dialogTitle": "Partager le fichier",
+  "legal.siretInvalid": "SIRET invalide (14 chiffres requis).",
+  "legal.companyNotFound": "Entreprise introuvable.",
+  "legal.lookupNetworkError": "Erreur réseau lors de la recherche.",
 };
 
 const en: Dictionary = {
@@ -1193,6 +1251,35 @@ const en: Dictionary = {
   "date.prevMonth": "Previous month",
   "date.nextMonth": "Next month",
   "date.selectDate": "Select a date",
+  "common.unknownError": "Unknown error",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Unread activity",
+  "urgence.externalIncident": "External incident",
+  "calendar.intro": "Sync your site dates with your calendar.",
+  "calendar.google": "Google Calendar",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Apple Calendar",
+  "calendar.oauthHint": "OAuth — events pushed automatically",
+  "calendar.appleHint": "Subscription URL to paste into Calendar",
+  "calendar.connectFailed": "Connection failed",
+  "calendar.urlCopied": "URL copied",
+  "calendar.urlCopiedBody": "On Mac, open Calendar: File → New Calendar Subscription, then paste the URL.\n\nOn iPhone: Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar.",
+  "calendar.disconnectTitle": "Disconnect?",
+  "calendar.disconnectBody": "Site events already created in your calendar will stay, but they will no longer be updated.",
+  "calendar.disconnect": "Disconnect",
+  "calendar.connect": "Connect",
+  "calendar.getUrl": "Get the URL",
+  "calendar.disconnectA11y": "Disconnect {provider}",
+  "calendar.connectA11y": "Connect {provider}",
+  "error.boundaryTitle": "Something went wrong",
+  "error.boundaryBody": "The app hit an unexpected problem. It has been reported automatically.",
+  "error.retry": "Try again",
+  "share.unavailable": "Sharing is not available on this device",
+  "share.downloadFailed": "File download failed",
+  "share.dialogTitle": "Share the file",
+  "legal.siretInvalid": "Invalid SIRET (14 digits required).",
+  "legal.companyNotFound": "Company not found.",
+  "legal.lookupNetworkError": "Network error during the lookup.",
 };
 
 const de: Dictionary = {
@@ -1632,6 +1719,35 @@ const de: Dictionary = {
   "date.prevMonth": "Vorheriger Monat",
   "date.nextMonth": "Nächster Monat",
   "date.selectDate": "Datum auswählen",
+  "common.unknownError": "Unbekannter Fehler",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Ungelesene Aktivität",
+  "urgence.externalIncident": "Externer Vorfall",
+  "calendar.intro": "Synchronisiere die Termine deiner Baustellen mit deinem Kalender.",
+  "calendar.google": "Google Kalender",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Apple Kalender",
+  "calendar.oauthHint": "OAuth — Termine werden automatisch übertragen",
+  "calendar.appleHint": "Abo-URL zum Einfügen in Kalender",
+  "calendar.connectFailed": "Verbindung fehlgeschlagen",
+  "calendar.urlCopied": "URL kopiert",
+  "calendar.urlCopiedBody": "Öffne am Mac Kalender: Ablage → Neues Kalenderabonnement, dann die URL einfügen.\n\nAuf dem iPhone: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo hinzufügen.",
+  "calendar.disconnectTitle": "Trennen?",
+  "calendar.disconnectBody": "Bereits erstellte Baustellentermine bleiben im Kalender, werden aber nicht mehr aktualisiert.",
+  "calendar.disconnect": "Trennen",
+  "calendar.connect": "Verbinden",
+  "calendar.getUrl": "URL abrufen",
+  "calendar.disconnectA11y": "{provider} trennen",
+  "calendar.connectA11y": "{provider} verbinden",
+  "error.boundaryTitle": "Ein Fehler ist aufgetreten",
+  "error.boundaryBody": "Die App hatte ein unerwartetes Problem. Es wurde automatisch gemeldet.",
+  "error.retry": "Erneut versuchen",
+  "share.unavailable": "Teilen ist auf diesem Gerät nicht verfügbar",
+  "share.downloadFailed": "Datei-Download fehlgeschlagen",
+  "share.dialogTitle": "Datei teilen",
+  "legal.siretInvalid": "Ungültige SIRET (14 Ziffern erforderlich).",
+  "legal.companyNotFound": "Unternehmen nicht gefunden.",
+  "legal.lookupNetworkError": "Netzwerkfehler bei der Suche.",
 };
 
 const es: Dictionary = {
@@ -2071,6 +2187,35 @@ const es: Dictionary = {
   "date.prevMonth": "Mes anterior",
   "date.nextMonth": "Mes siguiente",
   "date.selectDate": "Seleccionar una fecha",
+  "common.unknownError": "Error desconocido",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Actividad sin leer",
+  "urgence.externalIncident": "Incidente externo",
+  "calendar.intro": "Sincroniza las fechas de tus obras con tu calendario.",
+  "calendar.google": "Google Calendar",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Calendario de Apple",
+  "calendar.oauthHint": "OAuth: los eventos se envían automáticamente",
+  "calendar.appleHint": "URL de suscripción para pegar en Calendario",
+  "calendar.connectFailed": "Conexión fallida",
+  "calendar.urlCopied": "URL copiada",
+  "calendar.urlCopiedBody": "En el Mac, abre Calendario: Archivo → Nueva suscripción a calendario y pega la URL.\n\nEn el iPhone: Ajustes → Calendario → Cuentas → Añadir cuenta → Otra → Añadir calendario suscrito.",
+  "calendar.disconnectTitle": "¿Desconectar?",
+  "calendar.disconnectBody": "Los eventos de obra ya creados en tu calendario se mantendrán, pero dejarán de actualizarse.",
+  "calendar.disconnect": "Desconectar",
+  "calendar.connect": "Conectar",
+  "calendar.getUrl": "Obtener la URL",
+  "calendar.disconnectA11y": "Desconectar {provider}",
+  "calendar.connectA11y": "Conectar {provider}",
+  "error.boundaryTitle": "Se ha producido un error",
+  "error.boundaryBody": "La aplicación ha tenido un problema inesperado. Se ha notificado automáticamente.",
+  "error.retry": "Reintentar",
+  "share.unavailable": "Compartir no está disponible en este dispositivo",
+  "share.downloadFailed": "Error al descargar el archivo",
+  "share.dialogTitle": "Compartir el archivo",
+  "legal.siretInvalid": "SIRET no válido (se requieren 14 dígitos).",
+  "legal.companyNotFound": "Empresa no encontrada.",
+  "legal.lookupNetworkError": "Error de red durante la búsqueda.",
 };
 
 const it: Dictionary = {
@@ -2510,6 +2655,35 @@ const it: Dictionary = {
   "date.prevMonth": "Mese precedente",
   "date.nextMonth": "Mese successivo",
   "date.selectDate": "Seleziona una data",
+  "common.unknownError": "Errore sconosciuto",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Attività non letta",
+  "urgence.externalIncident": "Incidente esterno",
+  "calendar.intro": "Sincronizza le date dei tuoi cantieri con il tuo calendario.",
+  "calendar.google": "Google Calendar",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Calendario Apple",
+  "calendar.oauthHint": "OAuth — eventi inviati automaticamente",
+  "calendar.appleHint": "URL di abbonamento da incollare in Calendario",
+  "calendar.connectFailed": "Connessione non riuscita",
+  "calendar.urlCopied": "URL copiato",
+  "calendar.urlCopiedBody": "Su Mac apri Calendario: Archivio → Nuovo abbonamento a calendario, poi incolla l’URL.\n\nSu iPhone: Impostazioni → Calendario → Account → Aggiungi account → Altro → Aggiungi calendario con abbonamento.",
+  "calendar.disconnectTitle": "Disconnettere?",
+  "calendar.disconnectBody": "Gli eventi di cantiere già creati nel tuo calendario resteranno, ma non saranno più aggiornati.",
+  "calendar.disconnect": "Disconnetti",
+  "calendar.connect": "Connetti",
+  "calendar.getUrl": "Ottieni l’URL",
+  "calendar.disconnectA11y": "Disconnetti {provider}",
+  "calendar.connectA11y": "Connetti {provider}",
+  "error.boundaryTitle": "Si è verificato un errore",
+  "error.boundaryBody": "L’app ha riscontrato un problema imprevisto. È stato segnalato automaticamente.",
+  "error.retry": "Riprova",
+  "share.unavailable": "La condivisione non è disponibile su questo dispositivo",
+  "share.downloadFailed": "Download del file non riuscito",
+  "share.dialogTitle": "Condividi il file",
+  "legal.siretInvalid": "SIRET non valido (sono richieste 14 cifre).",
+  "legal.companyNotFound": "Azienda non trovata.",
+  "legal.lookupNetworkError": "Errore di rete durante la ricerca.",
 };
 
 const pt: Dictionary = {
@@ -2949,6 +3123,35 @@ const pt: Dictionary = {
   "date.prevMonth": "Mês anterior",
   "date.nextMonth": "Mês seguinte",
   "date.selectDate": "Selecionar uma data",
+  "common.unknownError": "Erro desconhecido",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Atividade não lida",
+  "urgence.externalIncident": "Incidente externo",
+  "calendar.intro": "Sincronize as datas das suas obras com o seu calendário.",
+  "calendar.google": "Google Agenda",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Calendário Apple",
+  "calendar.oauthHint": "OAuth — eventos enviados automaticamente",
+  "calendar.appleHint": "URL de subscrição para colar no Calendário",
+  "calendar.connectFailed": "A ligação falhou",
+  "calendar.urlCopied": "URL copiado",
+  "calendar.urlCopiedBody": "No Mac, abra o Calendário: Ficheiro → Nova subscrição de calendário e cole o URL.\n\nNo iPhone: Definições → Calendário → Contas → Adicionar conta → Outra → Adicionar calendário subscrito.",
+  "calendar.disconnectTitle": "Desligar?",
+  "calendar.disconnectBody": "Os eventos de obra já criados no seu calendário permanecem, mas deixam de ser atualizados.",
+  "calendar.disconnect": "Desligar",
+  "calendar.connect": "Ligar",
+  "calendar.getUrl": "Obter o URL",
+  "calendar.disconnectA11y": "Desligar {provider}",
+  "calendar.connectA11y": "Ligar {provider}",
+  "error.boundaryTitle": "Ocorreu um erro",
+  "error.boundaryBody": "A app encontrou um problema inesperado. Foi comunicado automaticamente.",
+  "error.retry": "Tentar novamente",
+  "share.unavailable": "A partilha não está disponível neste dispositivo",
+  "share.downloadFailed": "Falha ao transferir o ficheiro",
+  "share.dialogTitle": "Partilhar o ficheiro",
+  "legal.siretInvalid": "SIRET inválido (são necessários 14 dígitos).",
+  "legal.companyNotFound": "Empresa não encontrada.",
+  "legal.lookupNetworkError": "Erro de rede durante a pesquisa.",
 };
 
 const tr: Dictionary = {
@@ -3388,6 +3591,35 @@ const tr: Dictionary = {
   "date.prevMonth": "Önceki ay",
   "date.nextMonth": "Sonraki ay",
   "date.selectDate": "Bir tarih seç",
+  "common.unknownError": "Bilinmeyen hata",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Okunmamış etkinlik",
+  "urgence.externalIncident": "Dış olay",
+  "calendar.intro": "Şantiye tarihlerinizi takviminizle eşitleyin.",
+  "calendar.google": "Google Takvim",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Apple Takvim",
+  "calendar.oauthHint": "OAuth — etkinlikler otomatik gönderilir",
+  "calendar.appleHint": "Takvim uygulamasına yapıştırılacak abonelik adresi",
+  "calendar.connectFailed": "Bağlantı başarısız",
+  "calendar.urlCopied": "Adres kopyalandı",
+  "calendar.urlCopiedBody": "Mac’te Takvim’i açın: Dosya → Yeni Takvim Aboneliği, ardından adresi yapıştırın.\n\niPhone’da: Ayarlar → Takvim → Hesaplar → Hesap Ekle → Diğer → Abone Olunan Takvim Ekle.",
+  "calendar.disconnectTitle": "Bağlantı kesilsin mi?",
+  "calendar.disconnectBody": "Takviminizde oluşturulmuş şantiye etkinlikleri kalır, ancak artık güncellenmez.",
+  "calendar.disconnect": "Bağlantıyı kes",
+  "calendar.connect": "Bağla",
+  "calendar.getUrl": "Adresi al",
+  "calendar.disconnectA11y": "{provider} bağlantısını kes",
+  "calendar.connectA11y": "{provider} bağla",
+  "error.boundaryTitle": "Bir hata oluştu",
+  "error.boundaryBody": "Uygulamada beklenmeyen bir sorun oluştu. Otomatik olarak bildirildi.",
+  "error.retry": "Yeniden dene",
+  "share.unavailable": "Bu cihazda paylaşım kullanılamıyor",
+  "share.downloadFailed": "Dosya indirilemedi",
+  "share.dialogTitle": "Dosyayı paylaş",
+  "legal.siretInvalid": "Geçersiz SIRET (14 rakam gerekli).",
+  "legal.companyNotFound": "Şirket bulunamadı.",
+  "legal.lookupNetworkError": "Arama sırasında ağ hatası.",
 };
 
 const pl: Dictionary = {
@@ -3827,6 +4059,35 @@ const pl: Dictionary = {
   "date.prevMonth": "Poprzedni miesiąc",
   "date.nextMonth": "Następny miesiąc",
   "date.selectDate": "Wybierz datę",
+  "common.unknownError": "Nieznany błąd",
+  "common.labelWithCount": "{label} ({count})",
+  "urgence.unreadActivity": "Nieprzeczytana aktywność",
+  "urgence.externalIncident": "Zdarzenie zewnętrzne",
+  "calendar.intro": "Zsynchronizuj terminy budów ze swoim kalendarzem.",
+  "calendar.google": "Kalendarz Google",
+  "calendar.outlook": "Outlook",
+  "calendar.apple": "iCal / Kalendarz Apple",
+  "calendar.oauthHint": "OAuth — wydarzenia wysyłane automatycznie",
+  "calendar.appleHint": "Adres subskrypcji do wklejenia w Kalendarzu",
+  "calendar.connectFailed": "Połączenie nie powiodło się",
+  "calendar.urlCopied": "Skopiowano adres",
+  "calendar.urlCopiedBody": "Na Macu otwórz Kalendarz: Plik → Nowa subskrypcja kalendarza i wklej adres.\n\nNa iPhonie: Ustawienia → Kalendarz → Konta → Dodaj konto → Inne → Dodaj subskrybowany kalendarz.",
+  "calendar.disconnectTitle": "Odłączyć?",
+  "calendar.disconnectBody": "Utworzone wydarzenia budów pozostaną w kalendarzu, ale nie będą już aktualizowane.",
+  "calendar.disconnect": "Odłącz",
+  "calendar.connect": "Połącz",
+  "calendar.getUrl": "Pobierz adres",
+  "calendar.disconnectA11y": "Odłącz {provider}",
+  "calendar.connectA11y": "Połącz {provider}",
+  "error.boundaryTitle": "Wystąpił błąd",
+  "error.boundaryBody": "Aplikacja napotkała nieoczekiwany problem. Został zgłoszony automatycznie.",
+  "error.retry": "Spróbuj ponownie",
+  "share.unavailable": "Udostępnianie nie jest dostępne na tym urządzeniu",
+  "share.downloadFailed": "Nie udało się pobrać pliku",
+  "share.dialogTitle": "Udostępnij plik",
+  "legal.siretInvalid": "Nieprawidłowy SIRET (wymagane 14 cyfr).",
+  "legal.companyNotFound": "Nie znaleziono firmy.",
+  "legal.lookupNetworkError": "Błąd sieci podczas wyszukiwania.",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };

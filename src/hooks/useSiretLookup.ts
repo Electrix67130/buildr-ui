@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface SiretLookupResult {
   siret: string;
@@ -69,13 +70,14 @@ function buildStreet(e: ApiSiege | ApiMatchingEtab | undefined): string | null {
 }
 
 export function useSiretLookup() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const lookup = async (rawSiret: string): Promise<SiretLookupResult | null> => {
     const siret = rawSiret.replace(/\s/g, '');
     if (!/^\d{14}$/.test(siret)) {
-      setError('SIRET invalide (14 chiffres requis).');
+      setError(t('legal.siretInvalid'));
       return null;
     }
     setIsLoading(true);
@@ -88,7 +90,7 @@ export function useSiretLookup() {
       const data = (await res.json()) as ApiResponse;
       const first = data.results?.[0];
       if (!first) {
-        setError('Entreprise introuvable.');
+        setError(t('legal.companyNotFound'));
         return null;
       }
       const etab = pickEtab(first, siret);
@@ -109,7 +111,7 @@ export function useSiretLookup() {
         vat_number: computeFrVat(siren),
       };
     } catch {
-      setError('Erreur réseau lors de la recherche.');
+      setError(t('legal.lookupNetworkError'));
       return null;
     } finally {
       setIsLoading(false);

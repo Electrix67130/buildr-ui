@@ -4,17 +4,19 @@ import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import type { ChantierStatus } from '@/api/types';
+import { useTranslation } from '@/contexts/I18nContext';
+import type { TranslationKeys } from '@/i18n/translations';
 
 interface Chip {
   key: ChantierStatus | 'all';
-  label: string;
+  labelKey: TranslationKeys;
 }
 
 const CHIPS: Chip[] = [
-  { key: 'all', label: 'Tous' },
-  { key: 'a_venir', label: 'À venir' },
-  { key: 'en_cours', label: 'En cours' },
-  { key: 'termine', label: 'Terminés' },
+  { key: 'all', labelKey: 'common.all' },
+  { key: 'a_venir', labelKey: 'chantier.statusUpcoming' },
+  { key: 'en_cours', labelKey: 'chantier.statusInProgress' },
+  { key: 'termine', labelKey: 'chantier.statusCompleted' },
 ];
 
 interface Props {
@@ -23,6 +25,7 @@ interface Props {
 }
 
 const FilterChips: React.FC<Props> = ({ selected, onSelect }) => {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
@@ -51,7 +54,7 @@ const FilterChips: React.FC<Props> = ({ selected, onSelect }) => {
             ]}
             onPress={() => onSelect(chip.key)}
             accessibilityRole="tab"
-            accessibilityLabel={chip.label}
+            accessibilityLabel={t(chip.labelKey)}
             accessibilityState={{ selected: isActive }}
           >
             <Text
@@ -60,7 +63,7 @@ const FilterChips: React.FC<Props> = ({ selected, onSelect }) => {
                 { color: isActive ? chipColor : colors.text2 },
               ]}
             >
-              {chip.label}
+              {t(chip.labelKey)}
             </Text>
           </TouchableOpacity>
         );

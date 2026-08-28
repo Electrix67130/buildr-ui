@@ -25,6 +25,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useAllUsers } from '@/api/hooks/useMembers';
 import type { ChantierStatus, TemplateStepInput } from '@/api/hooks/useChantierTemplates';
+import type { TranslationKeys } from '@/i18n/translations';
 
 export interface TemplateMemberValue {
   user_id: string;
@@ -48,12 +49,13 @@ const ROLE_COLOR: Record<string, string> = {
   employee: '#2563EB',
 };
 
-function roleLabel(role: string): string {
-  if (role === 'admin') return 'Admin';
-  if (role === 'manager') return 'Manager';
-  if (role === 'employee') return 'Employé';
-  return role;
-}
+// Roles connus uniquement : un role inedit venu de l'API est affiche tel quel
+// plutot que masque.
+const ROLE_LABEL_KEYS: Record<string, TranslationKeys> = {
+  admin: 'collab.role.admin',
+  manager: 'collab.role.manager',
+  employee: 'collab.role.employee',
+};
 
 interface Props {
   initial?: Partial<TemplateFormValues>;
@@ -66,6 +68,11 @@ export default function TemplateForm({ initial, submitting, submitLabel, onSubmi
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { t } = useTranslation();
+
+  const roleLabel = (role: string) => {
+    const key = ROLE_LABEL_KEYS[role];
+    return key ? t(key) : role;
+  };
 
   const STATUS_OPTIONS: { key: ChantierStatus; label: string }[] = [
     { key: 'a_venir', label: t('chantier.statusUpcoming') },

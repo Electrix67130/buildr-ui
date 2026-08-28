@@ -52,7 +52,7 @@ export default function EmergencyList({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const { data, isLoading, refetch, isRefetching } = useEmergencies(chantierId);
   const createMutation = useCreateEmergency();
@@ -85,11 +85,10 @@ export default function EmergencyList({
 
   const formatDateTime = (date: string) => {
     const d = new Date(date);
-    return (
-      d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) +
-      ' à ' +
-      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-    );
+    return t('comments.dateAtTime', {
+      date: d.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
+      time: d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
+    });
   };
 
   const captureAndUpload = useCallback(
@@ -201,7 +200,7 @@ export default function EmergencyList({
           {hasUnread ? (
             <View
               style={[styles.unreadDot, { backgroundColor: colors.red }]}
-              accessibilityLabel="Activité non lue"
+              accessibilityLabel={t('urgence.unreadActivity')}
             />
           ) : null}
           {item.photo_url ? (
@@ -230,7 +229,7 @@ export default function EmergencyList({
         </TouchableOpacity>
       );
     },
-    [colors, t, router, chantierId, unreadEmergencyIds],
+    [colors, t, locale, router, chantierId, markItemViewed, unreadEmergencyIds],
   );
 
   const allItems = data?.data ?? [];
@@ -284,7 +283,12 @@ export default function EmergencyList({
                 { color: splitTab === 'emergency' ? colors.red : colors.text2 },
               ]}
             >
-              Incident externe{emergencyItems.length > 0 ? ` (${emergencyItems.length})` : ''}
+              {emergencyItems.length > 0
+                ? t('common.labelWithCount', {
+                    label: t('urgence.externalIncident'),
+                    count: emergencyItems.length,
+                  })
+                : t('urgence.externalIncident')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -312,7 +316,9 @@ export default function EmergencyList({
                 { color: splitTab === 'claim' ? colors.red : colors.text2 },
               ]}
             >
-              Réclamations{claimItems.length > 0 ? ` (${claimItems.length})` : ''}
+              {claimItems.length > 0
+                ? t('common.labelWithCount', { label: t('chantier.claims'), count: claimItems.length })
+                : t('chantier.claims')}
             </Text>
           </TouchableOpacity>
         </View>

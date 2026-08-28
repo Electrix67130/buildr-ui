@@ -14,11 +14,13 @@ import {
   CalendarProvider,
   CalendarIntegration,
 } from '@/api/hooks/useCalendarIntegrations';
+import type { TranslationKeys } from '@/i18n/translations';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface ProviderMeta {
   key: CalendarProvider;
-  label: string;
-  hint: string;
+  labelKey: TranslationKeys;
+  hintKey: TranslationKeys;
   logo?: ImageSourcePropType;
   badgeColor?: string;
   badgeLetter?: string;
@@ -29,26 +31,27 @@ interface ProviderMeta {
 const PROVIDERS: ProviderMeta[] = [
   {
     key: 'google',
-    label: 'Google Agenda',
-    hint: 'OAuth — events poussés automatiquement',
+    labelKey: 'calendar.google',
+    hintKey: 'calendar.oauthHint',
     logo: require('@/assets/images/google-calendar.png'),
   },
   {
     key: 'outlook',
-    label: 'Outlook',
-    hint: 'OAuth — events poussés automatiquement',
+    labelKey: 'calendar.outlook',
+    hintKey: 'calendar.oauthHint',
     logo: require('@/assets/images/outlook-calendar.png'),
   },
   {
     key: 'apple',
-    label: 'iCal / Calendrier Apple',
-    hint: 'URL d\'abonnement à coller dans Calendrier',
+    labelKey: 'calendar.apple',
+    hintKey: 'calendar.appleHint',
     badgeColor: '#1F1F1F',
     // Pas de logo Apple : marque protegee + on integre via iCal standard, pas via une API Apple
   },
 ];
 
 export default function CalendarIntegrations() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const integrations = useCalendarIntegrations();
@@ -79,7 +82,7 @@ export default function CalendarIntegrations() {
         await integrations.refetch();
       }
     } catch (err) {
-      Alert.alert('Connexion échouée', err instanceof Error ? err.message : 'Erreur inconnue');
+      Alert.alert(t('calendar.connectFailed'), err instanceof Error ? err.message : t('common.unknownError'));
     } finally {
       setBusyProvider(null);
     }
@@ -93,13 +96,10 @@ export default function CalendarIntegrations() {
         await Clipboard.setStringAsync(result.ical_url);
         setCopiedFlash(true);
         setTimeout(() => setCopiedFlash(false), 2500);
-        Alert.alert(
-          'URL copiée',
-          'Ouvre Calendrier sur Mac : Fichier → Nouvel abonnement à un calendrier, puis colle l\'URL.\n\nSur iPhone : Réglages → Calendrier → Comptes → Ajouter un compte → Autre → Calendrier avec abonnement.',
-        );
+        Alert.alert(t('calendar.urlCopied'), t('calendar.urlCopiedBody'));
       }
     } catch (err) {
-      Alert.alert('Erreur', err instanceof Error ? err.message : 'Erreur inconnue');
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.unknownError'));
     } finally {
       setBusyProvider(null);
     }
@@ -107,12 +107,12 @@ export default function CalendarIntegrations() {
 
   const handleDisconnect = (provider: CalendarProvider) => {
     Alert.alert(
-      'Déconnecter ?',
-      'Les events de chantier déjà créés dans ton calendrier resteront mais ne seront plus mis à jour.',
+      t('calendar.disconnectTitle'),
+      t('calendar.disconnectBody'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Déconnecter',
+          text: t('calendar.disconnect'),
           style: 'destructive',
           onPress: async () => {
             setBusyProvider(provider);
@@ -138,7 +138,7 @@ export default function CalendarIntegrations() {
       <View style={styles.headerRow}>
         <Calendar size={IconSize.md} color={colors.primary} />
         <Text style={[styles.headerText, { color: colors.text }]}>
-          Synchronise les dates de tes chantiers avec ton calendrier.
+          {t('calendar.intro')}
         </Text>
       </View>
 
@@ -168,8 +168,8 @@ export default function CalendarIntegrations() {
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.providerLabel, { color: colors.text }]}>{p.label}</Text>
-                  <Text style={[styles.providerHint, { color: colors.mutedText }]}>{p.hint}</Text>
+                  <Text style={[styles.providerLabel, { color: colors.text }]}>{t(p.labelKey)}</Text>
+                  <Text style={[styles.providerHint, { color: colors.mutedText }]}>{t(p.hintKey)}</Text>
                   {p.key === 'apple' && integration?.ical_url ? (
                     <TouchableOpacity onPress={() => handleCopyAppleUrl(integration.ical_url!)} style={styles.icalUrlRow}>
                       <Text numberOfLines={1} style={[styles.icalUrl, { color: colors.primary }]}>
@@ -192,21 +192,21 @@ export default function CalendarIntegrations() {
                   style={[styles.actionBtn, { borderColor: colors.red }]}
                   onPress={() => handleDisconnect(p.key)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Déconnecter ${p.label}`}
+                  accessibilityLabel={t('calendar.disconnectA11y', { provider: t(p.labelKey) })}
                 >
                   <Unlink size={IconSize.sm} color={colors.red} />
-                  <Text style={[styles.actionBtnText, { color: colors.red }]}>Déconnecter</Text>
+                  <Text style={[styles.actionBtnText, { color: colors.red }]}>{t('calendar.disconnect')}</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
                   style={[styles.actionBtn, { borderColor: colors.primary, backgroundColor: colors.primary }]}
                   onPress={() => (p.key === 'apple' ? handleConnectApple() : handleConnectGoogleOrOutlook(p.key))}
                   accessibilityRole="button"
-                  accessibilityLabel={`Connecter ${p.label}`}
+                  accessibilityLabel={t('calendar.connectA11y', { provider: t(p.labelKey) })}
                 >
                   <Link2 size={IconSize.sm} color="#FFFFFF" />
                   <Text style={[styles.actionBtnText, { color: '#FFFFFF' }]}>
-                    {p.key === 'apple' ? 'Obtenir l\'URL' : 'Connecter'}
+                    {p.key === 'apple' ? t('calendar.getUrl') : t('calendar.connect')}
                   </Text>
                 </TouchableOpacity>
               )}

@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
+import { translate } from '@/contexts/I18nContext';
 
 /**
  * Download a remote file to local cache and open the native share sheet
@@ -8,7 +9,7 @@ import { Platform } from 'react-native';
  */
 export async function shareFile(url: string, filename: string, mimeType?: string): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) {
-    throw new Error('Le partage n\'est pas disponible sur cet appareil');
+    throw new Error(translate('share.unavailable'));
   }
 
   // Download to cache
@@ -16,12 +17,12 @@ export async function shareFile(url: string, filename: string, mimeType?: string
   const download = await FileSystem.downloadAsync(url, cachePath);
 
   if (download.status !== 200) {
-    throw new Error('Échec du téléchargement du fichier');
+    throw new Error(translate('share.downloadFailed'));
   }
 
   await Sharing.shareAsync(download.uri, {
     mimeType: mimeType || 'application/octet-stream',
-    dialogTitle: 'Partager le fichier',
+    dialogTitle: translate('share.dialogTitle'),
     UTI: Platform.OS === 'ios' ? guessUTI(filename, mimeType) : undefined,
   });
 }

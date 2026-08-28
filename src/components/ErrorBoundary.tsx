@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { reportError } from '@/api/errorReport';
+import { translate } from '@/contexts/I18nContext';
 
 /**
  * Filet de securite autour de l'application.
@@ -9,9 +10,10 @@ import { reportError } from '@/api/errorReport';
  * aucun recours et toi aucune trace. Ici on remonte l'erreur dans error_log et
  * on propose de reessayer.
  *
- * Volontairement sans dependance a un contexte (theme, i18n, navigation) : si
- * l'un d'eux est la cause du plantage, l'ecran de secours doit quand meme
- * s'afficher. D'ou les couleurs en dur et le texte en francais.
+ * Volontairement sans dependance a un contexte React (theme, i18n, navigation) :
+ * si l'un d'eux est la cause du plantage, l'ecran de secours doit quand meme
+ * s'afficher. D'ou les couleurs en dur. Le texte passe par translate(), qui lit
+ * la derniere locale connue sans consommer de contexte.
  */
 
 interface Props {
@@ -44,16 +46,13 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Une erreur est survenue</Text>
-        <Text style={styles.body}>
-          L&apos;application a rencontré un problème inattendu. Il a été signalé
-          automatiquement.
-        </Text>
+        <Text style={styles.title}>{translate('error.boundaryTitle')}</Text>
+        <Text style={styles.body}>{translate('error.boundaryBody')}</Text>
         <Text style={styles.detail} numberOfLines={3}>
           {error.message}
         </Text>
         <TouchableOpacity style={styles.button} onPress={this.reset} accessibilityRole="button">
-          <Text style={styles.buttonText}>Réessayer</Text>
+          <Text style={styles.buttonText}>{translate('error.retry')}</Text>
         </TouchableOpacity>
       </View>
     );

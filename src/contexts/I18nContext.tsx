@@ -12,18 +12,41 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 const STORAGE_KEY = 'app_locale';
 const VALID: Locale[] = ['fr', 'en', 'de', 'es', 'it'];
 
+// Locale courante dupliquee hors de React. Elle sert aux quelques appelants qui
+// ne peuvent pas consommer le contexte : un utilitaire hors composant, et
+// surtout l'ErrorBoundary, dont l'ecran de secours doit s'afficher meme si c'est
+// un provider qui a plante.
+let currentLocale: Locale = 'fr';
+
+function interpolate(raw: string, vars?: Record<string, string | number>): string {
+  if (!vars) return raw;
+  return raw.replace(/\{(\w+)\}/g, (m, name) => (name in vars ? String(vars[name]) : m));
+}
+
+/**
+ * Traduction hors React, dans la derniere locale connue. A n'utiliser que
+ * lorsque useTranslation() est impossible : dans un composant, le hook reste la
+ * bonne porte d'entree car lui seul redeclenche le rendu au changement de langue.
+ */
+export function translate(key: TranslationKeys, vars?: Record<string, string | number>): string {
+  const raw = TRANSLATIONS[currentLocale][key] ?? TRANSLATIONS.fr[key] ?? key;
+  return interpolate(raw, vars);
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('fr');
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
       if (stored && VALID.includes(stored as Locale)) {
+        currentLocale = stored as Locale;
         setLocaleState(stored as Locale);
       }
     });
   }, []);
 
   const setLocale = useCallback((next: Locale) => {
+    currentLocale = next;
     setLocaleState(next);
     AsyncStorage.setItem(STORAGE_KEY, next);
   }, []);
@@ -33,10 +56,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       const raw = TRANSLATIONS[locale][key] ?? TRANSLATIONS.fr[key] ?? key;
       // Interpolation {nom} : une traduction doit pouvoir placer la variable ou
       // sa langue l'exige, ce qu'un gabarit assemble dans le code interdit.
-      if (!vars) return raw;
-      return raw.replace(/\{(\w+)\}/g, (m, name) =>
-        name in vars ? String(vars[name]) : m,
-      );
+      return interpolate(raw, vars);
     },
     [locale],
   );
