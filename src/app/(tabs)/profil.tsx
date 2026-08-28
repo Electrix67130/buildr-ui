@@ -374,7 +374,7 @@ export default function ProfilScreen() {
                   </View>
                   <View style={styles.notifInfo}>
                     <Text style={[styles.notifTitle, { color: colors.text }]}>
-                      Notifications push
+                      {t('profile.pushTitle')}
                     </Text>
                     <Text style={[styles.notifHint, { color: colors.mutedText }]}>
                       {t('profile.pushHint')}

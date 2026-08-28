@@ -380,7 +380,9 @@ export type TranslationKeys =
   | 'auth.signUpLink'
   | 'invite.lastNameRequired'
   | 'invite.companySetByHost'
-  | 'profile.versionUpdatedOn';
+  | 'profile.versionUpdatedOn'
+  | 'profile.pushTitle'
+  | 'discussions.messages';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -888,6 +890,8 @@ const fr: Dictionary = {
   "invite.lastNameRequired": "Nom *",
   "invite.companySetByHost": "Entreprise (définie par l’invitant)",
   "profile.versionUpdatedOn": "mise à jour du {date}",
+  "profile.pushTitle": "Notifications push",
+  "discussions.messages": "Messages",
 };
 
 const en: Dictionary = {
@@ -1394,6 +1398,8 @@ const en: Dictionary = {
   "invite.lastNameRequired": "Last name *",
   "invite.companySetByHost": "Company (set by whoever invited you)",
   "profile.versionUpdatedOn": "updated on {date}",
+  "profile.pushTitle": "Push notifications",
+  "discussions.messages": "Messages",
 };
 
 const de: Dictionary = {
@@ -1900,6 +1906,8 @@ const de: Dictionary = {
   "invite.lastNameRequired": "Nachname *",
   "invite.companySetByHost": "Unternehmen (vom Einladenden festgelegt)",
   "profile.versionUpdatedOn": "aktualisiert am {date}",
+  "profile.pushTitle": "Push-Mitteilungen",
+  "discussions.messages": "Nachrichten",
 };
 
 const es: Dictionary = {
@@ -2406,6 +2414,8 @@ const es: Dictionary = {
   "invite.lastNameRequired": "Apellido *",
   "invite.companySetByHost": "Empresa (definida por quien te invita)",
   "profile.versionUpdatedOn": "actualizada el {date}",
+  "profile.pushTitle": "Notificaciones push",
+  "discussions.messages": "Mensajes",
 };
 
 const it: Dictionary = {
@@ -2912,6 +2922,8 @@ const it: Dictionary = {
   "invite.lastNameRequired": "Cognome *",
   "invite.companySetByHost": "Azienda (definita da chi ti ha invitato)",
   "profile.versionUpdatedOn": "aggiornata il {date}",
+  "profile.pushTitle": "Notifiche push",
+  "discussions.messages": "Messaggi",
 };
 
 const pt: Dictionary = {
@@ -3418,6 +3430,8 @@ const pt: Dictionary = {
   "invite.lastNameRequired": "Apelido *",
   "invite.companySetByHost": "Empresa (definida por quem o convidou)",
   "profile.versionUpdatedOn": "atualizada a {date}",
+  "profile.pushTitle": "Notificações push",
+  "discussions.messages": "Mensagens",
 };
 
 const tr: Dictionary = {
@@ -3924,6 +3938,8 @@ const tr: Dictionary = {
   "invite.lastNameRequired": "Soyadı *",
   "invite.companySetByHost": "Şirket (sizi davet eden tarafından belirlenir)",
   "profile.versionUpdatedOn": "{date} tarihinde güncellendi",
+  "profile.pushTitle": "Anlık bildirimler",
+  "discussions.messages": "Mesajlar",
 };
 
 const pl: Dictionary = {
@@ -4430,6 +4446,8 @@ const pl: Dictionary = {
   "invite.lastNameRequired": "Nazwisko *",
   "invite.companySetByHost": "Firma (ustalona przez zapraszającego)",
   "profile.versionUpdatedOn": "zaktualizowano {date}",
+  "profile.pushTitle": "Powiadomienia push",
+  "discussions.messages": "Wiadomości",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };

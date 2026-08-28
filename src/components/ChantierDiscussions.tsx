@@ -138,7 +138,7 @@ export default function ChantierDiscussions({
                 { color: subTab === 'steps' ? colors.primary : colors.text2 },
               ]}
             >
-              Étapes
+              {t('templates.stepsLabel')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -166,7 +166,9 @@ export default function ChantierDiscussions({
                 { color: subTab === 'messages' ? colors.primary : colors.text2 },
               ]}
             >
-              Messages{generalCount > 0 ? ` (${generalCount})` : ''}
+              {generalCount > 0
+                ? t('common.labelWithCount', { label: t('discussions.messages'), count: generalCount })
+                : t('discussions.messages')}
             </Text>
           </TouchableOpacity>
         </View>
