@@ -212,7 +212,7 @@ export default function ChantierDiscussions({
               <TouchableOpacity
                 onPress={() => setOpenStep(null)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                accessibilityLabel="Fermer"
+                accessibilityLabel={t('common.close')}
               >
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>

@@ -566,7 +566,7 @@ export default function ChantierSteps({
                   {addingStep
                     ? t('steps.newStep')
                     : editingStep
-                    ? 'Renommer l\'étape'
+                    ? t('steps.renameStep')
                     : addingSubstepFor
                     ? t('steps.newSubstep')
                     : t('steps.renameSubstep')}
@@ -589,7 +589,7 @@ export default function ChantierSteps({
                 style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
                 value={draftName}
                 onChangeText={setDraftName}
-                placeholder="Nom"
+                placeholder={t('common.name')}
                 placeholderTextColor={colors.placeholder}
                 autoFocus
                 onSubmitEditing={() => {
@@ -610,7 +610,7 @@ export default function ChantierSteps({
                 }}
                 disabled={!draftName.trim()}
               >
-                <Text style={styles.modalSaveText}>Valider</Text>
+                <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
               </TouchableOpacity>
             </Animated.View>
           </View>
@@ -644,7 +644,7 @@ export default function ChantierSteps({
 
               <View style={styles.commentLabelRow}>
                 <MessageSquarePlus size={14} color={colors.mutedText} />
-                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>Commentaire (optionnel)</Text>
+                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.commentOptional')}</Text>
               </View>
               <TextInput
                 style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
@@ -661,14 +661,14 @@ export default function ChantierSteps({
                   style={[styles.modalSecondary, { borderColor: colors.border }]}
                   onPress={() => submitValidateWithComment(true)}
                 >
-                  <Text style={[styles.modalSecondaryText, { color: colors.text }]}>Sans commentaire</Text>
+                  <Text style={[styles.modalSecondaryText, { color: colors.text }]}>{t('steps.noComment')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalSave, { backgroundColor: colors.green, flex: 1 }]}
                   onPress={() => submitValidateWithComment(false)}
                 >
                   <Check size={IconSize.sm} color="#FFFFFF" />
-                  <Text style={styles.modalSaveText}>Valider</Text>
+                  <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -687,9 +687,9 @@ export default function ChantierSteps({
               <TouchableOpacity
                 onPress={() => setReorderModalOpen(false)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                accessibilityLabel="Fermer"
+                accessibilityLabel={t('common.close')}
               >
-                <Text style={[styles.reorderDone, { color: colors.primary }]}>{t('chantier.statusCompleted')}</Text>
+                <Text style={[styles.reorderDone, { color: colors.primary }]}>{t('common.done')}</Text>
               </TouchableOpacity>
             </View>
             <DraggableFlatList
@@ -807,12 +807,12 @@ export default function ChantierSteps({
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text }]}>
                 {addingStep
-                  ? 'Nouvelle étape'
+                  ? t('steps.newStep')
                   : editingStep
-                  ? 'Renommer l\'étape'
+                  ? t('steps.renameStep')
                   : addingSubstepFor
-                  ? 'Nouvelle sous-étape'
-                  : 'Renommer la sous-étape'}
+                  ? t('steps.newSubstep')
+                  : t('steps.renameSubstep')}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -831,7 +831,7 @@ export default function ChantierSteps({
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               value={draftName}
               onChangeText={setDraftName}
-              placeholder="Nom"
+              placeholder={t('common.name')}
               placeholderTextColor={colors.placeholder}
               autoFocus
               onSubmitEditing={() => {
@@ -852,7 +852,7 @@ export default function ChantierSteps({
               }}
               disabled={!draftName.trim()}
             >
-              <Text style={styles.modalSaveText}>Valider</Text>
+              <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -885,7 +885,7 @@ export default function ChantierSteps({
 
             <View style={styles.commentLabelRow}>
               <MessageSquarePlus size={14} color={colors.mutedText} />
-              <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>Commentaire (optionnel)</Text>
+              <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.commentOptional')}</Text>
             </View>
             <TextInput
               style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
@@ -902,14 +902,14 @@ export default function ChantierSteps({
                 style={[styles.modalSecondary, { borderColor: colors.border }]}
                 onPress={() => submitValidateWithComment(true)}
               >
-                <Text style={[styles.modalSecondaryText, { color: colors.text }]}>Sans commentaire</Text>
+                <Text style={[styles.modalSecondaryText, { color: colors.text }]}>{t('steps.noComment')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalSave, { backgroundColor: colors.green, flex: 1 }]}
                 onPress={() => submitValidateWithComment(false)}
               >
                 <Check size={IconSize.sm} color="#FFFFFF" />
-                <Text style={styles.modalSaveText}>Valider</Text>
+                <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>

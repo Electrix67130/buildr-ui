@@ -114,11 +114,11 @@ export default function CreateChantierScreen() {
           onPress={() => router.back()}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityRole="button"
-          accessibilityLabel="Retour"
+          accessibilityLabel={t('a11y.back')}
         >
           <ArrowLeft size={IconSize.lg} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.topTitle, { color: colors.text }]}>Nouveau chantier</Text>
+        <Text style={[styles.topTitle, { color: colors.text }]}>{t('chantier.create')}</Text>
         <View style={{ width: IconSize.lg }} />
       </View>
 
@@ -194,7 +194,7 @@ export default function CreateChantierScreen() {
             onChange={(s, e) => { Keyboard.dismiss(); setStartDate(s); setEndDate(e); }}
           />
 
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Localisation</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('chantier.location')}</Text>
 
           <CityAutocomplete
             city={city}
@@ -215,7 +215,7 @@ export default function CreateChantierScreen() {
             onChangeText={setDescription}
             multiline
             numberOfLines={3}
-            accessibilityLabel="Description"
+            accessibilityLabel={t('chantier.description')}
           />
 
           {error ? <Text style={[styles.error, { color: colors.red }]}>{error}</Text> : null}

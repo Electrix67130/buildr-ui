@@ -148,7 +148,7 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
             <Search size={16} color={colors.placeholder} />
             <TextInput
               style={[teamStyles.searchInput, { color: colors.text }]}
-              placeholder="Rechercher..."
+              placeholder={t('common.search')}
               placeholderTextColor={colors.placeholder}
               value={teamSearch}
               onChangeText={setTeamSearch}
@@ -174,9 +174,11 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
 
           <FlatList
             data={[
-              ...(teamMembers.length > 0 ? [{ type: 'header' as const, label: `MEMBRES (${teamMembers.length})` }] : []),
+              ...(teamMembers.length > 0
+                ? [{ type: 'header' as const, label: t('team.membersCount', { count: teamMembers.length }) }]
+                : []),
               ...teamMembers.map((m) => ({ type: 'member' as const, user: m })),
-              { type: 'header' as const, label: 'AJOUTER' },
+              { type: 'header' as const, label: t('common.addSection') },
               ...available.map((u) => ({ type: 'available' as const, user: u })),
             ]}
             keyExtractor={(item, i) => item.type === 'header' ? `h-${i}` : item.user.id}
@@ -199,10 +201,16 @@ function TeamModal({ managerId, allUsers, colors, onClose, onAdd, onRemove, onRe
                   <TouchableOpacity
                     style={teamStyles.removeBtn}
                     onPress={() => {
-                      Alert.alert('Retirer', `Retirer ${item.user.first_name} ${item.user.last_name} de l'équipe ?`, [
-                        { text: 'Annuler', style: 'cancel' },
-                        { text: 'Retirer', style: 'destructive', onPress: () => onRemove(item.user.id) },
-                      ]);
+                      Alert.alert(
+                        t('team.remove'),
+                        t('team.removeFromTeamConfirm', {
+                          name: `${item.user.first_name} ${item.user.last_name}`,
+                        }),
+                        [
+                          { text: t('common.cancel'), style: 'cancel' },
+                          { text: t('team.remove'), style: 'destructive', onPress: () => onRemove(item.user.id) },
+                        ],
+                      );
                     }}
                   >
                     <Trash2 size={IconSize.md} color={colors.red} />
@@ -279,7 +287,7 @@ const ROLE_COLORS: Record<string, string> = {
 export default function CollaborateursScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
@@ -309,7 +317,7 @@ export default function CollaborateursScreen() {
                 await deleteUser.mutateAsync(userId);
                 setSelectedUser(null);
               } catch (err) {
-                Alert.alert('Erreur', err instanceof Error ? err.message : 'Suppression impossible');
+                Alert.alert(t('common.error'), err instanceof Error ? err.message : t('chantier.deleteFailed'));
               }
             },
           },
@@ -371,12 +379,12 @@ export default function CollaborateursScreen() {
 
   const handleCancelInvite = useCallback(
     (id: string, email: string) => {
-      Alert.alert('Annuler', `Annuler l'invitation de ${email} ?`, [
-        { text: 'Non', style: 'cancel' },
-        { text: 'Oui', style: 'destructive', onPress: () => cancelInvite.mutate(id) },
+      Alert.alert(t('common.cancel'), t('collab.cancelInviteConfirm', { email }), [
+        { text: t('common.no'), style: 'cancel' },
+        { text: t('common.yes'), style: 'destructive', onPress: () => cancelInvite.mutate(id) },
       ]);
     },
-    [cancelInvite],
+    [cancelInvite, t],
   );
 
   const renderUser = useCallback(
@@ -408,7 +416,7 @@ export default function CollaborateursScreen() {
           <View style={styles.userInfo}>
             <Text style={[styles.userName, { color: colors.text }]}>
               {item.first_name} {item.last_name}
-              {isInactive && ' (désactivé)'}
+              {isInactive && ` ${t('collab.deactivatedSuffix')}`}
             </Text>
             <Text style={[styles.userEmail, { color: colors.mutedText }]}>{item.email}</Text>
             {item.company_name && (
@@ -438,7 +446,7 @@ export default function CollaborateursScreen() {
             accessibilityLabel={t('collab.inviteColleague')}
           >
             <UserPlus size={IconSize.md} color="#FFFFFF" />
-            <Text style={styles.inviteBtnText}>Inviter</Text>
+            <Text style={styles.inviteBtnText}>{t('collab.invite')}</Text>
           </TouchableOpacity>
         )}
       </AppHeader>
@@ -490,13 +498,13 @@ export default function CollaborateursScreen() {
                 <Text style={[styles.inviteEmail, { color: colors.text }]}>{inv.email}</Text>
                 <Text style={[styles.inviteRole, { color: colors.mutedText }]}>
                   {t(roleLabelKey(inv.role))} — expire le{' '}
-                  {new Date(inv.expires_at).toLocaleDateString('fr-FR')}
+                  {new Date(inv.expires_at).toLocaleDateString(locale)}
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => handleCancelInvite(inv.id, inv.email)}
                 accessibilityRole="button"
-                accessibilityLabel="Annuler l'invitation"
+                accessibilityLabel={t('collab.cancelInvite')}
               >
                 <Trash2 size={IconSize.md} color={colors.red} />
               </TouchableOpacity>
@@ -561,18 +569,18 @@ export default function CollaborateursScreen() {
                 </View>
 
                 {/* Contact section — always visible */}
-                <Text style={[styles.sectionLabel, { color: colors.text2 }]}>CONTACT</Text>
+                <Text style={[styles.sectionLabel, { color: colors.text2 }]}>{t('common.contactSection')}</Text>
                 <TouchableOpacity
                   style={[styles.contactRow, { backgroundColor: colors.itemBackground, borderColor: colors.border }]}
                   onPress={() => Linking.openURL(`mailto:${selectedUser.email}`)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Envoyer un email à ${selectedUser.email}`}
+                  accessibilityLabel={t('collab.emailA11y', { email: selectedUser.email })}
                 >
                   <View style={[styles.contactIcon, { backgroundColor: colors.primary + '15' }]}>
                     <Mail size={IconSize.md} color={colors.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.contactLabel, { color: colors.text2 }]}>Email</Text>
+                    <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.email')}</Text>
                     <Text style={[styles.contactValue, { color: colors.text }]}>{selectedUser.email}</Text>
                   </View>
                   <TouchableOpacity
@@ -585,7 +593,7 @@ export default function CollaborateursScreen() {
                     ]}
                     onPress={() => copyToClipboard(selectedUser.email, 'email')}
                     accessibilityRole="button"
-                    accessibilityLabel="Copier l'email"
+                    accessibilityLabel={t('team.copyEmail')}
                   >
                     {copiedField === 'email' ? (
                       <Check size={IconSize.sm} color={colors.green} />
@@ -659,7 +667,7 @@ export default function CollaborateursScreen() {
                       })}
                     </View>
 
-                    <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>STATUT</Text>
+                    <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>{t('common.statusSection')}</Text>
                     <TouchableOpacity
                       style={[
                         styles.actionRow,
@@ -677,7 +685,8 @@ export default function CollaborateursScreen() {
                         <>
                           <UserX size={IconSize.md} color={colors.red} />
                           <Text style={[styles.actionLabel, { color: colors.red }]}>
-                            Désactiver le compte{selectedUser.id === currentUser?.id ? ' (vous-même)' : ''}
+                            {t('collab.deactivate')}
+                            {selectedUser.id === currentUser?.id ? ` ${t('collab.yourselfSuffix')}` : ''}
                           </Text>
                         </>
                       )}
@@ -689,7 +698,7 @@ export default function CollaborateursScreen() {
 
                     {selectedUser.id !== currentUser?.id && (
                       <>
-                        <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>SUPPRESSION</Text>
+                        <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>{t('common.deleteSection')}</Text>
                         <TouchableOpacity
                           style={[styles.actionRow, { borderColor: colors.red, backgroundColor: colors.red + '10' }]}
                           onPress={() =>
@@ -750,7 +759,7 @@ export default function CollaborateursScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('auth.email')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               placeholder="collaborateur@email.com"
@@ -790,9 +799,9 @@ export default function CollaborateursScreen() {
               onPress={handleInvite}
               disabled={createInvite.isPending}
               accessibilityRole="button"
-              accessibilityLabel="Envoyer l'invitation"
+              accessibilityLabel={t('collab.sendInvite')}
             >
-              <Text style={styles.sendInviteText}>Envoyer l'invitation</Text>
+              <Text style={styles.sendInviteText}>{t('collab.sendInvite')}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>

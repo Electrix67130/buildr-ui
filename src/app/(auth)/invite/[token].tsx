@@ -19,11 +19,12 @@ import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
+import type { TranslationKeys } from '@/i18n/translations';
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Administrateur',
-  employee: 'Employé',
-  client: 'Client',
+const ROLE_LABEL_KEYS: Record<string, TranslationKeys> = {
+  admin: 'collab.role.adminLong',
+  employee: 'collab.role.employee',
+  client: 'collab.role.client',
 };
 
 export default function InviteScreen() {
@@ -148,8 +149,8 @@ export default function InviteScreen() {
             <Text style={[styles.subtitle, { color: colors.text2 }]}>
               <Text style={{ fontWeight: FontWeight.bold, color: colors.primary }}>
                 {invitation.organization_name}
-              </Text> vous invite en tant que <Text style={{ fontWeight: FontWeight.bold, color: colors.primary }}>
-                {ROLE_LABELS[invitation.role] || invitation.role}
+              </Text> {t('invite.invitesYouAs')} <Text style={{ fontWeight: FontWeight.bold, color: colors.primary }}>
+                {ROLE_LABEL_KEYS[invitation.role] ? t(ROLE_LABEL_KEYS[invitation.role]) : invitation.role}
               </Text>
             </Text>
           </View>
@@ -176,14 +177,14 @@ export default function InviteScreen() {
                 />
               </View>
               <View style={styles.halfField}>
-                <Text style={[styles.label, { color: colors.text }]}>Nom *</Text>
+                <Text style={[styles.label, { color: colors.text }]}>{t('invite.lastNameRequired')}</Text>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
                   placeholder="Dupont"
                   placeholderTextColor={colors.placeholder}
                   value={lastName}
                   onChangeText={setLastName}
-                  accessibilityLabel="Nom"
+                  accessibilityLabel={t('auth.lastName')}
                 />
               </View>
             </View>
@@ -211,7 +212,7 @@ export default function InviteScreen() {
             />
 
             <Text style={[styles.label, { color: colors.text }]}>
-              Entreprise {isClient ? '' : '(définie par l\'invitant)'}
+              {isClient ? t('auth.company') : t('invite.companySetByHost')}
             </Text>
             <TextInput
               style={[
@@ -238,7 +239,7 @@ export default function InviteScreen() {
               {submitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.buttonText}>Accepter l'invitation</Text>
+                <Text style={styles.buttonText}>{t('invite.accept')}</Text>
               )}
             </TouchableOpacity>
           </View>

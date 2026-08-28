@@ -55,8 +55,8 @@ export default function RegisterScreen() {
         <Link href="/(auth)/login" asChild>
           <TouchableOpacity style={styles.linkContainer} accessibilityRole="link">
             <Text style={[styles.linkText, { color: colors.text2 }]}>
-              Déjà un compte ?{' '}
-              <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>Se connecter</Text>
+              {t('auth.alreadyAccount')}{' '}
+              <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>{t('auth.signIn')}</Text>
             </Text>
           </TouchableOpacity>
         </Link>

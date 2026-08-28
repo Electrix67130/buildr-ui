@@ -366,7 +366,7 @@ export default function ProfilScreen() {
               </View>
 
               {/* Notifications */}
-              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>NOTIFICATIONS</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.notificationsSection')}</Text>
               <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.notifRow}>
                   <View style={[styles.notifIcon, { backgroundColor: colors.primary + '15' }]}>
@@ -392,7 +392,7 @@ export default function ProfilScreen() {
               </View>
 
               {/* Mes organisations */}
-              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>MES ORGANISATIONS</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.orgsSection')}</Text>
               <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 {(user?.memberships ?? []).map((m) => {
                   const isActive = m.organization_id === user?.active_organization_id;
@@ -431,7 +431,7 @@ export default function ProfilScreen() {
                       {isActive ? (
                         <View style={[styles.orgActiveBadge, { backgroundColor: colors.primary + '20' }]}>
                           <Check size={14} color={colors.primary} />
-                          <Text style={[styles.orgActiveText, { color: colors.primary }]}>Actuelle</Text>
+                          <Text style={[styles.orgActiveText, { color: colors.primary }]}>{t('profile.orgCurrent')}</Text>
                         </View>
                       ) : (
                         <TouchableOpacity
@@ -439,7 +439,7 @@ export default function ProfilScreen() {
                           onPress={() => {
                             switchOrg.mutate(m.organization_id, {
                               onError: (err) =>
-                                Alert.alert('Erreur', err instanceof Error ? err.message : t('profile.cannotSwitch')),
+                                Alert.alert(t('common.error'), err instanceof Error ? err.message : t('profile.cannotSwitch')),
                             });
                           }}
                           disabled={switchOrg.isPending}
@@ -472,7 +472,7 @@ export default function ProfilScreen() {
               </View>
 
               {/* Calendars */}
-              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>CALENDRIERS</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.calendarsSection')}</Text>
               <CalendarIntegrations />
 
               {/* Admin — Informations légales */}
@@ -498,7 +498,7 @@ export default function ProfilScreen() {
               {/* Admin — Conservation des archives */}
               {isAdmin && (
                 <>
-                  <Text style={[styles.sectionTitle, { color: colors.text2 }]}>ARCHIVES</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.archivesSection')}</Text>
                   <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     <Text style={[styles.label, { color: colors.text2 }]}>{t('profile.retentionLabel')}</Text>
                     <View style={styles.retentionInputRow}>
@@ -654,7 +654,7 @@ export default function ProfilScreen() {
                 {Updates.isEmbeddedLaunch
                   ? t('profile.versionInstalled')
                   : Updates.createdAt
-                    ? `mise a jour du ${Updates.createdAt.toLocaleDateString('fr-FR')}`
+                    ? t('profile.versionUpdatedOn', { date: Updates.createdAt.toLocaleDateString(locale) })
                     : t('profile.versionUpdated')}
               </Text>
             </>
@@ -693,7 +693,7 @@ export default function ProfilScreen() {
               accessibilityLabel={t('auth.newPassword')}
             />
 
-            <Text style={[styles.label, { color: colors.text2 }]}>Confirmer</Text>
+            <Text style={[styles.label, { color: colors.text2 }]}>{t('common.confirm')}</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
               value={confirmPassword}
@@ -711,7 +711,7 @@ export default function ProfilScreen() {
               onPress={handleChangePassword}
               disabled={updatePassword.isPending}
               accessibilityRole="button"
-              accessibilityLabel="Valider"
+              accessibilityLabel={t('common.validate')}
             >
               {updatePassword.isPending ? (
                 <ActivityIndicator color="#FFFFFF" />
@@ -728,7 +728,7 @@ export default function ProfilScreen() {
         <View style={styles.modalOverlay}>
           <Animated.View style={[styles.modalContent, { backgroundColor: colors.surface }, animatedCreateOrgModalStyle]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Nouvelle organisation</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.newOrg')}</Text>
               <TouchableOpacity
                 onPress={() => setShowCreateOrgModal(false)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}

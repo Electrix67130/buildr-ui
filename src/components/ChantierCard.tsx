@@ -6,6 +6,7 @@ import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/const
 import { useColorScheme } from '@/hooks/useColorScheme';
 import StatusBadge from './StatusBadge';
 import type { Chantier } from '@/api/types';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface Props {
   chantier: Chantier;
@@ -18,12 +19,13 @@ interface Props {
 }
 
 const ChantierCard: React.FC<Props> = ({ chantier, onPress, onLongPress, selectionMode, selected, unread = 0 }) => {
+  const { locale } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
   const formatDate = (date?: string) => {
     if (!date) return null;
-    return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (

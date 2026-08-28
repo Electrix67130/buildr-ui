@@ -116,7 +116,7 @@ export default function EditChantierScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Retour">
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel={t('a11y.back')}>
           <ArrowLeft size={IconSize.lg} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.topTitle, { color: colors.text }]}>{t('chantier.edit')}</Text>
@@ -139,7 +139,7 @@ export default function EditChantierScreen() {
             onChangeText={setDescription}
             multiline
             numberOfLines={3}
-            accessibilityLabel="Description"
+            accessibilityLabel={t('chantier.description')}
           />
 
           <Text style={[styles.label, { color: colors.text }]}>{t('chantier.status')}</Text>
@@ -168,7 +168,7 @@ export default function EditChantierScreen() {
             })}
           </View>
 
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Localisation</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('chantier.location')}</Text>
 
           <CityAutocomplete
             city={city}
@@ -198,7 +198,7 @@ export default function EditChantierScreen() {
             {updateMutation.isPending ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>Enregistrer</Text>
+              <Text style={styles.buttonText}>{t('common.save')}</Text>
             )}
           </TouchableOpacity>
       </KeyboardAwareScroll>

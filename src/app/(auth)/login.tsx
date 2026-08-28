@@ -105,15 +105,15 @@ export default function LoginScreen() {
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.buttonText}>Se connecter</Text>
+                <Text style={styles.buttonText}>{t('auth.signIn')}</Text>
               )}
             </TouchableOpacity>
 
             <Link href="/(auth)/register" asChild>
               <TouchableOpacity style={styles.linkContainer} accessibilityRole="link">
                 <Text style={[styles.linkText, { color: colors.text2 }]}>
-                  Pas encore de compte ?{' '}
-                  <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>S'inscrire</Text>
+                  {t('auth.noAccount')}{' '}
+                  <Text style={{ color: colors.primary, fontWeight: FontWeight.semibold }}>{t('auth.signUpLink')}</Text>
                 </Text>
               </TouchableOpacity>
             </Link>

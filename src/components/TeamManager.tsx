@@ -133,11 +133,11 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
   }, [availableUsers, addSearch]);
 
   const handleRemove = useCallback((id: string, name: string) => {
-    Alert.alert('Retirer', `Retirer ${name} du chantier ?`, [
-      { text: 'Annuler', style: 'cancel' },
-      { text: 'Retirer', style: 'destructive', onPress: () => removeMutation.mutate(id) },
+    Alert.alert(t('team.remove'), t('team.removeFromChantierConfirm', { name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('team.remove'), style: 'destructive', onPress: () => removeMutation.mutate(id) },
     ]);
-  }, [removeMutation]);
+  }, [removeMutation, t]);
 
   const handleAdd = useCallback(
     (userId: string, role: ChantierMemberRole, firstName?: string, lastName?: string) => {
@@ -354,7 +354,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                       </TouchableOpacity>
                     </View>
 
-                    <Text style={[styles.contactSectionLabel, { color: colors.text2 }]}>CONTACT</Text>
+                    <Text style={[styles.contactSectionLabel, { color: colors.text2 }]}>{t('common.contactSection')}</Text>
                     <TouchableOpacity
                       style={[styles.contactRow, { backgroundColor: colors.itemBackground, borderColor: colors.border }]}
                       onPress={() => Linking.openURL(`mailto:${viewingMember.email}`)}
@@ -363,7 +363,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         <Mail size={IconSize.md} color={colors.primary} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={[styles.contactLabel, { color: colors.text2 }]}>Email</Text>
+                        <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.email')}</Text>
                         <Text style={[styles.contactValue, { color: colors.text }]}>{viewingMember.email}</Text>
                       </View>
                       <TouchableOpacity
@@ -376,7 +376,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         ]}
                         onPress={() => copyToClipboard(viewingMember.email, 'email')}
                         accessibilityRole="button"
-                        accessibilityLabel="Copier l'email"
+                        accessibilityLabel={t('team.copyEmail')}
                       >
                         {copiedField === 'email' ? (
                           <Check size={IconSize.sm} color={colors.green} />
@@ -457,7 +457,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
             <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
               <View style={styles.modalHeader}>
                 <View>
-                  <Text style={[styles.modalTitle, { color: colors.text }]}>Permissions</Text>
+                  <Text style={[styles.modalTitle, { color: colors.text }]}>{t('team.permissions')}</Text>
                   <Text style={[styles.modalSub, { color: colors.mutedText }]}>
                     {editingMember.first_name} {editingMember.last_name}
                   </Text>
@@ -503,7 +503,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 })()}
               </View>
 
-              <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>PERMISSIONS</Text>
+              <Text style={[styles.sectionLabel, { color: colors.text2, marginTop: Spacing.xl }]}>{t('team.permissionsSection')}</Text>
               {PERMISSION_LABELS.map((p) => {
                 const value = !!editingMember[p.key];
                 const desc =
@@ -555,7 +555,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                 </TouchableOpacity>
               </View>
 
-              <Text style={[styles.sectionLabel, { color: colors.text2 }]}>QUOI VOIR ?</Text>
+              <Text style={[styles.sectionLabel, { color: colors.text2 }]}>{t('team.whatToSee')}</Text>
               {PERMISSION_LABELS.filter((p) => p.key !== 'can_edit').map((p) => {
                 const key = p.key as keyof ExternalPerms;
                 const value = !!pendingExternalAdd.perms[key];
