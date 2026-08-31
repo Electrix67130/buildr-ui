@@ -26,6 +26,12 @@ interface Props {
   /** Sous-onglet actif controle par le parent (preserve entre main-tab switches). */
   subTab?: DiscussionSubTab;
   onSubTabChange?: (tab: DiscussionSubTab) => void;
+  /**
+   * Masque le selecteur Etapes / Messages. Depuis que chacun a son propre onglet
+   * de premier niveau, l'afficher ferait doublon : deux commandes cote a cote
+   * pour la meme navigation.
+   */
+  hideToggle?: boolean;
 }
 
 export default function ChantierDiscussions({
@@ -38,6 +44,7 @@ export default function ChantierDiscussions({
   onInputFocus,
   subTab: subTabProp,
   onSubTabChange,
+  hideToggle = false,
 }: Props) {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
@@ -107,7 +114,7 @@ export default function ChantierDiscussions({
     );
   }
 
-  const showToggle = canViewSteps && canViewComments;
+  const showToggle = !hideToggle && canViewSteps && canViewComments;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

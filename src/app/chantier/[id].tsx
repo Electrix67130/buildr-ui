@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Linking, Alert, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, MapPin, Navigation, Archive, ArchiveRestore, Pencil, MessageSquare, Camera, FileText, Users, ChevronDown, ChevronUp, Copy, Check, Trash2, AlertTriangle, Clock, Save } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Navigation, Archive, ArchiveRestore, Pencil, MessageSquare, Camera, FileText, Users, ChevronDown, ChevronUp, Copy, Check, Trash2, AlertTriangle, Clock, Save, ListChecks } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/constants/Layout';
@@ -22,6 +22,10 @@ import { useTranslation } from '@/contexts/I18nContext';
 
 // Les onglets portent une cle de traduction, pas un libelle : le rendu appelle t().
 const TABS = [
+  // Etapes en tete et en premier niveau : c'est le coeur du suivi de chantier.
+  // Il vivait auparavant en sous-onglet de « Discussions », ou personne n'allait
+  // le chercher — une etape n'est pas une conversation.
+  { key: 'steps', labelKey: 'templates.stepsLabel', icon: ListChecks },
   { key: 'comments', labelKey: 'detail.discussions', icon: MessageSquare },
   { key: 'photos', labelKey: 'detail.photos', icon: Camera },
   { key: 'documents', labelKey: 'detail.documents', icon: FileText },
@@ -46,7 +50,7 @@ export default function ChantierDetailScreen() {
   const deleteMutation = chantierHooks.useRemove();
   const [showRetentionModal, setShowRetentionModal] = useState(false);
   const [retentionInput, setRetentionInput] = useState('');
-  const [activeTab, setActiveTab] = useState<TabKey>('comments');
+  const [activeTab, setActiveTab] = useState<TabKey>('steps');
   const [showInfo, setShowInfo] = useState(true);
   const [addressCopied, setAddressCopied] = useState(false);
   // Sous-onglets persistes au-dessus des unmounts des sections.
@@ -101,9 +105,8 @@ export default function ChantierDetailScreen() {
   const visibleTabs = TABS
     .filter((tab) => {
       if (tab.key === 'team') return canViewTeam;
-      // L'onglet "Discussions" contient deux sous-onglets (messages + etapes) : on le cache
-      // uniquement si le user n'a acces ni aux messages ni aux etapes.
-      if (tab.key === 'comments') return canViewComments || canViewSteps;
+      if (tab.key === 'steps') return canViewSteps;
+      if (tab.key === 'comments') return canViewComments;
       if (tab.key === 'photos') return canViewPhotos;
       if (tab.key === 'documents') return canViewDocuments;
       if (tab.key === 'emergencies') return canViewEmergencies;
@@ -114,6 +117,16 @@ export default function ChantierDetailScreen() {
         ? { ...tab, labelKey: 'chantier.claims' as const }
         : tab,
     );
+
+  // L'onglet par defaut est « Etapes », mais tout le monde n'y a pas droit : un
+  // client peut n'avoir acces qu'aux photos. Si l'onglet actif ne fait pas partie
+  // des onglets visibles, on retombe sur le premier disponible plutot que
+  // d'afficher un ecran vide.
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.some((tab) => tab.key === activeTab)) {
+      setActiveTab(visibleTabs[0].key);
+    }
+  }, [visibleTabs, activeTab]);
 
   const openInMaps = async () => {
     if (!chantier?.latitude || !chantier?.longitude) return;
@@ -244,7 +257,7 @@ export default function ChantierDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel={t('a11y.back')}>
           <ArrowLeft size={IconSize.lg} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.topTitle, { color: colors.text }]} numberOfLines={1}>
+        <Text style={[styles.topTitle, { color: colors.text }]} numberOfLines={2}>
           {chantier.name}
         </Text>
         <View style={styles.headerActions}>
@@ -392,17 +405,14 @@ export default function ChantierDetailScreen() {
           // Pour Discussions et Urgences, la pastille du tab principal = somme des
           // sous-onglets. Le marquage "lu" se fait DANS le sous-composant quand on
           // visite le bon sous-onglet (cf. ChantierDiscussions / EmergencyList).
-          const unread = isActive
-            ? 0
-            : tab.key === 'comments'
-              ? (unreadCounts?.comments ?? 0) + (unreadCounts?.comments_steps ?? 0)
-              : tab.key === 'photos'
-                ? unreadCounts?.photos ?? 0
-                : tab.key === 'documents'
-                  ? unreadCounts?.documents ?? 0
-                  : tab.key === 'emergencies'
-                    ? (unreadCounts?.emergencies ?? 0) + (unreadCounts?.emergencies_claim ?? 0)
-                    : 0;
+          const UNREAD_BY_TAB: Record<string, number> = {
+            steps: unreadCounts?.comments_steps ?? 0,
+            comments: unreadCounts?.comments ?? 0,
+            photos: unreadCounts?.photos ?? 0,
+            documents: unreadCounts?.documents ?? 0,
+            emergencies: (unreadCounts?.emergencies ?? 0) + (unreadCounts?.emergencies_claim ?? 0),
+          };
+          const unread = isActive ? 0 : UNREAD_BY_TAB[tab.key] ?? 0;
           return (
             <TouchableOpacity
               key={tab.key}
@@ -437,7 +447,7 @@ export default function ChantierDetailScreen() {
 
       {/* Tab content — takes all remaining space, no parent ScrollView */}
       <View style={styles.tabContent}>
-        {activeTab === 'comments' && (
+        {(activeTab === 'steps' || activeTab === 'comments') && (
           <ChantierDiscussions
             chantierId={id!}
             canManageSteps={canManageSteps}
@@ -446,8 +456,9 @@ export default function ChantierDetailScreen() {
             canViewComments={canViewComments}
             readonly={!!chantier.archived_at}
             onInputFocus={() => setShowInfo(false)}
-            subTab={discussionSubTab}
+            subTab={activeTab === 'steps' ? 'steps' : 'messages'}
             onSubTabChange={setDiscussionSubTab}
+            hideToggle
           />
         )}
         {activeTab === 'photos' && <PhotoGallery chantierId={id!} readonly={!!chantier.archived_at || !canEdit} />}
@@ -548,7 +559,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     gap: Spacing.md,
   },
-  topTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.semibold, flex: 1, textAlign: 'center' },
+  // Deux lignes : la convention de nommage des chantiers (« Lieu — nature des
+  // travaux ») produit des titres qui ne tiennent jamais sur une seule.
+  topTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, flex: 1, textAlign: 'center' },
   headerActions: { flexDirection: 'row', gap: Spacing.md },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

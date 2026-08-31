@@ -47,7 +47,10 @@ const ChantierCard: React.FC<Props> = ({ chantier, onPress, onLongPress, selecti
       accessibilityState={selectionMode ? { selected: !!selected } : undefined}
     >
       <View style={styles.header}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+        {/* Deux lignes : les noms suivent la forme « Lieu — nature des travaux »
+            et se faisaient couper au milieu du lieu, ce qui rendait deux
+            chantiers du meme quartier indistinguables dans la liste. */}
+        <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
           {chantier.name}
         </Text>
         {unread > 0 ? (
