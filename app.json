@@ -30,7 +30,7 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#1C1917"
+        "backgroundColor": "#D97706"
       },
       "permissions": [
         "android.permission.CAMERA",
