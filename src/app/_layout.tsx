@@ -3,7 +3,6 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-import { Asset } from 'expo-asset';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -12,9 +11,6 @@ import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { installGlobalErrorHandler } from '@/api/errorReport';
-
-// Preload logo pendant le splash screen
-Asset.loadAsync(require('@/assets/images/casque-logo.png'));
 
 SplashScreen.preventAutoHideAsync();
 

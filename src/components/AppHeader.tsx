@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { Spacing, FontSize, FontWeight } from '@/constants/Layout';
+import { Spacing } from '@/constants/Layout';
+import BuildrLogo from '@/components/BuildrLogo';
 import { useColorScheme } from '@/hooks/useColorScheme';
-
-const casqueLogo = require('@/assets/images/casque-logo.png');
 
 interface Props {
   children?: React.ReactNode;
@@ -16,7 +15,7 @@ const AppHeader: React.FC<Props> = ({ children }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={casqueLogo} style={styles.logo} resizeMode="contain" />
+      <BuildrLogo size={30} showText={false} />
       {children}
     </View>
   );
@@ -30,20 +29,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xxl,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.sm,
-  },
-  brand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  logo: {
-    width: 32,
-    height: 20,
-  },
-  name: {
-    fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
-    letterSpacing: 1,
   },
 });
 
