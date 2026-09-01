@@ -99,6 +99,11 @@ const ChantierMap: React.FC<Props> = ({ chantiers, onChantierPress }) => {
       <div id="map"></div>
       <script>
         var map = L.map('map').setView([${center.lat}, ${center.lng}], ${center.zoom});
+        // Attribution en bas a gauche : par defaut Leaflet la place en bas a
+        // droite, ou le bouton flottant « + » de la liste la recouvrait. La
+        // licence ODbL d'OpenStreetMap impose qu'elle reste lisible, ce n'est
+        // donc pas un simple reglage esthetique.
+        map.attributionControl.setPosition('bottomleft');
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap'
         }).addTo(map);
