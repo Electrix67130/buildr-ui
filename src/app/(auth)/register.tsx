@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ExternalLink, Building2 } from 'lucide-react-native';
+import { ExternalLink, Mail } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -22,11 +22,27 @@ export default function RegisterScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
+        {/* L'invitation d'abord, la creation d'entreprise ensuite.
+            L'ecran mettait en avant « cree ton entreprise », alors que la
+            plupart des gens qui telechargent l'app sont des ouvriers, chefs de
+            chantier ou prestataires invites par quelqu'un d'autre. Un ouvrier
+            arrivait ici et se voyait proposer de creer une societe. */}
         <View style={[styles.iconBubble, { backgroundColor: colors.primary + '15' }]}>
-          <Building2 size={36} color={colors.primary} />
+          <Mail size={36} color={colors.primary} />
         </View>
 
-        <Text style={[styles.title, { color: colors.text }]}>{t('register.createCompany')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('register.haveInvite')}</Text>
+        <Text style={[styles.body, { color: colors.text2 }]}>
+          {t('register.inviteBody')}
+        </Text>
+
+        <Text style={[styles.hint, { color: colors.mutedText }]}>
+          {t('register.noInvite')}
+        </Text>
+
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        <Text style={[styles.invitationTitle, { color: colors.text }]}>{t('register.companyTitle')}</Text>
         <Text style={[styles.body, { color: colors.text2 }]}>
           {t('register.body')}
         </Text>
@@ -43,13 +59,6 @@ export default function RegisterScreen() {
 
         <Text style={[styles.hint, { color: colors.mutedText }]}>
           {t('register.hint')}
-        </Text>
-
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-        <Text style={[styles.invitationTitle, { color: colors.text }]}>{t('register.haveInvite')}</Text>
-        <Text style={[styles.body, { color: colors.text2 }]}>
-          {t('register.inviteBody')}
         </Text>
 
         <Link href="/(auth)/login" asChild>

@@ -382,7 +382,9 @@ export type TranslationKeys =
   | 'invite.companySetByHost'
   | 'profile.versionUpdatedOn'
   | 'profile.pushTitle'
-  | 'discussions.messages';
+  | 'discussions.messages'
+  | 'register.noInvite'
+  | 'register.companyTitle';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -892,6 +894,8 @@ const fr: Dictionary = {
   "profile.versionUpdatedOn": "mise à jour du {date}",
   "profile.pushTitle": "Notifications push",
   "discussions.messages": "Messages",
+  "register.noInvite": "Pas d'invitation ? Demande à l'administrateur de ton entreprise de t'inviter avec ton adresse e-mail. On ne peut pas créer de compte soi-même depuis l'app.",
+  "register.companyTitle": "Tu diriges une entreprise ?",
 };
 
 const en: Dictionary = {
@@ -1400,6 +1404,8 @@ const en: Dictionary = {
   "profile.versionUpdatedOn": "updated on {date}",
   "profile.pushTitle": "Push notifications",
   "discussions.messages": "Messages",
+  "register.noInvite": "No invitation? Ask your company administrator to invite you with your email address. You cannot create an account yourself from the app.",
+  "register.companyTitle": "Do you run a company?",
 };
 
 const de: Dictionary = {
@@ -1908,6 +1914,8 @@ const de: Dictionary = {
   "profile.versionUpdatedOn": "aktualisiert am {date}",
   "profile.pushTitle": "Push-Mitteilungen",
   "discussions.messages": "Nachrichten",
+  "register.noInvite": "Keine Einladung? Bitten Sie den Administrator Ihres Unternehmens, Sie mit Ihrer E-Mail-Adresse einzuladen. Ein Konto lässt sich nicht selbst in der App erstellen.",
+  "register.companyTitle": "Leiten Sie ein Unternehmen?",
 };
 
 const es: Dictionary = {
@@ -2416,6 +2424,8 @@ const es: Dictionary = {
   "profile.versionUpdatedOn": "actualizada el {date}",
   "profile.pushTitle": "Notificaciones push",
   "discussions.messages": "Mensajes",
+  "register.noInvite": "¿Sin invitación? Pide al administrador de tu empresa que te invite con tu dirección de email. No se puede crear una cuenta desde la app.",
+  "register.companyTitle": "¿Diriges una empresa?",
 };
 
 const it: Dictionary = {
@@ -2924,6 +2934,8 @@ const it: Dictionary = {
   "profile.versionUpdatedOn": "aggiornata il {date}",
   "profile.pushTitle": "Notifiche push",
   "discussions.messages": "Messaggi",
+  "register.noInvite": "Nessun invito? Chiedi all'amministratore della tua azienda di invitarti con il tuo indirizzo email. Non è possibile creare un account dall'app.",
+  "register.companyTitle": "Dirigi un'azienda?",
 };
 
 const pt: Dictionary = {
@@ -3432,6 +3444,8 @@ const pt: Dictionary = {
   "profile.versionUpdatedOn": "atualizada a {date}",
   "profile.pushTitle": "Notificações push",
   "discussions.messages": "Mensagens",
+  "register.noInvite": "Sem convite? Peça ao administrador da sua empresa que o convide com o seu endereço de email. Não é possível criar uma conta a partir da aplicação.",
+  "register.companyTitle": "Dirige uma empresa?",
 };
 
 const tr: Dictionary = {
@@ -3940,6 +3954,8 @@ const tr: Dictionary = {
   "profile.versionUpdatedOn": "{date} tarihinde güncellendi",
   "profile.pushTitle": "Anlık bildirimler",
   "discussions.messages": "Mesajlar",
+  "register.noInvite": "Davetiniz yok mu? Şirketinizin yöneticisinden sizi e-posta adresinizle davet etmesini isteyin. Uygulamadan kendi başınıza hesap oluşturamazsınız.",
+  "register.companyTitle": "Bir şirket mi yönetiyorsunuz?",
 };
 
 const pl: Dictionary = {
@@ -4448,6 +4464,8 @@ const pl: Dictionary = {
   "profile.versionUpdatedOn": "zaktualizowano {date}",
   "profile.pushTitle": "Powiadomienia push",
   "discussions.messages": "Wiadomości",
+  "register.noInvite": "Brak zaproszenia? Poproś administratora swojej firmy o zaproszenie na Twój adres e-mail. Konta nie można założyć samodzielnie w aplikacji.",
+  "register.companyTitle": "Prowadzisz firmę?",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };
