@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { Radius, Spacing, FontSize } from '@/constants/Layout';
+import { Radius, Spacing, FontSize, FontWeight } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
 import { LOCALES } from '@/i18n/translations';
@@ -14,9 +14,13 @@ import { LOCALES } from '@/i18n/translations';
  * d'avoir reussi a se connecter, ce qui est precisement le moment ou il en a
  * besoin.
  *
- * Ne montre que les drapeaux : huit libelles ne tiendraient pas sur une ligne,
- * et le drapeau seul se reconnait sans savoir lire la langue courante. Le nom
- * complet reste accessible aux lecteurs d'ecran.
+ * Affiche les codes de langue (FR, EN, DE...) et non des drapeaux. Un drapeau
+ * designe un pays, pas une langue — le drapeau britannique ignore les
+ * anglophones non britanniques, et le portugais du Portugal n'est pas celui du
+ * Bresil. Les drapeaux ne s'affichent d'ailleurs pas dans le simulateur iOS,
+ * qui n'embarque pas leurs glyphes : on ne pouvait pas verifier le rendu.
+ *
+ * Le nom complet de la langue reste expose aux lecteurs d'ecran.
  */
 export default function LanguageSwitch() {
   const colorScheme = useColorScheme();
@@ -42,7 +46,11 @@ export default function LanguageSwitch() {
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={loc.label}
           >
-            <Text style={styles.flag}>{loc.flag}</Text>
+            <Text
+              style={[styles.code, { color: isActive ? colors.primary : colors.text2 }]}
+            >
+              {loc.code.toUpperCase()}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -53,10 +61,10 @@ export default function LanguageSwitch() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: Spacing.xs },
   chip: {
-    paddingHorizontal: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: Radius.md,
     borderWidth: 1,
   },
-  flag: { fontSize: FontSize.lg },
+  code: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, letterSpacing: 0.5 },
 });

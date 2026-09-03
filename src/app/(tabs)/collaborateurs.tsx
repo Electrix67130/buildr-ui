@@ -794,7 +794,9 @@ export default function CollaborateursScreen() {
                     accessibilityState={{ selected: isActive }}
                     accessibilityLabel={loc.label}
                   >
-                    <Text style={styles.langChipFlag}>{loc.flag}</Text>
+                    <Text style={[styles.langChipCode, { color: isActive ? colors.primary : colors.text2 }]}>
+                      {loc.code.toUpperCase()}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -843,7 +845,7 @@ export default function CollaborateursScreen() {
 const styles = StyleSheet.create({
   langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginBottom: Spacing.xs },
   langChip: { paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.md, borderWidth: 1 },
-  langChipFlag: { fontSize: FontSize.lg },
+  langChipCode: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, letterSpacing: 0.5 },
   hint: { fontSize: FontSize.sm, marginBottom: Spacing.sm },
   container: { flex: 1 },
   header: {

@@ -612,7 +612,9 @@ export default function ProfilScreen() {
                         accessibilityState={{ selected: isActive }}
                         accessibilityLabel={loc.label}
                       >
-                        <Text style={styles.langFlag}>{loc.flag}</Text>
+                        <Text style={[styles.langCode, { color: isActive ? colors.primary : colors.mutedText }]}>
+                          {loc.code.toUpperCase()}
+                        </Text>
                         <Text style={[styles.langLabel, { color: isActive ? colors.primary : colors.text2 }]}>
                           {loc.label}
                         </Text>
@@ -949,7 +951,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minWidth: 130,
   },
-  langFlag: { fontSize: 20 },
+  langCode: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, letterSpacing: 0.5, minWidth: 26 },
   langLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
 
   logoutBtn: {
