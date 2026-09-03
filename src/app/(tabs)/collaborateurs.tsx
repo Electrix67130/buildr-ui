@@ -41,6 +41,7 @@ function roleLabelKey(role: string): TranslationKeys {
 import SearchBar from '@/components/SearchBar';
 import AppHeader from '@/components/AppHeader';
 import type { MeResponse } from '@/api/types';
+import { LOCALES, Locale } from '@/i18n/translations';
 
 // --------------- Team Modal (admin manages a manager's team) ---------------
 
@@ -332,6 +333,9 @@ export default function CollaborateursScreen() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'employee' | 'client' | 'gestionnaire_reseau'>('employee');
+  // Pre-remplie avec la langue de celui qui invite : cas le plus frequent.
+  // C'est lui qui tranche, pas une detection — on ne connait pas encore l'invite.
+  const [inviteLocale, setInviteLocale] = useState<Locale>(locale);
   const [selectedUser, setSelectedUser] = useState<MeResponse | null>(null);
   const [copiedField, setCopiedField] = useState<'email' | 'phone' | null>(null);
   const animatedInviteModalStyle = useKeyboardAwareModalStyle({ visible: showInviteModal });
@@ -372,10 +376,10 @@ export default function CollaborateursScreen() {
 
   const handleInvite = useCallback(async () => {
     if (!inviteEmail.trim()) return;
-    await createInvite.mutateAsync({ email: inviteEmail.trim(), role: inviteRole });
+    await createInvite.mutateAsync({ email: inviteEmail.trim(), role: inviteRole, locale: inviteLocale });
     setInviteEmail('');
     setShowInviteModal(false);
-  }, [inviteEmail, inviteRole, createInvite]);
+  }, [inviteEmail, inviteRole, inviteLocale, createInvite]);
 
   const handleCancelInvite = useCallback(
     (id: string, email: string) => {
@@ -771,6 +775,32 @@ export default function CollaborateursScreen() {
               accessibilityLabel={t('collab.emailLabel')}
             />
 
+            <Text style={[styles.label, { color: colors.text }]}>{t('collab.inviteLanguage')}</Text>
+            <View style={styles.langRow}>
+              {LOCALES.map((loc) => {
+                const isActive = inviteLocale === loc.code;
+                return (
+                  <TouchableOpacity
+                    key={loc.code}
+                    onPress={() => setInviteLocale(loc.code)}
+                    style={[
+                      styles.langChip,
+                      {
+                        backgroundColor: isActive ? colors.primary + '20' : colors.itemBackground,
+                        borderColor: isActive ? colors.primary : colors.border,
+                      },
+                    ]}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isActive }}
+                    accessibilityLabel={loc.label}
+                  >
+                    <Text style={styles.langChipFlag}>{loc.flag}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={[styles.hint, { color: colors.mutedText }]}>{t('collab.inviteLanguageHint')}</Text>
+
             <Text style={[styles.label, { color: colors.text }]}>{t('collab.role')}</Text>
             <View style={styles.roleRow}>
               {(['employee', 'client', 'gestionnaire_reseau'] as const).map((role) => (
@@ -811,6 +841,10 @@ export default function CollaborateursScreen() {
 }
 
 const styles = StyleSheet.create({
+  langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginBottom: Spacing.xs },
+  langChip: { paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.md, borderWidth: 1 },
+  langChipFlag: { fontSize: FontSize.lg },
+  hint: { fontSize: FontSize.sm, marginBottom: Spacing.sm },
   container: { flex: 1 },
   header: {
     flexDirection: 'row',

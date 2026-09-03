@@ -384,7 +384,9 @@ export type TranslationKeys =
   | 'profile.pushTitle'
   | 'discussions.messages'
   | 'register.noInvite'
-  | 'register.companyTitle';
+  | 'register.companyTitle'
+  | 'collab.inviteLanguage'
+  | 'collab.inviteLanguageHint';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -896,6 +898,8 @@ const fr: Dictionary = {
   "discussions.messages": "Messages",
   "register.noInvite": "Pas d\'invitation ? Demandez à l\'administrateur de votre entreprise de vous inviter avec votre adresse e-mail. Vous ne pouvez pas créer de compte vous-même depuis l\'app.",
   "register.companyTitle": "Vous dirigez une entreprise ?",
+  "collab.inviteLanguage": "Langue du mail",
+  "collab.inviteLanguageHint": "Langue dans laquelle la personne recevra son invitation.",
 };
 
 const en: Dictionary = {
@@ -1406,6 +1410,8 @@ const en: Dictionary = {
   "discussions.messages": "Messages",
   "register.noInvite": "No invitation? Ask your company administrator to invite you with your email address. You cannot create an account yourself from the app.",
   "register.companyTitle": "Do you run a company?",
+  "collab.inviteLanguage": "Email language",
+  "collab.inviteLanguageHint": "Language in which the person will receive their invitation.",
 };
 
 const de: Dictionary = {
@@ -1916,6 +1922,8 @@ const de: Dictionary = {
   "discussions.messages": "Nachrichten",
   "register.noInvite": "Keine Einladung? Bitten Sie den Administrator Ihres Unternehmens, Sie mit Ihrer E-Mail-Adresse einzuladen. Ein Konto lässt sich nicht selbst in der App erstellen.",
   "register.companyTitle": "Leiten Sie ein Unternehmen?",
+  "collab.inviteLanguage": "Sprache der E-Mail",
+  "collab.inviteLanguageHint": "Sprache, in der die Person ihre Einladung erhält.",
 };
 
 const es: Dictionary = {
@@ -2426,6 +2434,8 @@ const es: Dictionary = {
   "discussions.messages": "Mensajes",
   "register.noInvite": "¿Sin invitación? Pide al administrador de tu empresa que te invite con tu dirección de email. No se puede crear una cuenta desde la app.",
   "register.companyTitle": "¿Diriges una empresa?",
+  "collab.inviteLanguage": "Idioma del email",
+  "collab.inviteLanguageHint": "Idioma en el que la persona recibirá su invitación.",
 };
 
 const it: Dictionary = {
@@ -2936,6 +2946,8 @@ const it: Dictionary = {
   "discussions.messages": "Messaggi",
   "register.noInvite": "Nessun invito? Chiedi all'amministratore della tua azienda di invitarti con il tuo indirizzo email. Non è possibile creare un account dall'app.",
   "register.companyTitle": "Dirigi un'azienda?",
+  "collab.inviteLanguage": "Lingua dell'email",
+  "collab.inviteLanguageHint": "Lingua in cui la persona riceverà il suo invito.",
 };
 
 const pt: Dictionary = {
@@ -3446,6 +3458,8 @@ const pt: Dictionary = {
   "discussions.messages": "Mensagens",
   "register.noInvite": "Sem convite? Peça ao administrador da sua empresa que o convide com o seu endereço de email. Não é possível criar uma conta a partir da aplicação.",
   "register.companyTitle": "Dirige uma empresa?",
+  "collab.inviteLanguage": "Idioma do email",
+  "collab.inviteLanguageHint": "Idioma no qual a pessoa receberá o convite.",
 };
 
 const tr: Dictionary = {
@@ -3956,6 +3970,8 @@ const tr: Dictionary = {
   "discussions.messages": "Mesajlar",
   "register.noInvite": "Davetiniz yok mu? Şirketinizin yöneticisinden sizi e-posta adresinizle davet etmesini isteyin. Uygulamadan kendi başınıza hesap oluşturamazsınız.",
   "register.companyTitle": "Bir şirket mi yönetiyorsunuz?",
+  "collab.inviteLanguage": "E-posta dili",
+  "collab.inviteLanguageHint": "Kişinin davetini alacağı dil.",
 };
 
 const pl: Dictionary = {
@@ -4466,6 +4482,8 @@ const pl: Dictionary = {
   "discussions.messages": "Wiadomości",
   "register.noInvite": "Brak zaproszenia? Poproś administratora swojej firmy o zaproszenie na Twój adres e-mail. Konta nie można założyć samodzielnie w aplikacji.",
   "register.companyTitle": "Prowadzisz firmę?",
+  "collab.inviteLanguage": "Język e-maila",
+  "collab.inviteLanguageHint": "Język, w którym osoba otrzyma zaproszenie.",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };

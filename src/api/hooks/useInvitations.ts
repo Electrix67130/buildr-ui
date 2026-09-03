@@ -23,7 +23,7 @@ export function useInvitations() {
 export function useCreateInvitation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { email: string; role?: string }) =>
+    mutationFn: (body: { email: string; role?: string; locale?: string }) =>
       apiFetch<Invitation>('/invitations', { method: 'POST', body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
