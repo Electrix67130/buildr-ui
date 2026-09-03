@@ -19,6 +19,7 @@ import { Spacing, Radius, FontSize, FontWeight } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import BuildrLogo from '@/components/BuildrLogo';
 import { useTranslation } from '@/contexts/I18nContext';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -119,6 +120,12 @@ export default function LoginScreen() {
             </Link>
           </View>
         </ScrollView>
+        {/* Sous le formulaire : quelqu'un qui ne parle pas francais doit pouvoir
+            changer de langue avant de se connecter, pas apres. Hors du
+            ScrollView pour rester visible quand le clavier remonte le contenu. */}
+        <View style={styles.langBar}>
+          <LanguageSwitch />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -126,6 +133,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  langBar: { paddingBottom: Spacing.lg, paddingTop: Spacing.sm },
   flex: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: Spacing.xxl },
   header: { alignItems: 'center', marginBottom: Spacing.xxxl },

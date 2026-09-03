@@ -38,14 +38,43 @@ export function translate(key: TranslationKeys, vars?: Record<string, string | n
   return interpolate(raw, vars);
 }
 
+/**
+ * Langue de l'appareil, si Buildr la parle. Lue via Intl plutot qu'en ajoutant
+ * expo-localization : Hermes expose deja la locale systeme, et l'app s'en sert
+ * pour les noms de mois. Enveloppe dans un try : sur une version d'Intl reduite,
+ * resolvedOptions peut echouer, et l'absence de detection ne doit pas empecher
+ * l'app de demarrer.
+ */
+function detectDeviceLocale(): Locale | null {
+  try {
+    const tag = Intl.DateTimeFormat().resolvedOptions().locale;
+    const code = tag?.split('-')[0];
+    return VALID.includes(code as Locale) ? (code as Locale) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('fr');
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
+      // La preference enregistree prime toujours : un utilisateur qui a choisi
+      // sa langue ne doit pas la voir changer parce qu'il a modifie celle du
+      // telephone.
       if (stored && VALID.includes(stored as Locale)) {
         currentLocale = stored as Locale;
         setLocaleState(stored as Locale);
+        return;
+      }
+      // Premier lancement : on suit la langue de l'appareil. Sans ca, l'app
+      // s'ouvrait en francais pour tout le monde, et les huit traductions ne
+      // servaient qu'a ceux qui pensaient a chercher le selecteur.
+      const device = detectDeviceLocale();
+      if (device) {
+        currentLocale = device;
+        setLocaleState(device);
       }
     });
   }, []);
