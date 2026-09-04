@@ -1,70 +1,110 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable, ScrollView } from 'react-native';
+import { Globe, Check, ChevronDown } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
-import { Radius, Spacing, FontSize, FontWeight } from '@/constants/Layout';
+import { Radius, Spacing, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
 import { LOCALES } from '@/i18n/translations';
 
 /**
- * Selecteur de langue compact, pour les ecrans accessibles avant connexion.
+ * Selecteur de langue pour les ecrans accessibles avant connexion.
  *
  * Le selecteur complet vit dans le Profil, donc derriere l'authentification :
  * quelqu'un qui ne parle pas francais ne pouvait pas changer de langue avant
- * d'avoir reussi a se connecter, ce qui est precisement le moment ou il en a
- * besoin.
+ * d'avoir reussi a se connecter, ce qui est le moment ou il en a besoin.
  *
- * Affiche les codes de langue (FR, EN, DE...) et non des drapeaux. Un drapeau
- * designe un pays, pas une langue — le drapeau britannique ignore les
- * anglophones non britanniques, et le portugais du Portugal n'est pas celui du
- * Bresil. Les drapeaux ne s'affichent d'ailleurs pas dans le simulateur iOS,
- * qui n'embarque pas leurs glyphes : on ne pouvait pas verifier le rendu.
- *
- * Le nom complet de la langue reste expose aux lecteurs d'ecran.
+ * Un bouton qui ouvre une liste, plutot qu'une rangee de puces : c'est le
+ * comportement d'un menu deroulant, celui du dashboard, et il affiche le nom
+ * complet de la langue. Le drapeau l'accompagne sans le remplacer — un drapeau
+ * designe un pays et non une langue, et le simulateur iOS n'en affiche meme pas
+ * les glyphes. Si le drapeau manque, le nom suffit.
  */
 export default function LanguageSwitch() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { locale, setLocale } = useTranslation();
+  const { locale, setLocale, t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  const current = LOCALES.find((l) => l.code === locale) ?? LOCALES[0];
 
   return (
-    <View style={styles.row}>
-      {LOCALES.map((loc) => {
-        const isActive = locale === loc.code;
-        return (
-          <TouchableOpacity
-            key={loc.code}
-            onPress={() => setLocale(loc.code)}
-            style={[
-              styles.chip,
-              {
-                backgroundColor: isActive ? colors.primary + '20' : 'transparent',
-                borderColor: isActive ? colors.primary : 'transparent',
-              },
-            ]}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: isActive }}
-            accessibilityLabel={loc.label}
-          >
-            <Text
-              style={[styles.code, { color: isActive ? colors.primary : colors.text2 }]}
-            >
-              {loc.code.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+    <>
+      <TouchableOpacity
+        onPress={() => setOpen(true)}
+        style={[styles.trigger, { borderColor: colors.border, backgroundColor: colors.itemBackground }]}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('profile.language')} : ${current.label}`}
+      >
+        <Globe size={IconSize.sm} color={colors.mutedText} />
+        <Text style={[styles.triggerText, { color: colors.text2 }]}>
+          {current.flag} {current.label}
+        </Text>
+        <ChevronDown size={IconSize.sm} color={colors.mutedText} />
+      </TouchableOpacity>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
+          {/* Pressable interne : un appui sur la liste ne doit pas la refermer. */}
+          <Pressable style={[styles.sheet, { backgroundColor: colors.surface }, Shadow.lg]}>
+            <Text style={[styles.sheetTitle, { color: colors.text }]}>{t('profile.language')}</Text>
+            <ScrollView>
+              {LOCALES.map((loc) => {
+                const isActive = loc.code === locale;
+                return (
+                  <TouchableOpacity
+                    key={loc.code}
+                    style={[styles.option, { borderBottomColor: colors.border }]}
+                    onPress={() => {
+                      setLocale(loc.code);
+                      setOpen(false);
+                    }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isActive }}
+                    accessibilityLabel={loc.label}
+                  >
+                    <Text style={[styles.optionText, { color: isActive ? colors.primary : colors.text }]}>
+                      {loc.flag} {loc.label}
+                    </Text>
+                    {isActive ? <Check size={IconSize.sm} color={colors.primary} /> : null}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: Spacing.xs },
-  chip: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: Radius.md,
+  trigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.lg,
     borderWidth: 1,
   },
-  code: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, letterSpacing: 0.5 },
+  triggerText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: Spacing.xl },
+  sheet: { borderRadius: Radius.xl, paddingVertical: Spacing.sm, maxHeight: '70%' },
+  sheetTitle: {
+    fontSize: FontSize.base,
+    fontWeight: FontWeight.semibold,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  optionText: { fontSize: FontSize.base },
 });
