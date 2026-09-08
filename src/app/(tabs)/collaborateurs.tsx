@@ -294,7 +294,7 @@ export default function CollaborateursScreen() {
   const isAdmin = currentUser?.role === 'admin';
 
   const { data: usersData, isLoading: usersLoading, refetch: refetchUsers, isRefetching: usersRefetching } = useAllUsers();
-  const { data: invitationsData } = useInvitations();
+  const { data: invitationsData } = useInvitations(isAdmin || currentUser?.role === 'manager');
   const createInvite = useCreateInvitation();
   const cancelInvite = useCancelInvitation();
   const updateProfile = useUpdateProfile();

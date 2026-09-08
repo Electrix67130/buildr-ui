@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { pushTokensApi } from '@/api/services';
 
 // Token courant pour ce device — partage entre le hook (qui le set au register)
@@ -84,6 +84,23 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
 interface PushNotificationData {
   type?: string;
   chantier_id?: string;
+  feedback_id?: string;
+}
+
+/**
+ * Destination d'un tap sur une notification.
+ *
+ * Une seule fonction pour les deux points d'entree — le tap a chaud et le
+ * demarrage a froid — sinon un nouveau type de notification se retrouve traite
+ * dans l'un et pas dans l'autre.
+ */
+function destination(data: PushNotificationData | undefined): Href | null {
+  if (!data) return null;
+  // Reponse du support a un signalement : l'ecran liste tous les siens, avec
+  // les reponses recues.
+  if (data.type === 'feedback') return '/support';
+  if (data.chantier_id) return `/chantier/${data.chantier_id}`;
+  return null;
 }
 
 /**
@@ -127,10 +144,8 @@ export function usePushNotifications(enabled: boolean): void {
 
     // Navigation au tap d'une notif (foreground OU background).
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as PushNotificationData;
-      if (data?.chantier_id) {
-        router.push(`/chantier/${data.chantier_id}`);
-      }
+      const cible = destination(response.notification.request.content.data as PushNotificationData);
+      if (cible) router.push(cible);
     });
 
     // Si l'app a ete cold-started par un tap, on traite la reponse initiale une fois.
@@ -139,10 +154,8 @@ export function usePushNotifications(enabled: boolean): void {
       respondedRef.current = true;
       const last = await Notifications.getLastNotificationResponseAsync();
       if (last) {
-        const data = last.notification.request.content.data as PushNotificationData;
-        if (data?.chantier_id) {
-          router.push(`/chantier/${data.chantier_id}`);
-        }
+        const cible = destination(last.notification.request.content.data as PushNotificationData);
+        if (cible) router.push(cible);
       }
     })();
 

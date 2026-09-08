@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'react-native';
-import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle } from 'lucide-react-native';
+import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle, LifeBuoy } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DASHBOARD_CREATE_ORG_URL } from '@/constants/Urls';
@@ -54,6 +54,21 @@ export default function ProfilScreen() {
   const { locale, setLocale, t } = useTranslation();
   const queryClient = useQueryClient();
   const updateProfile = useUpdateProfile();
+
+  /**
+   * Choix de la langue.
+   *
+   * Enregistree sur l'appareil pour l'interface, et sur le compte pour les
+   * e-mails et les notifications — sans quoi le produit continuerait de repondre
+   * en francais a quelqu'un qui l'utilise dans une autre langue. Un echec
+   * d'enregistrement ne doit pas empecher l'interface de changer : c'est le
+   * geste attendu, le reste en est la consequence.
+   */
+  const choisirLangue = (code: Locale) => {
+    setLocale(code);
+    if (!user?.id) return;
+    updateProfile.mutate({ id: user.id, body: { locale: code } });
+  };
   const isAdmin = user?.role === 'admin';
   const orgQuery = useOrganization(isAdmin);
   const updateOrg = useUpdateOrganization();
@@ -471,6 +486,24 @@ export default function ProfilScreen() {
                 </TouchableOpacity>
               </View>
 
+              {/* Aide et signalements — ouvert a tous les roles : c'est souvent
+                  l'ouvrier sur le chantier qui rencontre le bug, pas
+                  l'administrateur au bureau. */}
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('support.section')}</Text>
+              <TouchableOpacity
+                style={[styles.settingsCard, styles.legalRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => router.push('/support')}
+                accessibilityRole="button"
+                accessibilityLabel={t('support.title')}
+              >
+                <LifeBuoy size={IconSize.md} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.legalRowTitle, { color: colors.text }]}>{t('support.title')}</Text>
+                  <Text style={[styles.hint, { color: colors.mutedText }]}>{t('support.entryHint')}</Text>
+                </View>
+                <ChevronRight size={IconSize.sm} color={colors.mutedText} />
+              </TouchableOpacity>
+
               {/* Calendars */}
               <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.calendarsSection')}</Text>
               <CalendarIntegrations />
@@ -607,7 +640,7 @@ export default function ProfilScreen() {
                             borderColor: isActive ? colors.primary : colors.border,
                           },
                         ]}
-                        onPress={() => setLocale(loc.code)}
+                        onPress={() => choisirLangue(loc.code)}
                         accessibilityRole="radio"
                         accessibilityState={{ selected: isActive }}
                         accessibilityLabel={loc.label}

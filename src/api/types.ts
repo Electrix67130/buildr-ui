@@ -50,6 +50,12 @@ export interface RegisterInput {
   company_name?: string;
   invitation_token?: string;
   organization?: RegisterOrgInput;
+  /**
+   * Langue de l'interface au moment de l'inscription. Elle devient celle des
+   * e-mails et des notifications du compte. Ignoree si une invitation est
+   * fournie : la langue choisie par l'employeur prime.
+   */
+  locale?: string;
 }
 
 export interface AuthResponse {
@@ -78,6 +84,8 @@ export interface MeResponse {
   company_name?: string;
   is_active: boolean;
   push_enabled: boolean;
+  /** Langue des e-mails et des notifications envoyes a ce compte. */
+  locale?: string;
   created_at: string;
   updated_at: string;
   /** Id de l'organisation active (l'org dans laquelle l'utilisateur est en train de travailler). */

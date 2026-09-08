@@ -386,7 +386,32 @@ export type TranslationKeys =
   | 'register.noInvite'
   | 'register.companyTitle'
   | 'collab.inviteLanguage'
-  | 'collab.inviteLanguageHint';
+  | 'collab.inviteLanguageHint'
+  // Signalements (bugs et suggestions)
+  | 'support.section'
+  | 'support.entryHint'
+  | 'support.title'
+  | 'support.subtitle'
+  | 'support.typeBug'
+  | 'support.typeSuggestion'
+  | 'support.subject'
+  | 'support.subjectPlaceholderBug'
+  | 'support.subjectPlaceholderIdea'
+  | 'support.message'
+  | 'support.messagePlaceholderBug'
+  | 'support.messagePlaceholderIdea'
+  | 'support.messageHint'
+  | 'support.send'
+  | 'support.sent'
+  | 'support.mine'
+  | 'support.answered'
+  | 'support.responseFrom'
+  | 'support.awaitingResponse'
+  | 'support.emptyDescription'
+  | 'support.status.new'
+  | 'support.status.in_progress'
+  | 'support.status.resolved'
+  | 'support.status.declined';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -900,6 +925,31 @@ const fr: Dictionary = {
   "register.companyTitle": "Vous dirigez une entreprise ?",
   "collab.inviteLanguage": "Langue du mail",
   "collab.inviteLanguageHint": "Langue dans laquelle la personne recevra son invitation.",
+  // Signalements
+  "support.section": "Aide",
+  "support.entryHint": "Signaler un bug ou proposer une amélioration.",
+  "support.title": "Aide et signalements",
+  "support.subtitle": "Signalez un bug ou proposez une amélioration. Chaque message est lu par l'équipe Buildr.",
+  "support.typeBug": "Bug",
+  "support.typeSuggestion": "Suggestion",
+  "support.subject": "Objet",
+  "support.subjectPlaceholderBug": "Ex. : les photos n'apparaissent pas dans la galerie",
+  "support.subjectPlaceholderIdea": "Ex. : pouvoir dupliquer un modèle de chantier",
+  "support.message": "Message",
+  "support.messagePlaceholderBug": "Décrivez ce que vous faisiez, ce que vous attendiez et ce qui s'est passé.",
+  "support.messagePlaceholderIdea": "Décrivez l'amélioration souhaitée et ce qu'elle vous ferait gagner.",
+  "support.messageHint": "Plus le message est précis, plus la correction sera rapide.",
+  "support.send": "Envoyer",
+  "support.sent": "Message envoyé. Merci !",
+  "support.mine": "Mes signalements",
+  "support.answered": "Réponse reçue",
+  "support.responseFrom": "Réponse de l'équipe Buildr",
+  "support.awaitingResponse": "En attente d'une réponse de l'équipe.",
+  "support.emptyDescription": "Vos bugs et suggestions apparaîtront ici, avec les réponses de l'équipe.",
+  "support.status.new": "Nouveau",
+  "support.status.in_progress": "En cours",
+  "support.status.resolved": "Traité",
+  "support.status.declined": "Écarté",
 };
 
 const en: Dictionary = {
@@ -1412,6 +1462,31 @@ const en: Dictionary = {
   "register.companyTitle": "Do you run a company?",
   "collab.inviteLanguage": "Email language",
   "collab.inviteLanguageHint": "Language in which the person will receive their invitation.",
+  // Signalements
+  "support.section": "Help",
+  "support.entryHint": "Report a bug or suggest an improvement.",
+  "support.title": "Help and reports",
+  "support.subtitle": "Report a bug or suggest an improvement. Every message is read by the Buildr team.",
+  "support.typeBug": "Bug",
+  "support.typeSuggestion": "Suggestion",
+  "support.subject": "Subject",
+  "support.subjectPlaceholderBug": "E.g. photos do not show up in the gallery",
+  "support.subjectPlaceholderIdea": "E.g. let me duplicate a site template",
+  "support.message": "Message",
+  "support.messagePlaceholderBug": "Describe what you were doing, what you expected and what happened instead.",
+  "support.messagePlaceholderIdea": "Describe the improvement you would like and what it would save you.",
+  "support.messageHint": "The more precise your message, the faster the fix.",
+  "support.send": "Send",
+  "support.sent": "Message sent. Thank you!",
+  "support.mine": "My reports",
+  "support.answered": "Answered",
+  "support.responseFrom": "Reply from the Buildr team",
+  "support.awaitingResponse": "Waiting for a reply from the team.",
+  "support.emptyDescription": "Your bugs and suggestions will appear here, along with the team's replies.",
+  "support.status.new": "New",
+  "support.status.in_progress": "In progress",
+  "support.status.resolved": "Resolved",
+  "support.status.declined": "Declined",
 };
 
 const de: Dictionary = {
@@ -1924,6 +1999,31 @@ const de: Dictionary = {
   "register.companyTitle": "Leiten Sie ein Unternehmen?",
   "collab.inviteLanguage": "Sprache der E-Mail",
   "collab.inviteLanguageHint": "Sprache, in der die Person ihre Einladung erhält.",
+  // Signalements
+  "support.section": "Hilfe",
+  "support.entryHint": "Einen Fehler melden oder eine Verbesserung vorschlagen.",
+  "support.title": "Hilfe und Meldungen",
+  "support.subtitle": "Melden Sie einen Fehler oder schlagen Sie eine Verbesserung vor. Jede Nachricht wird vom Buildr-Team gelesen.",
+  "support.typeBug": "Fehler",
+  "support.typeSuggestion": "Vorschlag",
+  "support.subject": "Betreff",
+  "support.subjectPlaceholderBug": "Z. B.: Fotos erscheinen nicht in der Galerie",
+  "support.subjectPlaceholderIdea": "Z. B.: eine Baustellenvorlage duplizieren können",
+  "support.message": "Nachricht",
+  "support.messagePlaceholderBug": "Beschreiben Sie, was Sie getan haben, was Sie erwartet haben und was stattdessen geschah.",
+  "support.messagePlaceholderIdea": "Beschreiben Sie die gewünschte Verbesserung und was sie Ihnen ersparen würde.",
+  "support.messageHint": "Je genauer die Nachricht, desto schneller die Behebung.",
+  "support.send": "Senden",
+  "support.sent": "Nachricht gesendet. Vielen Dank!",
+  "support.mine": "Meine Meldungen",
+  "support.answered": "Beantwortet",
+  "support.responseFrom": "Antwort des Buildr-Teams",
+  "support.awaitingResponse": "Wartet auf eine Antwort des Teams.",
+  "support.emptyDescription": "Ihre Fehler und Vorschläge erscheinen hier, samt den Antworten des Teams.",
+  "support.status.new": "Neu",
+  "support.status.in_progress": "In Bearbeitung",
+  "support.status.resolved": "Erledigt",
+  "support.status.declined": "Abgelehnt",
 };
 
 const es: Dictionary = {
@@ -2436,6 +2536,31 @@ const es: Dictionary = {
   "register.companyTitle": "¿Diriges una empresa?",
   "collab.inviteLanguage": "Idioma del email",
   "collab.inviteLanguageHint": "Idioma en el que la persona recibirá su invitación.",
+  // Signalements
+  "support.section": "Ayuda",
+  "support.entryHint": "Informar de un error o proponer una mejora.",
+  "support.title": "Ayuda e incidencias",
+  "support.subtitle": "Informe de un error o proponga una mejora. El equipo de Buildr lee todos los mensajes.",
+  "support.typeBug": "Error",
+  "support.typeSuggestion": "Sugerencia",
+  "support.subject": "Asunto",
+  "support.subjectPlaceholderBug": "Ej.: las fotos no aparecen en la galería",
+  "support.subjectPlaceholderIdea": "Ej.: poder duplicar una plantilla de obra",
+  "support.message": "Mensaje",
+  "support.messagePlaceholderBug": "Describa qué estaba haciendo, qué esperaba y qué ocurrió en su lugar.",
+  "support.messagePlaceholderIdea": "Describa la mejora que desea y lo que le ahorraría.",
+  "support.messageHint": "Cuanto más preciso sea el mensaje, más rápida será la corrección.",
+  "support.send": "Enviar",
+  "support.sent": "Mensaje enviado. ¡Gracias!",
+  "support.mine": "Mis incidencias",
+  "support.answered": "Respondida",
+  "support.responseFrom": "Respuesta del equipo de Buildr",
+  "support.awaitingResponse": "Esperando respuesta del equipo.",
+  "support.emptyDescription": "Sus errores y sugerencias aparecerán aquí, junto con las respuestas del equipo.",
+  "support.status.new": "Nueva",
+  "support.status.in_progress": "En curso",
+  "support.status.resolved": "Resuelta",
+  "support.status.declined": "Descartada",
 };
 
 const it: Dictionary = {
@@ -2948,6 +3073,31 @@ const it: Dictionary = {
   "register.companyTitle": "Dirigi un'azienda?",
   "collab.inviteLanguage": "Lingua dell'email",
   "collab.inviteLanguageHint": "Lingua in cui la persona riceverà il suo invito.",
+  // Signalements
+  "support.section": "Assistenza",
+  "support.entryHint": "Segnalare un errore o proporre un miglioramento.",
+  "support.title": "Assistenza e segnalazioni",
+  "support.subtitle": "Segnali un errore o proponga un miglioramento. Ogni messaggio viene letto dal team Buildr.",
+  "support.typeBug": "Errore",
+  "support.typeSuggestion": "Suggerimento",
+  "support.subject": "Oggetto",
+  "support.subjectPlaceholderBug": "Es.: le foto non compaiono nella galleria",
+  "support.subjectPlaceholderIdea": "Es.: poter duplicare un modello di cantiere",
+  "support.message": "Messaggio",
+  "support.messagePlaceholderBug": "Descriva cosa stava facendo, cosa si aspettava e cosa è accaduto invece.",
+  "support.messagePlaceholderIdea": "Descriva il miglioramento desiderato e cosa le farebbe risparmiare.",
+  "support.messageHint": "Più il messaggio è preciso, più rapida sarà la correzione.",
+  "support.send": "Invia",
+  "support.sent": "Messaggio inviato. Grazie!",
+  "support.mine": "Le mie segnalazioni",
+  "support.answered": "Risposta ricevuta",
+  "support.responseFrom": "Risposta del team Buildr",
+  "support.awaitingResponse": "In attesa di una risposta del team.",
+  "support.emptyDescription": "I suoi errori e suggerimenti compariranno qui, con le risposte del team.",
+  "support.status.new": "Nuova",
+  "support.status.in_progress": "In corso",
+  "support.status.resolved": "Risolta",
+  "support.status.declined": "Scartata",
 };
 
 const pt: Dictionary = {
@@ -3460,6 +3610,31 @@ const pt: Dictionary = {
   "register.companyTitle": "Dirige uma empresa?",
   "collab.inviteLanguage": "Idioma do email",
   "collab.inviteLanguageHint": "Idioma no qual a pessoa receberá o convite.",
+  // Signalements
+  "support.section": "Ajuda",
+  "support.entryHint": "Comunicar um erro ou sugerir uma melhoria.",
+  "support.title": "Ajuda e comunicações",
+  "support.subtitle": "Comunique um erro ou sugira uma melhoria. Todas as mensagens são lidas pela equipa Buildr.",
+  "support.typeBug": "Erro",
+  "support.typeSuggestion": "Sugestão",
+  "support.subject": "Assunto",
+  "support.subjectPlaceholderBug": "Ex.: as fotografias não aparecem na galeria",
+  "support.subjectPlaceholderIdea": "Ex.: poder duplicar um modelo de obra",
+  "support.message": "Mensagem",
+  "support.messagePlaceholderBug": "Descreva o que estava a fazer, o que esperava e o que aconteceu.",
+  "support.messagePlaceholderIdea": "Descreva a melhoria que deseja e o que lhe pouparia.",
+  "support.messageHint": "Quanto mais precisa for a mensagem, mais rápida será a correção.",
+  "support.send": "Enviar",
+  "support.sent": "Mensagem enviada. Obrigado!",
+  "support.mine": "As minhas comunicações",
+  "support.answered": "Respondida",
+  "support.responseFrom": "Resposta da equipa Buildr",
+  "support.awaitingResponse": "A aguardar resposta da equipa.",
+  "support.emptyDescription": "Os seus erros e sugestões aparecerão aqui, com as respostas da equipa.",
+  "support.status.new": "Nova",
+  "support.status.in_progress": "Em curso",
+  "support.status.resolved": "Resolvida",
+  "support.status.declined": "Recusada",
 };
 
 const tr: Dictionary = {
@@ -3972,6 +4147,31 @@ const tr: Dictionary = {
   "register.companyTitle": "Bir şirket mi yönetiyorsunuz?",
   "collab.inviteLanguage": "E-posta dili",
   "collab.inviteLanguageHint": "Kişinin davetini alacağı dil.",
+  // Signalements
+  "support.section": "Yardım",
+  "support.entryHint": "Bir hata bildirin veya bir iyileştirme önerin.",
+  "support.title": "Yardım ve bildirimler",
+  "support.subtitle": "Bir hata bildirin veya bir iyileştirme önerin. Her mesaj Buildr ekibi tarafından okunur.",
+  "support.typeBug": "Hata",
+  "support.typeSuggestion": "Öneri",
+  "support.subject": "Konu",
+  "support.subjectPlaceholderBug": "Örn.: fotoğraflar galeride görünmüyor",
+  "support.subjectPlaceholderIdea": "Örn.: bir şantiye şablonunu çoğaltabilmek",
+  "support.message": "Mesaj",
+  "support.messagePlaceholderBug": "Ne yaptığınızı, ne beklediğinizi ve bunun yerine ne olduğunu anlatın.",
+  "support.messagePlaceholderIdea": "İstediğiniz iyileştirmeyi ve size ne kazandıracağını anlatın.",
+  "support.messageHint": "Mesaj ne kadar net olursa, düzeltme o kadar hızlı olur.",
+  "support.send": "Gönder",
+  "support.sent": "Mesaj gönderildi. Teşekkürler!",
+  "support.mine": "Bildirimlerim",
+  "support.answered": "Yanıtlandı",
+  "support.responseFrom": "Buildr ekibinin yanıtı",
+  "support.awaitingResponse": "Ekipten yanıt bekleniyor.",
+  "support.emptyDescription": "Hatalarınız ve önerileriniz, ekibin yanıtlarıyla birlikte burada görünecek.",
+  "support.status.new": "Yeni",
+  "support.status.in_progress": "İşlemde",
+  "support.status.resolved": "Çözüldü",
+  "support.status.declined": "Reddedildi",
 };
 
 const pl: Dictionary = {
@@ -4484,6 +4684,31 @@ const pl: Dictionary = {
   "register.companyTitle": "Prowadzisz firmę?",
   "collab.inviteLanguage": "Język e-maila",
   "collab.inviteLanguageHint": "Język, w którym osoba otrzyma zaproszenie.",
+  // Signalements
+  "support.section": "Pomoc",
+  "support.entryHint": "Zgłoś błąd lub zaproponuj ulepszenie.",
+  "support.title": "Pomoc i zgłoszenia",
+  "support.subtitle": "Zgłoś błąd lub zaproponuj ulepszenie. Każdą wiadomość czyta zespół Buildr.",
+  "support.typeBug": "Błąd",
+  "support.typeSuggestion": "Propozycja",
+  "support.subject": "Temat",
+  "support.subjectPlaceholderBug": "Np.: zdjęcia nie pojawiają się w galerii",
+  "support.subjectPlaceholderIdea": "Np.: możliwość duplikowania szablonu budowy",
+  "support.message": "Wiadomość",
+  "support.messagePlaceholderBug": "Opisz, co robiłeś, czego oczekiwałeś i co się stało zamiast tego.",
+  "support.messagePlaceholderIdea": "Opisz oczekiwane ulepszenie i to, co by Ci zaoszczędziło.",
+  "support.messageHint": "Im dokładniejsza wiadomość, tym szybsza poprawka.",
+  "support.send": "Wyślij",
+  "support.sent": "Wiadomość wysłana. Dziękujemy!",
+  "support.mine": "Moje zgłoszenia",
+  "support.answered": "Odpowiedziano",
+  "support.responseFrom": "Odpowiedź zespołu Buildr",
+  "support.awaitingResponse": "Oczekiwanie na odpowiedź zespołu.",
+  "support.emptyDescription": "Twoje błędy i propozycje pojawią się tutaj, wraz z odpowiedziami zespołu.",
+  "support.status.new": "Nowe",
+  "support.status.in_progress": "W toku",
+  "support.status.resolved": "Rozwiązane",
+  "support.status.declined": "Odrzucone",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };

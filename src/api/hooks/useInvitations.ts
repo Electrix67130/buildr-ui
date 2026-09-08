@@ -7,16 +7,24 @@ interface Invitation {
   email: string;
   invited_by: string;
   role: 'admin' | 'employee' | 'client';
-  token: string;
   status: 'pending' | 'accepted' | 'expired';
   expires_at: string;
   created_at: string;
 }
 
-export function useInvitations() {
+/**
+ * Invitations en attente de l'organisation.
+ *
+ * Reservee aux admins et aux managers cote API — la liste des invitations est un
+ * outil d'administration. L'appeler pour un ouvrier ne rapporterait qu'un 403,
+ * d'ou le drapeau `enabled` : c'est a l'ecran de savoir s'il a le droit de
+ * demander.
+ */
+export function useInvitations(enabled = true) {
   return useQuery({
     queryKey: ['invitations'],
     queryFn: () => apiFetch<PaginatedResponse<Invitation>>('/invitations?limit=100'),
+    enabled,
   });
 }
 
