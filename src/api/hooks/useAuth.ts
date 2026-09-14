@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, setTokens, clearTokens } from '../client';
+import { clearPersistedCache } from '@/utils/persist';
 import { pushTokensApi } from '../services';
 import type { LoginInput, RegisterInput, AuthResponse, MeResponse } from '../types';
 
@@ -105,6 +106,12 @@ export function useLogout() {
         await apiFetch<void>('/auth/logout', { method: 'POST' });
       } finally {
         await clearTokens();
+        // Le cache vit aussi sur le disque depuis le mode hors ligne : le vider
+        // en memoire ne suffit plus. Il contient les chantiers, les adresses et
+        // les discussions — sur un telephone partage entre deux ouvriers, les
+        // laisser serait une fuite, et ils seraient rechargés au demarrage
+        // suivant meme sans session.
+        await clearPersistedCache();
       }
     },
     onSuccess: () => {

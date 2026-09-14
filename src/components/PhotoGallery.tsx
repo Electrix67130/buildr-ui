@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Dimensions, Alert, RefreshControl } from 'react-native';
-import { Camera, ImagePlus, Trash2, Share2, X } from 'lucide-react-native';
+import { Camera, ImagePlus, Trash2, Share2, X, CloudOff, RotateCw } from 'lucide-react-native';
 import ImageView from 'react-native-image-viewing';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/Colors';
@@ -13,6 +13,9 @@ import { shareFile } from '@/utils/shareFile';
 import { getSignedFileUrl } from '@/api/fileAccess';
 import type { Photo } from '@/api/types';
 import { useTranslation } from '@/contexts/I18nContext';
+import { probeApi } from '@/api/client';
+import { useOnlineStatus } from '@/utils/network';
+import { enqueuePhoto, usePendingPhotos, retryPhoto, discardPhoto } from '@/utils/photoQueue';
 
 const COLUMN_COUNT = 3;
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -30,6 +33,8 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
   const colors = Colors[colorScheme];
 
   const { data, isLoading, refetch, isRefetching } = usePhotos(chantierId);
+  const online = useOnlineStatus();
+  const enAttente = usePendingPhotos(chantierId);
   const createMutation = useCreatePhoto();
   const deleteMutation = useDeletePhoto();
   const [selectedPhoto, setSelectedPhoto] = useState<(Photo & { first_name: string; last_name: string }) | null>(null);
@@ -63,21 +68,43 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
+        // L'heure de la prise de vue, capturee tout de suite : une photo
+        // enregistree hors ligne et envoyee le soir doit apparaitre a l'heure ou
+        // elle a ete prise, sinon le fil d'avancement du chantier ment.
+        const takenAt = new Date().toISOString();
+
+        if (!online) {
+          await enqueuePhoto({ chantierId, photo: asset, takenAt });
+          Alert.alert(t('offline.banner'), t('offline.photoQueued'));
+          return;
+        }
+
         const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
         const fileName = `photo-${Date.now()}.jpg`;
-        const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
-        await createMutation.mutateAsync({
-          chantier_id: chantierId,
-          url: uploaded.url,
-          thumbnail_url: uploaded.thumbnail_url,
-          file_size: uploaded.file_size,
-          mime_type: uploaded.mime_type,
-        });
+        try {
+          const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
+          await createMutation.mutateAsync({
+            chantier_id: chantierId,
+            url: uploaded.url,
+            thumbnail_url: uploaded.thumbnail_url,
+            file_size: uploaded.file_size,
+            mime_type: uploaded.mime_type,
+            taken_at: takenAt,
+          });
+        } catch (err) {
+          // Le reseau a pu tomber entre la derniere sonde et maintenant : on
+          // revérifie avant de conclure. S'il est vraiment coupe, la photo part
+          // en file d'attente plutot que d'etre perdue ; sinon c'est une vraie
+          // erreur, et il faut la dire.
+          if (await probeApi()) throw err;
+          await enqueuePhoto({ chantierId, photo: asset, takenAt });
+          Alert.alert(t('offline.banner'), t('offline.photoQueued'));
+        }
       }
     } catch (err) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     }
-  }, [chantierId, createMutation, t]);
+  }, [chantierId, createMutation, online, t]);
 
   const handleDelete = useCallback((id: string) => {
     deleteMutation.mutate(id);
@@ -114,7 +141,62 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
     [colors, handleDelete, readonly, t],
   );
 
-  const renderHeader = () => readonly ? null : (
+  /**
+   * Les photos qui n'ont pas encore pu partir.
+   *
+   * Affichees a part plutot que melangees a la grille : elles ne sont pas
+   * encore sur le chantier, et personne d'autre ne les voit. Les confondre
+   * donnerait a l'ouvrier le sentiment d'avoir transmis son travail.
+   */
+  const renderEnAttente = () => enAttente.length === 0 ? null : (
+    <View style={[styles.pendingBox, { borderColor: colors.border, backgroundColor: colors.itemBackground }]}>
+      <View style={styles.pendingHeader}>
+        <CloudOff size={IconSize.sm} color={colors.mutedText} />
+        <Text style={[styles.pendingTitle, { color: colors.text2 }]}>
+          {t('photo.pendingUpload')} · {enAttente.length}
+        </Text>
+      </View>
+      <View style={styles.pendingRow}>
+        {enAttente.map((p) => (
+          <View key={p.id} style={styles.pendingItem}>
+            <Image source={{ uri: p.localUri }} style={styles.pendingImage} />
+            {p.status === 'error' ? (
+              <View style={styles.pendingActions}>
+                <Text style={[styles.pendingError, { color: colors.red }]} numberOfLines={1}>
+                  {t('photo.uploadFailed')}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => retryPhoto(p.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('photo.retryUpload')}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <RotateCw size={IconSize.sm} color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => discardPhoto(p.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('photo.discardPending')}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Trash2 size={IconSize.sm} color={colors.mutedText} />
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderHeader = () => (
+    <>
+      {renderEnAttente()}
+      {readonly ? null : renderActions()}
+    </>
+  );
+
+  const renderActions = () => (
     <View style={styles.actions}>
       <TouchableOpacity
         style={[styles.actionBtn, { backgroundColor: colors.primary }]}
@@ -241,6 +323,14 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
 };
 
 const styles = StyleSheet.create({
+  pendingBox: { borderWidth: 1, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md },
+  pendingHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.sm },
+  pendingTitle: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  pendingRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  pendingItem: { alignItems: 'center', gap: Spacing.xs },
+  pendingImage: { width: 64, height: 64, borderRadius: Radius.sm, opacity: 0.65 },
+  pendingActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  pendingError: { fontSize: FontSize.xs, maxWidth: 70 },
   container: { flex: 1 },
   list: { padding: Spacing.lg },
   actions: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },

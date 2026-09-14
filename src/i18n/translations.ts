@@ -411,7 +411,16 @@ export type TranslationKeys =
   | 'support.status.new'
   | 'support.status.in_progress'
   | 'support.status.resolved'
-  | 'support.status.declined';
+  | 'support.status.declined'
+  // Mode hors ligne
+  | 'offline.banner'
+  | 'offline.bannerWithPending'
+  | 'offline.sending'
+  | 'offline.photoQueued'
+  | 'photo.pendingUpload'
+  | 'photo.uploadFailed'
+  | 'photo.retryUpload'
+  | 'photo.discardPending';
 
 type Dictionary = Record<TranslationKeys, string>;
 
@@ -950,6 +959,15 @@ const fr: Dictionary = {
   "support.status.in_progress": "En cours",
   "support.status.resolved": "Traité",
   "support.status.declined": "Écarté",
+  // Mode hors ligne
+  "offline.banner": "Mode hors ligne",
+  "offline.bannerWithPending": "Hors ligne · {count} à envoyer",
+  "offline.sending": "Envoi en cours · {count}",
+  "offline.photoQueued": "Pas de réseau : la photo est enregistrée et partira dès que la connexion revient.",
+  "photo.pendingUpload": "À envoyer",
+  "photo.uploadFailed": "Envoi impossible",
+  "photo.retryUpload": "Réessayer",
+  "photo.discardPending": "Abandonner",
 };
 
 const en: Dictionary = {
@@ -1487,6 +1505,15 @@ const en: Dictionary = {
   "support.status.in_progress": "In progress",
   "support.status.resolved": "Resolved",
   "support.status.declined": "Declined",
+  // Mode hors ligne
+  "offline.banner": "Offline",
+  "offline.bannerWithPending": "Offline · {count} to send",
+  "offline.sending": "Sending · {count}",
+  "offline.photoQueued": "No network: the photo is saved and will be sent as soon as the connection returns.",
+  "photo.pendingUpload": "To send",
+  "photo.uploadFailed": "Sending failed",
+  "photo.retryUpload": "Try again",
+  "photo.discardPending": "Discard",
 };
 
 const de: Dictionary = {
@@ -2024,6 +2051,15 @@ const de: Dictionary = {
   "support.status.in_progress": "In Bearbeitung",
   "support.status.resolved": "Erledigt",
   "support.status.declined": "Abgelehnt",
+  // Mode hors ligne
+  "offline.banner": "Offline",
+  "offline.bannerWithPending": "Offline · {count} zu senden",
+  "offline.sending": "Wird gesendet · {count}",
+  "offline.photoQueued": "Kein Netz: Das Foto ist gespeichert und wird gesendet, sobald die Verbindung zurück ist.",
+  "photo.pendingUpload": "Zu senden",
+  "photo.uploadFailed": "Senden fehlgeschlagen",
+  "photo.retryUpload": "Erneut versuchen",
+  "photo.discardPending": "Verwerfen",
 };
 
 const es: Dictionary = {
@@ -2561,6 +2597,15 @@ const es: Dictionary = {
   "support.status.in_progress": "En curso",
   "support.status.resolved": "Resuelta",
   "support.status.declined": "Descartada",
+  // Mode hors ligne
+  "offline.banner": "Sin conexión",
+  "offline.bannerWithPending": "Sin conexión · {count} por enviar",
+  "offline.sending": "Enviando · {count}",
+  "offline.photoQueued": "Sin red: la foto está guardada y se enviará en cuanto vuelva la conexión.",
+  "photo.pendingUpload": "Por enviar",
+  "photo.uploadFailed": "Error al enviar",
+  "photo.retryUpload": "Reintentar",
+  "photo.discardPending": "Descartar",
 };
 
 const it: Dictionary = {
@@ -3098,6 +3143,15 @@ const it: Dictionary = {
   "support.status.in_progress": "In corso",
   "support.status.resolved": "Risolta",
   "support.status.declined": "Scartata",
+  // Mode hors ligne
+  "offline.banner": "Non in linea",
+  "offline.bannerWithPending": "Non in linea · {count} da inviare",
+  "offline.sending": "Invio in corso · {count}",
+  "offline.photoQueued": "Nessuna rete: la foto è salvata e partirà appena torna la connessione.",
+  "photo.pendingUpload": "Da inviare",
+  "photo.uploadFailed": "Invio non riuscito",
+  "photo.retryUpload": "Riprova",
+  "photo.discardPending": "Annulla",
 };
 
 const pt: Dictionary = {
@@ -3635,6 +3689,15 @@ const pt: Dictionary = {
   "support.status.in_progress": "Em curso",
   "support.status.resolved": "Resolvida",
   "support.status.declined": "Recusada",
+  // Mode hors ligne
+  "offline.banner": "Sem ligação",
+  "offline.bannerWithPending": "Sem ligação · {count} por enviar",
+  "offline.sending": "A enviar · {count}",
+  "offline.photoQueued": "Sem rede: a fotografia está guardada e será enviada assim que a ligação voltar.",
+  "photo.pendingUpload": "Por enviar",
+  "photo.uploadFailed": "Falha no envio",
+  "photo.retryUpload": "Tentar novamente",
+  "photo.discardPending": "Descartar",
 };
 
 const tr: Dictionary = {
@@ -4172,6 +4235,15 @@ const tr: Dictionary = {
   "support.status.in_progress": "İşlemde",
   "support.status.resolved": "Çözüldü",
   "support.status.declined": "Reddedildi",
+  // Mode hors ligne
+  "offline.banner": "Çevrimdışı",
+  "offline.bannerWithPending": "Çevrimdışı · gönderilecek {count}",
+  "offline.sending": "Gönderiliyor · {count}",
+  "offline.photoQueued": "Ağ yok: fotoğraf kaydedildi, bağlantı döndüğünde gönderilecek.",
+  "photo.pendingUpload": "Gönderilecek",
+  "photo.uploadFailed": "Gönderilemedi",
+  "photo.retryUpload": "Yeniden dene",
+  "photo.discardPending": "Vazgeç",
 };
 
 const pl: Dictionary = {
@@ -4709,6 +4781,15 @@ const pl: Dictionary = {
   "support.status.in_progress": "W toku",
   "support.status.resolved": "Rozwiązane",
   "support.status.declined": "Odrzucone",
+  // Mode hors ligne
+  "offline.banner": "Tryb offline",
+  "offline.bannerWithPending": "Offline · do wysłania: {count}",
+  "offline.sending": "Wysyłanie · {count}",
+  "offline.photoQueued": "Brak sieci: zdjęcie jest zapisane i zostanie wysłane, gdy wróci połączenie.",
+  "photo.pendingUpload": "Do wysłania",
+  "photo.uploadFailed": "Nie udało się wysłać",
+  "photo.retryUpload": "Spróbuj ponownie",
+  "photo.discardPending": "Odrzuć",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };
