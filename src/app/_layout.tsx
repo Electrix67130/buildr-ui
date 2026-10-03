@@ -78,6 +78,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       logout();
       Alert.alert(t('auth.accountDisabledTitle'), t('auth.accountDisabled'));
     },
+    onAccountDeleted: () => {
+      logout();
+      Alert.alert(t('auth.accountDeletedTitle'), t('auth.accountDeleted'));
+    },
   });
 
   // Push notifications — register le token au login, navigue au tap.
