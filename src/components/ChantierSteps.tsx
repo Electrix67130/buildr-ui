@@ -13,7 +13,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import ImageView from 'react-native-image-viewing';
+import PhotoViewer from '@/components/PhotoViewer';
 import { useCreatePhoto } from '@/api/hooks/usePhotos';
 import { pickAndUploadPhoto, type UploadedPhoto } from '@/utils/pickPhoto';
 import Animated from 'react-native-reanimated';
@@ -683,9 +683,9 @@ export default function ChantierSteps({
           </View>
         </Modal>
 
-        <ImageView
+        <PhotoViewer
           images={(viewer?.photos ?? []).map((p) => ({ uri: p.url }))}
-          imageIndex={viewer?.index ?? 0}
+          index={viewer?.index ?? 0}
           visible={viewer !== null}
           onRequestClose={() => setViewer(null)}
         />

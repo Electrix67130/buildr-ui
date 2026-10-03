@@ -13,6 +13,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { installGlobalErrorHandler } from '@/api/errorReport';
 import { initOnlineManager, initFocusManager } from '@/utils/network';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { initPhotoQueue } from '@/utils/photoQueue';
 import { persister, PERSIST_BUSTER } from '@/utils/persist';
 import OfflineBanner from '@/components/OfflineBanner';
@@ -27,6 +28,10 @@ installGlobalErrorHandler();
 // les reprend au retour, sans module natif.
 initOnlineManager();
 initFocusManager();
+// L'app vit en portrait. La configuration native autorise toutes les
+// orientations pour que la visionneuse de photos puisse se deverrouiller ;
+// c'est donc ici qu'on pose le verrou, des le chargement.
+ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => undefined);
 
 const queryClient = new QueryClient({
   defaultOptions: {

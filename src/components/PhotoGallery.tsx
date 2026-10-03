@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Dimensions, Alert, RefreshControl } from 'react-native';
 import { Camera, ImagePlus, Trash2, Share2, X, CloudOff, RotateCw } from 'lucide-react-native';
-import ImageView from 'react-native-image-viewing';
+import PhotoViewer from '@/components/PhotoViewer';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
@@ -220,7 +220,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
   );
 
   const photos = data?.data ?? [];
-  const imageSources = useMemo(() => photos.map((p) => ({ uri: p.url })), [photos]);
+  const imageSources = useMemo(() => photos.map((p) => ({ uri: p.url, caption: p.caption })), [photos]);
 
   // Detail overlay — tap the image to open fullscreen with zoom
   if (selectedPhoto) {
@@ -288,13 +288,11 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         </View>
 
         {/* Fullscreen zoom viewer */}
-        <ImageView
+        <PhotoViewer
           images={imageSources}
-          imageIndex={fullscreenIndex ?? 0}
+          index={fullscreenIndex ?? 0}
           visible={fullscreenIndex !== null}
           onRequestClose={() => setFullscreenIndex(null)}
-          swipeToCloseEnabled
-          doubleTapToZoomEnabled
         />
       </View>
     );

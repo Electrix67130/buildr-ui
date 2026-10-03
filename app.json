@@ -2,8 +2,8 @@
   "expo": {
     "name": "Buildr",
     "slug": "buildr",
-    "version": "1.0.0",
-    "orientation": "portrait",
+    "version": "1.1.0",
+    "orientation": "default",
     "icon": "./src/assets/images/icon.png",
     "scheme": "buildr",
     "userInterfaceStyle": "automatic",
@@ -84,6 +84,12 @@
         {
           "color": "#D97706",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT_UP"
         }
       ]
     ],
