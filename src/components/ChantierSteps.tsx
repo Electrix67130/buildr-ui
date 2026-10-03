@@ -10,7 +10,12 @@ import {
   Modal,
   Pressable,
   RefreshControl,
+  Image,
+  ScrollView,
 } from 'react-native';
+import ImageView from 'react-native-image-viewing';
+import { useCreatePhoto } from '@/api/hooks/usePhotos';
+import { pickAndUploadPhoto, type UploadedPhoto } from '@/utils/pickPhoto';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
 import DraggableFlatList, {
@@ -30,6 +35,8 @@ import {
   X,
   Check,
   MessageSquarePlus,
+  Camera,
+  ImagePlus,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
@@ -48,6 +55,7 @@ import {
   useUpdateSubstep,
   ChantierStep,
   ChantierSubstep,
+  type StepPhoto,
 } from '@/api/hooks/useChantierSteps';
 import { useTranslation } from '@/contexts/I18nContext';
 
@@ -213,17 +221,61 @@ export default function ChantierSteps({
     [canCheck, toggleStep],
   );
 
+  // Photo jointe a la validation : envoyee des le choix, rattachee a l'etape
+  // au moment de valider. Si la personne referme sans valider, la photo reste
+  // simplement un fichier orphelin, jamais une photo du chantier.
+  const createPhoto = useCreatePhoto();
+  const [draftPhoto, setDraftPhoto] = useState<UploadedPhoto | null>(null);
+  const [pickingPhoto, setPickingPhoto] = useState(false);
+  const [viewer, setViewer] = useState<{ photos: StepPhoto[]; index: number } | null>(null);
+
+  const attachPhoto = async (useCamera: boolean) => {
+    setPickingPhoto(true);
+    try {
+      const photo = await pickAndUploadPhoto(useCamera, t);
+      if (photo) setDraftPhoto(photo);
+    } catch (err) {
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
+    } finally {
+      setPickingPhoto(false);
+    }
+  };
+
   const submitValidateWithComment = async (skipComment = false) => {
     if (!commentTarget) return;
     const comment = skipComment ? null : draftComment.trim() || null;
-    if (commentTarget.kind === 'substep') {
-      await toggleSubstep.mutateAsync({ id: commentTarget.item.id, validated: true, validation_comment: comment });
+    const target = commentTarget;
+    const photo = skipComment ? null : draftPhoto;
+    if (target.kind === 'substep') {
+      await toggleSubstep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
     } else {
-      await toggleStep.mutateAsync({ id: commentTarget.item.id, validated: true, validation_comment: comment });
+      await toggleStep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
+    }
+    if (photo) {
+      const { local_uri: _local, ...body } = photo;
+      await createPhoto.mutateAsync({
+        chantier_id: chantierId,
+        ...body,
+        ...(target.kind === 'substep' ? { substep_id: target.item.id } : { step_id: target.item.id }),
+      });
+      refetch();
     }
     setCommentTarget(null);
     setDraftComment('');
+    setDraftPhoto(null);
   };
+
+  /** Rangee de vignettes sous une etape ou une sous-etape. */
+  const renderPhotoStrip = (photos: StepPhoto[]) =>
+    photos.length > 0 ? (
+      <View style={styles.photoStrip} accessibilityLabel={t('steps.stepPhotos')}>
+        {photos.map((p, i) => (
+          <TouchableOpacity key={p.id} onPress={() => setViewer({ photos, index: i })} accessibilityRole="imagebutton">
+            <Image source={{ uri: p.thumbnail_url ?? p.url }} style={[styles.photoThumb, { borderColor: colors.border }]} />
+          </TouchableOpacity>
+        ))}
+      </View>
+    ) : null;
 
   const moveSubstep = (step: ChantierStep, fromIdx: number, dir: -1 | 1) => {
     const toIdx = fromIdx + dir;
@@ -269,6 +321,7 @@ export default function ChantierSteps({
           {item.validation_comment ? (
             <Text style={[styles.substepComment, { color: colors.mutedText }]}>{item.validation_comment}</Text>
           ) : null}
+          {renderPhotoStrip(item.photos ?? [])}
         </View>
 
         {isManager ? (
@@ -421,6 +474,7 @@ export default function ChantierSteps({
               {step.validation_comment ? (
                 <Text style={[styles.substepComment, { color: colors.mutedText }]}>{step.validation_comment}</Text>
               ) : null}
+              {renderPhotoStrip(step.photos ?? [])}
             </View>
             <Text style={[styles.stepCount, { color: colors.mutedText }]}>
               {validatedCount}/{step.substeps.length}
@@ -428,6 +482,19 @@ export default function ChantierSteps({
 
             {isManager ? (
               <View style={styles.rowActions}>
+                {/* Poignee visible : l'appui long sur toute la ligne deplace deja
+                    l'etape, mais rien ne le disait. */}
+                <Pressable
+                  onLongPress={inline ? () => setReorderModalOpen(true) : drag}
+                  delayLongPress={120}
+                  disabled={isActive}
+                  style={styles.iconBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('steps.dragToReorder')}
+                  hitSlop={6}
+                >
+                  <GripVertical size={IconSize.sm} color={colors.mutedText} />
+                </Pressable>
                 <TouchableOpacity
                   onPress={() => {
                     setEditingStep(step);
@@ -616,6 +683,13 @@ export default function ChantierSteps({
           </View>
         </Modal>
 
+        <ImageView
+          images={(viewer?.photos ?? []).map((p) => ({ uri: p.url }))}
+          imageIndex={viewer?.index ?? 0}
+          visible={viewer !== null}
+          onRequestClose={() => setViewer(null)}
+        />
+
         {/* Modal — optional comment when validating */}
         <Modal
           visible={!!commentTarget}
@@ -634,6 +708,7 @@ export default function ChantierSteps({
                   onPress={() => {
                     setCommentTarget(null);
                     setDraftComment('');
+                    setDraftPhoto(null);
                   }}
                 >
                   <X size={IconSize.md} color={colors.text2} />
@@ -655,6 +730,46 @@ export default function ChantierSteps({
                 multiline
                 numberOfLines={3}
               />
+
+              <View style={styles.commentLabelRow}>
+                <Camera size={14} color={colors.mutedText} />
+                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.photoOptional')}</Text>
+              </View>
+              {draftPhoto ? (
+                <View style={styles.draftPhotoRow}>
+                  <Image source={{ uri: draftPhoto.local_uri }} style={[styles.draftPhoto, { borderColor: colors.border }]} />
+                  <TouchableOpacity
+                    onPress={() => setDraftPhoto(null)}
+                    style={[styles.photoBtn, { borderColor: colors.border }]}
+                    accessibilityRole="button"
+                  >
+                    <X size={IconSize.sm} color={colors.text2} />
+                    <Text style={[styles.photoBtnText, { color: colors.text2 }]}>{t('steps.removePhoto')}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.photoBtnRow}>
+                  <TouchableOpacity
+                    onPress={() => attachPhoto(true)}
+                    disabled={pickingPhoto}
+                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
+                    accessibilityRole="button"
+                  >
+                    <Camera size={IconSize.sm} color={colors.primary} />
+                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.takePhoto')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => attachPhoto(false)}
+                    disabled={pickingPhoto}
+                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
+                    accessibilityRole="button"
+                  >
+                    <ImagePlus size={IconSize.sm} color={colors.primary} />
+                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.choosePhoto')}</Text>
+                  </TouchableOpacity>
+                  {pickingPhoto ? <ActivityIndicator size="small" color={colors.primary} /> : null}
+                </View>
+              )}
 
               <View style={styles.commentActions}>
                 <TouchableOpacity
@@ -969,6 +1084,13 @@ const styles = StyleSheet.create({
   },
   substepName: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
   substepComment: { fontSize: FontSize.xs, marginTop: 2, fontStyle: 'italic' },
+  photoStrip: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginTop: Spacing.xs },
+  photoThumb: { width: 48, height: 48, borderRadius: Radius.sm, borderWidth: 1 },
+  photoBtnRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.xs, flexWrap: 'wrap' },
+  photoBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
+  photoBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  draftPhotoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.xs },
+  draftPhoto: { width: 72, height: 72, borderRadius: Radius.md, borderWidth: 1 },
 
   rowActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   iconBtn: { padding: Spacing.xs, borderRadius: Radius.sm },

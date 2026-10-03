@@ -1,6 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 
+/** Vignette d'une photo qui atteste une etape ou une sous-etape. */
+export interface StepPhoto {
+  id: string;
+  url: string;
+  thumbnail_url: string | null;
+  step_id: string;
+  substep_id: string | null;
+  created_at: string;
+}
+
 export interface ChantierSubstep {
   id: string;
   step_id: string;
@@ -9,6 +19,7 @@ export interface ChantierSubstep {
   validated_at: string | null;
   validated_by: string | null;
   validation_comment: string | null;
+  photos: StepPhoto[];
   created_at: string;
   updated_at: string;
 }
@@ -22,6 +33,8 @@ export interface ChantierStep {
   validated_by: string | null;
   validation_comment: string | null;
   substeps: ChantierSubstep[];
+  /** Photos de l'etape elle-meme, hors sous-etapes. */
+  photos: StepPhoto[];
   created_at: string;
   updated_at: string;
 }

@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert, Modal, Switch, Linking, RefreshControl } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { UserPlus, Trash2, Shield, Pencil, X, Mail, Phone, Search, Copy, Check } from 'lucide-react-native';
+import { UserPlus, Trash2, Shield, Pencil, X, Mail, Phone, Search, Copy, Check, ShieldCheck } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
@@ -420,7 +420,14 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                       </TouchableOpacity>
                     )}
 
-                    {canEditPerms && (
+                    {viewingMember.user_role === 'admin' ? (
+                      <View style={[styles.adminNote, { backgroundColor: colors.itemBackground, borderColor: colors.border, marginTop: Spacing.xl }]}>
+                        <ShieldCheck size={IconSize.md} color={colors.primary} />
+                        <Text style={[styles.adminNoteText, { color: colors.text2 }]}>{t('team.adminFullAccess')}</Text>
+                      </View>
+                    ) : null}
+
+                    {canEditPerms && viewingMember.user_role !== 'admin' && (
                       <TouchableOpacity
                         style={[styles.contactActionBtn, { borderColor: colors.primary, marginTop: Spacing.xl }]}
                         onPress={() => { setViewingMember(null); setEditingMember(viewingMember); }}
@@ -685,6 +692,8 @@ const styles = StyleSheet.create({
   contactValue: { fontSize: FontSize.base, fontWeight: FontWeight.medium, marginTop: 2 },
   contactActionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, paddingVertical: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
   contactActionText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
+  adminNote: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
+  adminNoteText: { flex: 1, fontSize: FontSize.sm, lineHeight: 18 },
   confirmBtn: {
     height: 48,
     alignItems: 'center',
