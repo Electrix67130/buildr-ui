@@ -21,6 +21,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization, useUpdateOrganization, Organization } from '@/api/hooks/useOrganization';
 import { useSiretLookup } from '@/hooks/useSiretLookup';
+import { formatPhone } from '@/utils/phone';
 
 interface FormState {
   siret: string;
@@ -65,7 +66,7 @@ function pickInitial(org: Organization | undefined): FormState {
     postal_code: org.postal_code ?? '',
     city: org.city ?? '',
     country: org.country ?? 'FR',
-    phone: org.phone ?? '',
+    phone: formatPhone(org.phone),
     billing_email: org.billing_email ?? '',
     website: org.website ?? '',
     insurance_provider: org.insurance_provider ?? '',
