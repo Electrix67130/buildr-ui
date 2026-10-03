@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -7,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { I18nProvider } from '@/contexts/I18nContext';
+import { I18nProvider, useTranslation } from '@/contexts/I18nContext';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -59,6 +60,7 @@ initPhotoQueue(queryClient);
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, logout } = useAuth();
+  const { t } = useTranslation();
   const segments = useSegments();
   const router = useRouter();
   const splashHiddenRef = useRef(false);
@@ -69,6 +71,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     enabled: isAuthenticated,
     onSessionReplaced: () => {
       logout();
+    },
+    // Compte desactive par un administrateur : on sort tout de suite, et on
+    // dit pourquoi — sinon la personne croit a une panne et reessaie.
+    onAccountDisabled: () => {
+      logout();
+      Alert.alert(t('auth.accountDisabledTitle'), t('auth.accountDisabled'));
     },
   });
 

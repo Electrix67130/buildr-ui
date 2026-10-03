@@ -23,6 +23,8 @@ export type TranslationKeys =
   | 'auth.login' | 'auth.register' | 'auth.email' | 'auth.password' | 'auth.firstName'
   | 'auth.lastName' | 'auth.phone' | 'auth.company' | 'auth.signIn' | 'auth.signUp'
   | 'auth.alreadyAccount' | 'auth.noAccount' | 'auth.invalidCredentials'
+  | 'auth.accountDisabled'
+  | 'auth.accountDisabledTitle'
   // Chantier
   | 'chantier.title' | 'chantier.create' | 'chantier.edit' | 'chantier.name'
   | 'chantier.description' | 'chantier.address' | 'chantier.city' | 'chantier.postalCode'
@@ -467,6 +469,8 @@ const fr: Dictionary = {
   'auth.alreadyAccount': 'Déjà un compte ?',
   'auth.noAccount': 'Pas encore de compte ?',
   'auth.invalidCredentials': 'Email ou mot de passe incorrect.',
+  "auth.accountDisabled": "Ce compte est désactivé. Contactez votre administrateur.",
+  "auth.accountDisabledTitle": "Compte désactivé",
 
   'chantier.title': 'Chantiers',
   'chantier.create': 'Nouveau chantier',
@@ -1020,6 +1024,8 @@ const en: Dictionary = {
   'auth.alreadyAccount': 'Already have an account?',
   'auth.noAccount': "Don't have an account?",
   'auth.invalidCredentials': 'Invalid email or password.',
+  "auth.accountDisabled": "This account has been deactivated. Please contact your administrator.",
+  "auth.accountDisabledTitle": "Account deactivated",
 
   'chantier.title': 'Sites',
   'chantier.create': 'New site',
@@ -1573,6 +1579,8 @@ const de: Dictionary = {
   'auth.alreadyAccount': 'Bereits ein Konto?',
   'auth.noAccount': 'Noch kein Konto?',
   'auth.invalidCredentials': 'Ungültige E-Mail oder Passwort.',
+  "auth.accountDisabled": "Dieses Konto wurde deaktiviert. Bitte wenden Sie sich an Ihren Administrator.",
+  "auth.accountDisabledTitle": "Konto deaktiviert",
 
   'chantier.title': 'Baustellen',
   'chantier.create': 'Neue Baustelle',
@@ -2126,6 +2134,8 @@ const es: Dictionary = {
   'auth.alreadyAccount': '¿Ya tienes una cuenta?',
   'auth.noAccount': '¿No tienes cuenta?',
   'auth.invalidCredentials': 'Correo o contraseña incorrectos.',
+  "auth.accountDisabled": "Esta cuenta está desactivada. Póngase en contacto con su administrador.",
+  "auth.accountDisabledTitle": "Cuenta desactivada",
 
   'chantier.title': 'Obras',
   'chantier.create': 'Nueva obra',
@@ -2679,6 +2689,8 @@ const it: Dictionary = {
   'auth.alreadyAccount': 'Hai già un account?',
   'auth.noAccount': 'Non hai un account?',
   'auth.invalidCredentials': 'Email o password non validi.',
+  "auth.accountDisabled": "Questo account è disattivato. Contatti il suo amministratore.",
+  "auth.accountDisabledTitle": "Account disattivato",
 
   'chantier.title': 'Cantieri',
   'chantier.create': 'Nuovo cantiere',
@@ -3232,6 +3244,8 @@ const pt: Dictionary = {
   'auth.alreadyAccount': 'Já tem conta?',
   'auth.noAccount': 'Ainda não tem conta?',
   'auth.invalidCredentials': 'Email ou palavra-passe incorretos.',
+  "auth.accountDisabled": "Esta conta está desativada. Contacte o seu administrador.",
+  "auth.accountDisabledTitle": "Conta desativada",
 
   'chantier.title': 'Obras',
   'chantier.create': 'Nova obra',
@@ -3785,6 +3799,8 @@ const tr: Dictionary = {
   'auth.alreadyAccount': 'Zaten hesabınız var mı?',
   'auth.noAccount': 'Hesabınız yok mu?',
   'auth.invalidCredentials': 'E-posta veya şifre hatalı.',
+  "auth.accountDisabled": "Bu hesap devre dışı bırakıldı. Lütfen yöneticinizle iletişime geçin.",
+  "auth.accountDisabledTitle": "Hesap devre dışı",
 
   'chantier.title': 'Şantiyeler',
   'chantier.create': 'Yeni şantiye',
@@ -4338,6 +4354,8 @@ const pl: Dictionary = {
   'auth.alreadyAccount': 'Masz już konto?',
   'auth.noAccount': 'Nie masz konta?',
   'auth.invalidCredentials': 'Nieprawidłowy e-mail lub hasło.',
+  "auth.accountDisabled": "To konto zostało dezaktywowane. Prosimy o kontakt z administratorem.",
+  "auth.accountDisabledTitle": "Konto dezaktywowane",
 
   'chantier.title': 'Budowy',
   'chantier.create': 'Nowa budowa',

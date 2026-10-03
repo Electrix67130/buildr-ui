@@ -45,7 +45,13 @@ export default function LoginScreen() {
       await login({ email: email.trim(), password });
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.statusCode === 401 ? t('auth.invalidCredentials') : String(err.details));
+        setError(
+          err.statusCode === 403 && err.error === 'AccountDisabled'
+            ? t('auth.accountDisabled')
+            : err.statusCode === 401
+              ? t('auth.invalidCredentials')
+              : String(err.details),
+        );
       } else {
         setError(t('auth.networkError'));
       }
