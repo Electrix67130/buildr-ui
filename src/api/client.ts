@@ -90,9 +90,15 @@ async function refreshAccessToken(): Promise<string> {
         body: JSON.stringify({ refresh_token: refreshToken }),
       });
 
-      if (!response.ok) {
+      // Seul un 401 dit que la session est finie. Un 502 pendant un
+      // redeploiement de l'API, un 500, un 429 sont passagers : effacer les
+      // jetons la-dessus deconnectait tout le monde a chaque mise en ligne.
+      if (response.status === 401) {
         await clearTokens();
         throw new ApiError(401, 'Unauthorized', 'Refresh token expired');
+      }
+      if (!response.ok) {
+        throw new ApiError(response.status, 'Service Unavailable', 'Refresh temporarily failed');
       }
 
       const data = await response.json();
@@ -153,8 +159,14 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
         headers,
         body: effectiveBody !== undefined ? JSON.stringify(effectiveBody) : undefined,
       });
-    } catch {
-      throw new ApiError(401, 'Unauthorized', 'Session expired');
+    } catch (err) {
+      // Session reellement finie : 401 du renouvellement. Tout le reste
+      // (API injoignable, erreur passagere) remonte tel quel, sans que
+      // l'appelant n'en deduise une deconnexion.
+      if (err instanceof ApiError && err.statusCode === 401) {
+        throw new ApiError(401, 'Unauthorized', 'Session expired');
+      }
+      throw err;
     }
   }
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getAccessToken, clearTokens } from '@/api/client';
+import { getAccessToken, clearTokens, ApiError } from '@/api/client';
 import { useMe, useLogin, useRegister, useLogout, useDeleteAccount } from '@/api/hooks/useAuth';
 import { unregisterCurrentPushToken } from '@/hooks/usePushNotifications';
 import type { MeResponse, LoginInput, RegisterInput } from '@/api/types';
@@ -35,7 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const queryClient = useQueryClient();
-  const { data: user, isLoading: meLoading, isError: meFailed } = useMe(hasToken);
+  const { data: user, isLoading: meLoading, error: meError } = useMe(hasToken);
+  // Seul un 401 signifie que la session est finie. Une erreur passagere
+  // (API en cours de redeploiement, reseau) garde le profil deja en cache et
+  // l'utilisateur connecte : on reessaiera au prochain retour au premier plan.
+  const meFailed = meError instanceof ApiError && meError.statusCode === 401;
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
