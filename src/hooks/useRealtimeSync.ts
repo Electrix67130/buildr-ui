@@ -24,11 +24,12 @@ export type RealtimeEventType =
   | 'emergency-comment.deleted'
   | 'chantier-member.created'
   | 'chantier-member.updated'
-  | 'chantier-member.deleted';
+  | 'chantier-member.deleted'
+  | 'membership.updated';
 
 interface RealtimeEvent {
   type: RealtimeEventType;
-  chantier_id: string;
+  chantier_id?: string;
   resource_id?: string;
   actor_id?: string;
 }
@@ -91,6 +92,15 @@ export function useRealtimeSync({ enabled, onSessionReplaced }: Options): void {
         case 'chantier-member.updated':
         case 'chantier-member.deleted':
           queryClient.invalidateQueries({ queryKey: ['chantier-members', cid] });
+          // Etre ajoute ou retire change ce qu'on a le droit de voir : la
+          // liste des chantiers et ses propres droits sur celui-ci.
+          queryClient.invalidateQueries({ queryKey: ['chantiers'] });
+          break;
+        case 'membership.updated':
+          // Le role conditionne tout ce que l'API renvoie : on relit tout,
+          // profil en tete, pour que les nouveaux droits s'appliquent sans
+          // attendre.
+          queryClient.invalidateQueries();
           break;
       }
     };

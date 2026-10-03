@@ -644,7 +644,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  unreadBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: FontWeight.bold },
+  unreadBadgeText: { color: '#FFFFFF', fontSize: 10, lineHeight: 12, fontWeight: FontWeight.bold, textAlign: 'center', includeFontPadding: false },
 
   // Tab content fills remaining space
   tabContent: { flex: 1 },

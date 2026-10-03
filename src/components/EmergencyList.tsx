@@ -436,18 +436,28 @@ const styles = StyleSheet.create({
   togglePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
   pillIconWrap: { position: 'relative' },
+  // Meme gabarit que la pastille des onglets principaux du chantier : a 16 px
+  // avec une police de 9, le chiffre flottait dans un rond trop petit et, sur
+  // Android, la reserve de hauteur de la police le poussait vers le bas.
   subUnreadBadge: {
     position: 'absolute',
-    top: -6,
-    right: -10,
-    minWidth: 16,
-    height: 16,
+    top: -8,
+    right: -12,
+    minWidth: 18,
+    height: 18,
     paddingHorizontal: 4,
-    borderRadius: 8,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  subUnreadBadgeText: { color: '#FFFFFF', fontSize: 9, fontWeight: FontWeight.bold },
+  subUnreadBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: FontWeight.bold,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
 
   unreadDot: {
     position: 'absolute',
