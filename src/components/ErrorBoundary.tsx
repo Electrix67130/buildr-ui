@@ -78,5 +78,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 12,
   },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
+  buttonText: { textAlign: 'center', color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
 });

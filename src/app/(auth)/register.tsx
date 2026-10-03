@@ -102,5 +102,5 @@ const styles = StyleSheet.create({
   divider: { height: 1, marginVertical: Spacing.xl },
   invitationTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, marginBottom: Spacing.sm },
   linkContainer: { alignItems: 'center', marginTop: Spacing.lg },
-  linkText: { fontSize: FontSize.base },
+  linkText: { textAlign: 'center', fontSize: FontSize.base },
 });

@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
     borderTopWidth: 1,
   },
-  closeBtnText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
+  closeBtnText: { textAlign: 'center', fontSize: FontSize.base, fontWeight: FontWeight.medium },
 });
 
 export default DatePickerField;

@@ -269,5 +269,5 @@ const styles = StyleSheet.create({
   error: { fontSize: FontSize.sm, marginTop: Spacing.sm },
 
   submit: { height: 48, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
-  submitText: { fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  submitText: { textAlign: 'center', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
 });

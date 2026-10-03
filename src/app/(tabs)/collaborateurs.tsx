@@ -42,6 +42,7 @@ import SearchBar from '@/components/SearchBar';
 import AppHeader from '@/components/AppHeader';
 import type { MeResponse } from '@/api/types';
 import { LOCALES, Locale } from '@/i18n/translations';
+import { formatPhone } from '@/utils/phone';
 
 // --------------- Team Modal (admin manages a manager's team) ---------------
 
@@ -612,14 +613,14 @@ export default function CollaborateursScreen() {
                     style={[styles.contactRow, { backgroundColor: colors.itemBackground, borderColor: colors.border, marginTop: Spacing.sm }]}
                     onPress={() => Linking.openURL(`tel:${selectedUser.phone}`)}
                     accessibilityRole="button"
-                    accessibilityLabel={`Appeler ${selectedUser.phone}`}
+                    accessibilityLabel={`Appeler ${formatPhone(selectedUser.phone)}`}
                   >
                     <View style={[styles.contactIcon, { backgroundColor: colors.green + '15' }]}>
                       <Phone size={IconSize.md} color={colors.green} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.phone')}</Text>
-                      <Text style={[styles.contactValue, { color: colors.text }]}>{selectedUser.phone}</Text>
+                      <Text style={[styles.contactValue, { color: colors.text }]}>{formatPhone(selectedUser.phone)}</Text>
                     </View>
                     <TouchableOpacity
                       style={[
@@ -917,8 +918,8 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   roleRow: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.sm },
-  roleOption: { flex: 1, alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
-  roleOptionText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  roleOption: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xs, borderRadius: Radius.md, borderWidth: 1 },
+  roleOptionText: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.medium },
   modalSub: { fontSize: FontSize.sm, marginTop: 2 },
   sectionLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
   actionRow: {
@@ -964,5 +965,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.xl,
   },
-  sendInviteText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  sendInviteText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
 });

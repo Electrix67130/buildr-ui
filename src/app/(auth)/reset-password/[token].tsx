@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.lg,
   },
-  buttonText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  buttonText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
   successBox: {
     padding: Spacing.xl,
     borderRadius: Radius.lg,

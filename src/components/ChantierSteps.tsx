@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalSecondaryText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  modalSecondaryText: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.medium },
 
   reorderTrigger: {
     flexDirection: 'row',

@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { ChantierMemberRole, ChantierMember } from '@/api/types';
 import { useTranslation } from '@/contexts/I18nContext';
 import type { TranslationKeys } from '@/i18n/translations';
+import { formatPhone } from '@/utils/phone';
 
 type MemberWithUser = ChantierMember & { first_name: string; last_name: string; email: string; phone?: string; company_name?: string; user_role?: 'admin' | 'manager' | 'employee' | 'client' | 'gestionnaire_reseau' };
 
@@ -396,7 +397,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                         </View>
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.contactLabel, { color: colors.text2 }]}>{t('auth.phone')}</Text>
-                          <Text style={[styles.contactValue, { color: colors.text }]}>{viewingMember.phone}</Text>
+                          <Text style={[styles.contactValue, { color: colors.text }]}>{formatPhone(viewingMember.phone)}</Text>
                         </View>
                         <TouchableOpacity
                           style={[
@@ -662,12 +663,12 @@ const styles = StyleSheet.create({
   userEmail: { fontSize: FontSize.sm },
   rolePickerRow: { flexDirection: 'row', gap: Spacing.xs },
   rolePickerBtn: { flex: 1, alignItems: 'center', paddingVertical: Spacing.sm, borderRadius: Radius.md, borderWidth: 1 },
-  rolePickerText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
+  rolePickerText: { textAlign: 'center', fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
 
   sectionLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, marginBottom: Spacing.sm },
   roleRow: { flexDirection: 'row', gap: Spacing.sm },
-  roleOption: { flex: 1, alignItems: 'center', paddingVertical: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
-  roleOptionText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  roleOption: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.xs, borderRadius: Radius.md, borderWidth: 1 },
+  roleOptionText: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   permissionRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, borderBottomWidth: 1, gap: Spacing.md },
   permissionInfo: { flex: 1 },
   permissionLabel: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
@@ -690,7 +691,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: Radius.md,
   },
-  confirmBtnText: { color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  confirmBtnText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
   copyContactBtn: {
     width: 36,
     height: 36,

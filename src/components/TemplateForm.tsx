@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     alignItems: 'center',
   },
-  statusText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  statusText: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
   stepCard: {
     borderWidth: 1,
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  submitText: { fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  submitText: { textAlign: 'center', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
 
   teamEmpty: { fontSize: FontSize.sm, fontStyle: 'italic', marginTop: Spacing.xs },
   memberRow: {

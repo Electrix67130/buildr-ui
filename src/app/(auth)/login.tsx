@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.lg,
   },
-  buttonText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  buttonText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
   linkContainer: { alignItems: 'center', marginTop: Spacing.xl },
-  linkText: { fontSize: FontSize.base },
+  linkText: { textAlign: 'center', fontSize: FontSize.base },
 });

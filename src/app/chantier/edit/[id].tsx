@@ -257,5 +257,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.xxl,
   },
-  buttonText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  buttonText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
 });

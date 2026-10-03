@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.lg,
   },
-  saveBtnText: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  saveBtnText: { textAlign: 'center', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
 
   fullscreenOverlay: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   fullscreenImage: { width: '100%', height: '100%' },

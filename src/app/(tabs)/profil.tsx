@@ -38,6 +38,7 @@ import CalendarIntegrations from '@/components/CalendarIntegrations';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useOrganization, useUpdateOrganization } from '@/api/hooks/useOrganization';
+import { formatPhone } from '@/utils/phone';
 
 const THEME_OPTIONS: { mode: ThemeMode; key: 'profile.themeLight' | 'profile.themeDark' | 'profile.themeSystem'; icon: typeof Sun }[] = [
   { mode: 'light', key: 'profile.themeLight', icon: Sun },
@@ -111,7 +112,7 @@ export default function ProfilScreen() {
       setFirstName(user.first_name || '');
       setLastName(user.last_name || '');
       setEmail(user.email || '');
-      setPhone(user.phone || '');
+      setPhone(formatPhone(user.phone));
       setCompanyName(user.company_name || '');
     }
   }, [user]);
@@ -151,18 +152,24 @@ export default function ProfilScreen() {
 
   const handleSave = async () => {
     if (!user) return;
-    await updateProfile.mutateAsync({
-      id: user.id,
-      body: {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: email.trim(),
-        phone: phone.trim() || undefined,
-        company_name: companyName.trim() || undefined,
-      },
-    });
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2000);
+    try {
+      await updateProfile.mutateAsync({
+        id: user.id,
+        body: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          company_name: companyName.trim() || undefined,
+        },
+      });
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2000);
+    } catch (err) {
+      // L'API refuse desormais un telephone invalide : sans ce retour, le
+      // bouton retombait simplement au repos et rien n'expliquait pourquoi.
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.error'));
+    }
   };
 
   const handleChangePassword = async () => {
@@ -215,7 +222,7 @@ export default function ProfilScreen() {
     firstName !== (user.first_name || '') ||
     lastName !== (user.last_name || '') ||
     email !== (user.email || '') ||
-    phone !== (user.phone || '') ||
+    phone !== formatPhone(user.phone) ||
     companyName !== (user.company_name || '')
   );
 
@@ -971,7 +978,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: Radius.md,
   },
-  themeLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  themeLabel: { textAlign: 'center', fontSize: FontSize.sm, fontWeight: FontWeight.medium },
 
   langGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.xs },
   langOption: {
@@ -1021,7 +1028,7 @@ const styles = StyleSheet.create({
   },
   deleteWarningText: { fontSize: FontSize.base, lineHeight: 22, marginBottom: Spacing.sm },
   deleteCancelBtn: { alignItems: 'center', justifyContent: 'center', height: 44, marginTop: Spacing.xs },
-  deleteCancelText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
+  deleteCancelText: { textAlign: 'center', fontSize: FontSize.base, fontWeight: FontWeight.medium },
 
   securityBtn: {
     flexDirection: 'row',

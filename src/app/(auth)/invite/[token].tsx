@@ -285,9 +285,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: Spacing.lg,
   },
-  buttonText: { color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
+  buttonText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
   errorTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold },
   errorText: { fontSize: FontSize.base, textAlign: 'center' },
   backBtn: { paddingHorizontal: Spacing.xxl, paddingVertical: Spacing.md, borderRadius: Radius.md, marginTop: Spacing.lg },
-  backBtnText: { color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
+  backBtnText: { textAlign: 'center', color: '#FFFFFF', fontSize: FontSize.base, fontWeight: FontWeight.semibold },
 });
