@@ -12,7 +12,7 @@ import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { installGlobalErrorHandler } from '@/api/errorReport';
-import { initOnlineManager } from '@/utils/network';
+import { initOnlineManager, initFocusManager } from '@/utils/network';
 import { initPhotoQueue } from '@/utils/photoQueue';
 import { persister, PERSIST_BUSTER } from '@/utils/persist';
 import OfflineBanner from '@/components/OfflineBanner';
@@ -26,6 +26,7 @@ installGlobalErrorHandler();
 // Detection reseau en JavaScript pur : met les requetes en pause hors ligne et
 // les reprend au retour, sans module natif.
 initOnlineManager();
+initFocusManager();
 
 const queryClient = new QueryClient({
   defaultOptions: {

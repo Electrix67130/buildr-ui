@@ -291,7 +291,7 @@ export default function CollaborateursScreen() {
   const colors = Colors[colorScheme];
   const { t, locale } = useTranslation();
 
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, refreshUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
 
   const { data: usersData, isLoading: usersLoading, refetch: refetchUsers, isRefetching: usersRefetching } = useAllUsers();
@@ -534,7 +534,7 @@ export default function CollaborateursScreen() {
         refreshControl={
           <RefreshControl
             refreshing={usersRefetching}
-            onRefresh={() => refetchUsers()}
+            onRefresh={() => { refetchUsers(); refreshUser(); }}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />

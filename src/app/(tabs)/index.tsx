@@ -26,7 +26,7 @@ export default function ChantiersScreen() {
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [statusFilter, setStatusFilter] = useState<ChantierStatus | 'all'>('all');
@@ -256,7 +256,7 @@ export default function ChantiersScreen() {
           refreshControl={
             <RefreshControl
               refreshing={chantiersQuery.isRefetching}
-              onRefresh={() => { chantiersQuery.refetch(); searchResults.refetch(); }}
+              onRefresh={() => { chantiersQuery.refetch(); searchResults.refetch(); refreshUser(); }}
               tintColor={colors.primary}
               colors={[colors.primary]}
             />

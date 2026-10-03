@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
-import { onlineManager } from '@tanstack/react-query';
+import { onlineManager, focusManager } from '@tanstack/react-query';
 import { probeApi } from '@/api/client';
 
 /** Reactif : true si l'API est joignable, false sinon. */
@@ -53,5 +53,28 @@ export function initOnlineManager(): void {
       appStateSub.remove();
       clearInterval(interval);
     };
+  });
+}
+
+/**
+ * Dit a React Query quand l'app revient au premier plan.
+ *
+ * Sur le web, React Query ecoute `visibilitychange` tout seul ; en React
+ * Native il faut lui donner l'equivalent, sinon « au retour de l'app » ne
+ * declenche jamais rien. Avec ce branchement, toute requete perimee est
+ * relue quand on ressort le telephone : le profil (donc le role, et les
+ * droits qui en decoulent), les listes, les compteurs.
+ *
+ * C'est ce qui manquait quand un administrateur changeait le role de
+ * quelqu'un : la liste des chantiers se rafraichissait a la main, mais le
+ * profil restait celui de la connexion, et l'ecran du chantier continuait
+ * d'appliquer les anciens droits.
+ *
+ * A appeler une seule fois, au chargement du module racine.
+ */
+export function initFocusManager(): void {
+  focusManager.setEventListener((setFocused) => {
+    const sub = AppState.addEventListener('change', (state) => setFocused(state === 'active'));
+    return () => sub.remove();
   });
 }

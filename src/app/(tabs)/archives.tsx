@@ -20,7 +20,7 @@ export default function ArchivesScreen() {
   const colors = Colors[colorScheme];
 
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [search, setSearch] = useState('');
   const { data, isLoading, refetch, isRefetching } = useChantierArchives({ q: search || undefined });
@@ -298,7 +298,7 @@ export default function ArchivesScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => refetch()}
+            onRefresh={() => { refetch(); refreshUser(); }}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />

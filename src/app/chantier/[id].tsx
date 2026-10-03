@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Linking, Alert, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MapPin, Navigation, Archive, ArchiveRestore, Pencil, MessageSquare, Camera, FileText, Users, ChevronDown, ChevronUp, Copy, Check, Trash2, AlertTriangle, Clock, Save, ListChecks } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/Colors';
@@ -43,6 +44,16 @@ export default function ChantierDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { data: chantier, isLoading } = chantierHooks.useById(id);
+  const queryClient = useQueryClient();
+  // Les droits de cet ecran se deduisent du role du profil. Si le profil est
+  // perime (plus d'une minute), on le relit en arrivant : un role change par
+  // un administrateur s'applique ainsi des l'ouverture du chantier, sans
+  // attendre un passage par l'onglet Profil.
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.refetchQueries({ queryKey: ['auth', 'me'], stale: true });
+    }, [queryClient]),
+  );
   const archiveMutation = useArchiveChantier();
   const { user } = useAuth();
   const unarchiveMutation = useUnarchiveChantier();

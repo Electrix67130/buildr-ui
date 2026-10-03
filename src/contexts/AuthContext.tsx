@@ -13,6 +13,12 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
+  /**
+   * Relit le profil (role compris). A appeler avec chaque « tirer pour
+   * rafraichir » : les droits affiches dependent du role, et celui-ci peut
+   * avoir change depuis la connexion.
+   */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -79,6 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * l'organisation) doit laisser la session parfaitement intacte. L'erreur remonte
    * volontairement a l'appelant pour etre affichee.
    */
+  const refreshUser = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ['auth', 'me'] }),
+    [queryClient],
+  );
+
   const deleteAccount = useCallback(
     async (password: string) => {
       await deleteAccountMutation.mutateAsync({ password });
@@ -103,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         deleteAccount,
+        refreshUser,
       }}
     >
       {children}
