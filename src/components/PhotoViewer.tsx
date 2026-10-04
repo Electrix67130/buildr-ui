@@ -68,9 +68,11 @@ function ViewerContent({ images, index, onRequestClose }: Omit<Props, 'visible'>
     setCurrent(index);
   }, [index]);
 
-  // Apres une rotation, la liste se recale sur la photo courante.
+  // Apres une rotation, la liste se recale sur la photo courante. On ne
+  // remonte pas la liste (pas de `key` liee a la largeur) : la remonter
+  // rechargeait les images et l'ecran passait au noir le temps du retour.
   useEffect(() => {
-    const id = setTimeout(() => listRef.current?.scrollToIndex({ index: current, animated: false }), 0);
+    const id = setTimeout(() => listRef.current?.scrollToOffset({ offset: width * current, animated: false }), 0);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width]);
@@ -97,8 +99,8 @@ function ViewerContent({ images, index, onRequestClose }: Omit<Props, 'visible'>
     <Animated.View style={[styles.container, backdropStyle]}>
       <StatusBar hidden />
       <FlatList
-        key={width}
         ref={listRef}
+        extraData={width}
         data={images}
         horizontal
         pagingEnabled
