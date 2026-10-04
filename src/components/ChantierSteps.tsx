@@ -242,12 +242,13 @@ export default function ChantierSteps({
     }
   };
 
-  const submitValidateWithComment = async (skipComment = false) => {
+  // Un seul bouton : commentaire et photo sont facultatifs, « Valider »
+  // envoie ce qui a ete rempli. Un bouton « Sans commentaire » faisait
+  // doublon avec un champ laisse vide.
+  const submitValidateWithComment = async () => {
     if (!commentTarget) return;
-    const comment = skipComment ? null : draftComment.trim() || null;
+    const comment = draftComment.trim() || null;
     const target = commentTarget;
-    // « Sans commentaire » ne retire que le commentaire : une photo choisie
-    // part avec la validation dans les deux cas.
     const photo = draftPhoto;
     if (target.kind === 'substep') {
       await toggleSubstep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
@@ -576,6 +577,115 @@ export default function ChantierSteps({
 
   // Mode inline : pas de drag-drop direct (les libs nested ont trop de bugs avec le scroll
   // parent). Reorder via la modal "Réorganiser" qui isole un DraggableFlatList plein ecran.
+  // Visionneuse et fenetre de validation, communes aux deux modes (en ligne
+  // et plein ecran) : elles etaient dupliquees, et la copie du mode plein
+  // ecran — celui du chantier — n'avait pas recu la photo a la validation.
+  const validationModal = (
+    <>
+        <PhotoViewer
+          images={(viewer?.photos ?? []).map((p) => ({ uri: p.url }))}
+          index={viewer?.index ?? 0}
+          visible={viewer !== null}
+          onRequestClose={() => setViewer(null)}
+        />
+
+        {/* Modal — optional comment when validating */}
+        <Modal
+          visible={!!commentTarget}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setCommentTarget(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modal, { backgroundColor: colors.surface }, animatedCommentModalStyle]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {commentTarget?.kind === 'step' ? t('steps.validateStep') : t('steps.validateSubstep')}
+                </Text>
+                <TouchableOpacity
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  onPress={() => {
+                    setCommentTarget(null);
+                    setDraftComment('');
+                    setDraftPhoto(null);
+                  }}
+                >
+                  <X size={IconSize.md} color={colors.text2} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.modalLabel, { color: colors.text2 }]}>{commentTarget?.item.name}</Text>
+
+              <View style={styles.commentLabelRow}>
+                <MessageSquarePlus size={14} color={colors.mutedText} />
+                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.commentOptional')}</Text>
+              </View>
+              <TextInput
+                style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
+                value={draftComment}
+                onChangeText={setDraftComment}
+                placeholder={t('steps.commentExample')}
+                placeholderTextColor={colors.placeholder}
+                multiline
+                numberOfLines={3}
+              />
+
+              <View style={styles.commentLabelRow}>
+                <Camera size={14} color={colors.mutedText} />
+                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.photoOptional')}</Text>
+              </View>
+              {draftPhoto ? (
+                <View style={styles.draftPhotoRow}>
+                  <Image source={{ uri: draftPhoto.local_uri }} style={[styles.draftPhoto, { borderColor: colors.border }]} />
+                  <TouchableOpacity
+                    onPress={() => setDraftPhoto(null)}
+                    style={[styles.photoBtn, { borderColor: colors.border }]}
+                    accessibilityRole="button"
+                  >
+                    <X size={IconSize.sm} color={colors.text2} />
+                    <Text style={[styles.photoBtnText, { color: colors.text2 }]}>{t('steps.removePhoto')}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.photoBtnRow}>
+                  <TouchableOpacity
+                    onPress={() => attachPhoto(true)}
+                    disabled={pickingPhoto}
+                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
+                    accessibilityRole="button"
+                  >
+                    <Camera size={IconSize.sm} color={colors.primary} />
+                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.takePhoto')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => attachPhoto(false)}
+                    disabled={pickingPhoto}
+                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
+                    accessibilityRole="button"
+                  >
+                    <ImagePlus size={IconSize.sm} color={colors.primary} />
+                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.choosePhoto')}</Text>
+                  </TouchableOpacity>
+                  {pickingPhoto ? <ActivityIndicator size="small" color={colors.primary} /> : null}
+                </View>
+              )}
+
+              <View style={styles.commentActions}>
+                <TouchableOpacity
+                  style={[styles.modalSave, { backgroundColor: colors.green, flex: 1 }]}
+                  onPress={() => submitValidateWithComment()}
+                  disabled={pickingPhoto}
+                >
+                  <Check size={IconSize.sm} color="#FFFFFF" />
+                  <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+    </>
+  );
+
   if (inline) {
     return (
       <View>
@@ -686,112 +796,7 @@ export default function ChantierSteps({
           </View>
         </Modal>
 
-        <PhotoViewer
-          images={(viewer?.photos ?? []).map((p) => ({ uri: p.url }))}
-          index={viewer?.index ?? 0}
-          visible={viewer !== null}
-          onRequestClose={() => setViewer(null)}
-        />
-
-        {/* Modal — optional comment when validating */}
-        <Modal
-          visible={!!commentTarget}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setCommentTarget(null)}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modal, { backgroundColor: colors.surface }, animatedCommentModalStyle]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>
-                  {commentTarget?.kind === 'step' ? t('steps.validateStep') : t('steps.validateSubstep')}
-                </Text>
-                <TouchableOpacity
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  onPress={() => {
-                    setCommentTarget(null);
-                    setDraftComment('');
-                    setDraftPhoto(null);
-                  }}
-                >
-                  <X size={IconSize.md} color={colors.text2} />
-                </TouchableOpacity>
-              </View>
-
-              <Text style={[styles.modalLabel, { color: colors.text2 }]}>{commentTarget?.item.name}</Text>
-
-              <View style={styles.commentLabelRow}>
-                <MessageSquarePlus size={14} color={colors.mutedText} />
-                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.commentOptional')}</Text>
-              </View>
-              <TextInput
-                style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-                value={draftComment}
-                onChangeText={setDraftComment}
-                placeholder={t('steps.commentExample')}
-                placeholderTextColor={colors.placeholder}
-                multiline
-                numberOfLines={3}
-              />
-
-              <View style={styles.commentLabelRow}>
-                <Camera size={14} color={colors.mutedText} />
-                <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.photoOptional')}</Text>
-              </View>
-              {draftPhoto ? (
-                <View style={styles.draftPhotoRow}>
-                  <Image source={{ uri: draftPhoto.local_uri }} style={[styles.draftPhoto, { borderColor: colors.border }]} />
-                  <TouchableOpacity
-                    onPress={() => setDraftPhoto(null)}
-                    style={[styles.photoBtn, { borderColor: colors.border }]}
-                    accessibilityRole="button"
-                  >
-                    <X size={IconSize.sm} color={colors.text2} />
-                    <Text style={[styles.photoBtnText, { color: colors.text2 }]}>{t('steps.removePhoto')}</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.photoBtnRow}>
-                  <TouchableOpacity
-                    onPress={() => attachPhoto(true)}
-                    disabled={pickingPhoto}
-                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
-                    accessibilityRole="button"
-                  >
-                    <Camera size={IconSize.sm} color={colors.primary} />
-                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.takePhoto')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => attachPhoto(false)}
-                    disabled={pickingPhoto}
-                    style={[styles.photoBtn, { borderColor: colors.border, opacity: pickingPhoto ? 0.5 : 1 }]}
-                    accessibilityRole="button"
-                  >
-                    <ImagePlus size={IconSize.sm} color={colors.primary} />
-                    <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('steps.choosePhoto')}</Text>
-                  </TouchableOpacity>
-                  {pickingPhoto ? <ActivityIndicator size="small" color={colors.primary} /> : null}
-                </View>
-              )}
-
-              <View style={styles.commentActions}>
-                <TouchableOpacity
-                  style={[styles.modalSecondary, { borderColor: colors.border }]}
-                  onPress={() => submitValidateWithComment(true)}
-                >
-                  <Text style={[styles.modalSecondaryText, { color: colors.text }]}>{t('steps.noComment')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalSave, { backgroundColor: colors.green, flex: 1 }]}
-                  onPress={() => submitValidateWithComment(false)}
-                >
-                  <Check size={IconSize.sm} color="#FFFFFF" />
-                  <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
-          </View>
-        </Modal>
+        {validationModal}
 
         {/* Modal Reorder : drag-drop isole du scroll parent */}
         <Modal
@@ -976,63 +981,7 @@ export default function ChantierSteps({
         </View>
       </Modal>
 
-      {/* Modal — optional comment when validating */}
-      <Modal
-        visible={!!commentTarget}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setCommentTarget(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modal, { backgroundColor: colors.surface }, animatedCommentModalStyle]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {commentTarget?.kind === 'step' ? t('steps.validateStep') : t('steps.validateSubstep')}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setCommentTarget(null);
-                  setDraftComment('');
-                }}
-              >
-                <X size={IconSize.md} color={colors.text2} />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={[styles.modalLabel, { color: colors.text2 }]}>{commentTarget?.item.name}</Text>
-
-            <View style={styles.commentLabelRow}>
-              <MessageSquarePlus size={14} color={colors.mutedText} />
-              <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.commentOptional')}</Text>
-            </View>
-            <TextInput
-              style={[styles.commentInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              value={draftComment}
-              onChangeText={setDraftComment}
-              placeholder={t('steps.commentExample')}
-              placeholderTextColor={colors.placeholder}
-              multiline
-              numberOfLines={3}
-            />
-
-            <View style={styles.commentActions}>
-              <TouchableOpacity
-                style={[styles.modalSecondary, { borderColor: colors.border }]}
-                onPress={() => submitValidateWithComment(true)}
-              >
-                <Text style={[styles.modalSecondaryText, { color: colors.text }]}>{t('steps.noComment')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSave, { backgroundColor: colors.green, flex: 1 }]}
-                onPress={() => submitValidateWithComment(false)}
-              >
-                <Check size={IconSize.sm} color="#FFFFFF" />
-                <Text style={styles.modalSaveText}>{t('common.validate')}</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
+      {validationModal}
     </View>
   );
 }
