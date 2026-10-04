@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Pressable, FlatList, StyleSheet, Modal, Keyboard, Platform, Animated, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Reanimated from 'react-native-reanimated';
+import Reanimated, { ZoomIn, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { Send, Trash2, Pencil, X } from 'lucide-react-native';
+import { Send, Trash2, Pencil, X, Reply } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
+import { REACTION_EMOJIS, type ReactionEmoji } from '@/constants/reactions';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useComments, useCreateComment, useUpdateComment, useDeleteComment } from '@/api/hooks/useComments';
+import { useComments, useCreateComment, useUpdateComment, useDeleteComment, useToggleReaction } from '@/api/hooks/useComments';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Comment } from '@/api/types';
 import { useTranslation } from '@/contexts/I18nContext';
@@ -35,14 +36,19 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const createMutation = useCreateComment();
   const updateMutation = useUpdateComment();
   const deleteMutation = useDeleteComment();
+  const reactMutation = useToggleReaction(chantierId);
 
   const [text, setText] = useState('');
   const [selectedComment, setSelectedComment] = useState<CommentWithAuthor | null>(null);
+  const [replyTo, setReplyTo] = useState<CommentWithAuthor | null>(null);
   const [editText, setEditText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  // Message brievement mis en avant apres un saut depuis une citation.
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const animatedEditModalStyle = useKeyboardAwareModalStyle({ visible: isEditing });
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<CommentWithAuthor>>(null);
+  const inputRef = useRef<TextInput>(null);
   const keyboardPadding = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
   // Auto-scroll only quand l'utilisateur est deja proche du bas. Si il a scrolle pour relire
@@ -51,6 +57,8 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   // Premier rendu : on aligne la liste sur le dernier message peu importe la position.
   const isFirstContentLayoutRef = useRef(true);
   const NEAR_BOTTOM_THRESHOLD = 80;
+
+  const messages = data?.data ?? [];
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
@@ -95,12 +103,18 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const handleSend = useCallback(async () => {
     if (!text.trim()) return;
     const step_id = stepFilter && stepFilter !== 'general' ? stepFilter : null;
-    await createMutation.mutateAsync({ chantier_id: chantierId, step_id, content: text.trim() });
+    await createMutation.mutateAsync({
+      chantier_id: chantierId,
+      step_id,
+      content: text.trim(),
+      reply_to_id: replyTo?.id ?? null,
+    });
     setText('');
+    setReplyTo(null);
     // Envoi : on force le scroll pour que l'utilisateur voie son message.
     isNearBottomRef.current = true;
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 200);
-  }, [text, chantierId, stepFilter, createMutation]);
+  }, [text, chantierId, stepFilter, createMutation, replyTo]);
 
   const handleDelete = useCallback(() => {
     if (!selectedComment) return;
@@ -122,6 +136,32 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
     setEditText('');
   }, [selectedComment, editText, updateMutation]);
 
+  const handleStartReply = useCallback(() => {
+    if (!selectedComment) return;
+    setReplyTo(selectedComment);
+    setSelectedComment(null);
+    setTimeout(() => inputRef.current?.focus(), 150);
+  }, [selectedComment]);
+
+  const handleReact = useCallback(
+    (comment: CommentWithAuthor, emoji: ReactionEmoji) => {
+      reactMutation.mutate({ id: comment.id, emoji });
+    },
+    [reactMutation],
+  );
+
+  /** Saute au message cite et le met en avant un instant. */
+  const scrollToComment = useCallback(
+    (id: string) => {
+      const index = messages.findIndex((m) => m.id === id);
+      if (index < 0) return;
+      flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 });
+      setHighlightedId(id);
+      setTimeout(() => setHighlightedId((cur) => (cur === id ? null : cur)), 1600);
+    },
+    [messages],
+  );
+
   const formatTime = (date: string) => {
     const d = new Date(date);
     return t('comments.dateAtTime', {
@@ -130,28 +170,78 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
     });
   };
 
+  const authorName = (c: { author_id: string; first_name: string; last_name: string }) =>
+    c.author_id === user?.id ? t('comments.you') : `${c.first_name} ${c.last_name}`;
+
   const renderItem = useCallback(
     ({ item }: { item: CommentWithAuthor }) => {
       const isOwn = item.author_id === user?.id;
+      const highlighted = highlightedId === item.id;
+      const reactions = item.reactions ?? [];
       return (
-        <TouchableOpacity
-          activeOpacity={isOwn ? 0.7 : 1}
-          onPress={() => Keyboard.dismiss()}
-          onLongPress={() => (isOwn && !readonly) ? setSelectedComment(item) : undefined}
-          delayLongPress={300}
-          style={[styles.bubble, { backgroundColor: isOwn ? colors.primary + '15' : colors.itemBackground }]}
-        >
-          <View style={styles.bubbleHeader}>
-            <Text style={[styles.author, { color: colors.primary }]}>
-              {isOwn ? t('comments.you') : `${item.first_name} ${item.last_name}`}
-            </Text>
-            <Text style={[styles.time, { color: colors.mutedText }]}>{formatTime(item.created_at)}</Text>
-          </View>
-          <Text style={[styles.content, { color: colors.text }]}>{item.content}</Text>
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity
+            activeOpacity={readonly ? 1 : 0.7}
+            onPress={() => Keyboard.dismiss()}
+            onLongPress={() => (!readonly ? setSelectedComment(item) : undefined)}
+            delayLongPress={300}
+            style={[
+              styles.bubble,
+              { backgroundColor: isOwn ? colors.primary + '15' : colors.itemBackground },
+              highlighted ? { borderWidth: 1.5, borderColor: colors.primary } : null,
+            ]}
+          >
+            <View style={styles.bubbleHeader}>
+              <Text style={[styles.author, { color: colors.primary }]}>{authorName(item)}</Text>
+              <Text style={[styles.time, { color: colors.mutedText }]}>{formatTime(item.created_at)}</Text>
+            </View>
+
+            {item.reply_to ? (
+              <Pressable
+                onPress={() => scrollToComment(item.reply_to!.id)}
+                style={[styles.quote, { borderLeftColor: colors.primary, backgroundColor: colors.surface }]}
+                accessibilityRole="button"
+                accessibilityLabel={t('comments.replyingTo', { name: authorName(item.reply_to) })}
+              >
+                <Text style={[styles.quoteAuthor, { color: colors.primary }]} numberOfLines={1}>
+                  {authorName(item.reply_to)}
+                </Text>
+                <Text style={[styles.quoteText, { color: colors.text2 }]} numberOfLines={2}>
+                  {item.reply_to.content}
+                </Text>
+              </Pressable>
+            ) : null}
+
+            <Text style={[styles.content, { color: colors.text }]}>{item.content}</Text>
+          </TouchableOpacity>
+
+          {reactions.length > 0 ? (
+            <Reanimated.View style={styles.reactionRow} layout={LinearTransition.springify().damping(18)}>
+              {reactions.map((r) => (
+                <Reanimated.View key={r.emoji} entering={ZoomIn.springify().damping(12)} exiting={FadeOut.duration(120)} layout={LinearTransition}>
+                  <Pressable
+                    onPress={() => (!readonly ? handleReact(item, r.emoji as ReactionEmoji) : undefined)}
+                    style={[
+                      styles.reactionChip,
+                      {
+                        backgroundColor: r.mine ? colors.primary + '25' : colors.surface,
+                        borderColor: r.mine ? colors.primary : colors.border,
+                      },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: r.mine }}
+                  >
+                    <Text style={styles.reactionEmoji}>{r.emoji}</Text>
+                    <Text style={[styles.reactionCount, { color: r.mine ? colors.primary : colors.text2 }]}>{r.count}</Text>
+                  </Pressable>
+                </Reanimated.View>
+              ))}
+            </Reanimated.View>
+          ) : null}
+        </View>
       );
     },
-    [user, colors, readonly, locale, t],
+    [user, colors, readonly, locale, t, highlightedId, handleReact, scrollToComment],
   );
 
   return (
@@ -160,9 +250,10 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
         <Pressable style={styles.flex} onPress={() => Keyboard.dismiss()}>
           <FlatList
             ref={flatListRef}
-            data={data?.data ?? []}
+            data={messages}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
+            extraData={highlightedId}
             contentContainerStyle={styles.list}
             ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
             keyboardShouldPersistTaps="handled"
@@ -170,6 +261,11 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
             onScrollBeginDrag={() => Keyboard.dismiss()}
             onScroll={handleScroll}
             scrollEventThrottle={100}
+            onScrollToIndexFailed={({ index }) => {
+              // La cible n'est pas encore mesuree : on s'en approche, puis on reessaie.
+              flatListRef.current?.scrollToOffset({ offset: index * 80, animated: true });
+              setTimeout(() => flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 }), 250);
+            }}
             onContentSizeChange={() => {
               // Premier rendu : aligne sur le dernier message. Apres, on suit la conversation
               // uniquement si l'utilisateur est deja proche du bas — sinon il lit d'anciens
@@ -191,49 +287,104 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
           />
         </Pressable>
 
-        {!readonly && <View style={[styles.inputRow, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-            placeholder={t('comments.placeholder')}
-            placeholderTextColor={colors.placeholder}
-            value={text}
-            onChangeText={setText}
-            onFocus={onInputFocus}
-            multiline
-            accessibilityLabel={t('comments.write')}
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, { backgroundColor: text.trim() ? colors.primary : colors.itemBackground }]}
-            onPress={handleSend}
-            disabled={!text.trim() || createMutation.isPending}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.send')}
-          >
-            <Send size={IconSize.md} color={text.trim() ? '#FFFFFF' : colors.mutedText} />
-          </TouchableOpacity>
-        </View>}
+        {!readonly && (
+          <View style={[styles.composer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+            {replyTo ? (
+              <Reanimated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)} style={[styles.replyBar, { borderLeftColor: colors.primary, backgroundColor: colors.itemBackground }]}>
+                <Reply size={IconSize.sm} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.quoteAuthor, { color: colors.primary }]} numberOfLines={1}>
+                    {t('comments.replyingTo', { name: authorName(replyTo) })}
+                  </Text>
+                  <Text style={[styles.quoteText, { color: colors.text2 }]} numberOfLines={1}>
+                    {replyTo.content}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setReplyTo(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityLabel={t('common.cancel')}>
+                  <X size={IconSize.sm} color={colors.text2} />
+                </TouchableOpacity>
+              </Reanimated.View>
+            ) : null}
+            <View style={styles.inputRow}>
+              <TextInput
+                ref={inputRef}
+                style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
+                placeholder={t('comments.placeholder')}
+                placeholderTextColor={colors.placeholder}
+                value={text}
+                onChangeText={setText}
+                onFocus={onInputFocus}
+                multiline
+                accessibilityLabel={t('comments.write')}
+              />
+              <TouchableOpacity
+                style={[styles.sendBtn, { backgroundColor: text.trim() ? colors.primary : colors.itemBackground }]}
+                onPress={handleSend}
+                disabled={!text.trim() || createMutation.isPending}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.send')}
+              >
+                <Send size={IconSize.md} color={text.trim() ? '#FFFFFF' : colors.mutedText} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </Animated.View>
 
-      {/* Action sheet */}
+      {/* Action sheet : reactions, repondre, et pour ses propres messages modifier / supprimer */}
       <Modal visible={!!selectedComment && !isEditing} transparent animationType="fade">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelectedComment(null)}>
-          <View style={[styles.actionSheet, { backgroundColor: colors.surface }]}>
+          <View style={[styles.actionSheet, { backgroundColor: colors.surface, paddingBottom: Spacing.xl + insets.bottom }]}>
             {selectedComment && (
               <>
+                <View style={styles.reactionPicker} accessibilityLabel={t('comments.react')}>
+                  {REACTION_EMOJIS.map((emoji, i) => {
+                    const mine = selectedComment.reactions?.some((r) => r.emoji === emoji && r.mine);
+                    return (
+                      <Reanimated.View key={emoji} entering={ZoomIn.delay(i * 30).springify().damping(11)}>
+                        <Pressable
+                          onPress={() => {
+                            handleReact(selectedComment, emoji);
+                            setSelectedComment(null);
+                          }}
+                          style={({ pressed }) => [
+                            styles.reactionPickerItem,
+                            { backgroundColor: mine ? colors.primary + '25' : colors.itemBackground, transform: [{ scale: pressed ? 1.25 : 1 }] },
+                          ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={emoji}
+                          accessibilityState={{ selected: !!mine }}
+                        >
+                          <Text style={styles.reactionPickerEmoji}>{emoji}</Text>
+                        </Pressable>
+                      </Reanimated.View>
+                    );
+                  })}
+                </View>
+
                 <Text style={[styles.actionSheetPreview, { color: colors.text }]} numberOfLines={2}>
                   {selectedComment.content}
                 </Text>
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
-                <TouchableOpacity style={styles.actionRow} onPress={handleStartEdit}>
-                  <Pencil size={IconSize.lg} color={colors.primary} />
-                  <Text style={[styles.actionLabel, { color: colors.text }]}>{t('common.edit')}</Text>
+                <TouchableOpacity style={styles.actionRow} onPress={handleStartReply}>
+                  <Reply size={IconSize.lg} color={colors.primary} />
+                  <Text style={[styles.actionLabel, { color: colors.text }]}>{t('comments.reply')}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionRow} onPress={handleDelete}>
-                  <Trash2 size={IconSize.lg} color={colors.red} />
-                  <Text style={[styles.actionLabel, { color: colors.red }]}>{t('common.delete')}</Text>
-                </TouchableOpacity>
+                {selectedComment.author_id === user?.id ? (
+                  <>
+                    <TouchableOpacity style={styles.actionRow} onPress={handleStartEdit}>
+                      <Pencil size={IconSize.lg} color={colors.primary} />
+                      <Text style={[styles.actionLabel, { color: colors.text }]}>{t('common.edit')}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionRow} onPress={handleDelete}>
+                      <Trash2 size={IconSize.lg} color={colors.red} />
+                      <Text style={[styles.actionLabel, { color: colors.red }]}>{t('common.delete')}</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : null}
               </>
             )}
           </View>
@@ -285,13 +436,21 @@ const styles = StyleSheet.create({
   author: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
   time: { fontSize: FontSize.xs },
   content: { fontSize: FontSize.base, lineHeight: 20 },
+  quote: { borderLeftWidth: 3, borderRadius: Radius.sm, paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm, marginBottom: Spacing.sm },
+  quoteAuthor: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
+  quoteText: { fontSize: FontSize.sm },
+  reactionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginTop: -Spacing.xs, marginLeft: Spacing.sm },
+  reactionChip: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: Radius.pill, borderWidth: 1 },
+  reactionEmoji: { fontSize: 14, lineHeight: 18 },
+  reactionCount: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
   empty: { fontSize: FontSize.base, textAlign: 'center', paddingTop: Spacing.xxxl },
+  composer: { borderTopWidth: 1 },
+  replyBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginHorizontal: Spacing.md, marginTop: Spacing.sm, paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm, borderLeftWidth: 3, borderRadius: Radius.sm },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: Spacing.sm,
     padding: Spacing.md,
-    borderTopWidth: 1,
   },
   input: {
     flex: 1,
@@ -312,11 +471,13 @@ const styles = StyleSheet.create({
   },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
   actionSheet: { borderTopLeftRadius: Radius.xxl, borderTopRightRadius: Radius.xxl, padding: Spacing.xl },
+  reactionPicker: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.lg },
+  reactionPickerItem: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  reactionPickerEmoji: { fontSize: 22, lineHeight: 28 },
   actionSheetPreview: { fontSize: FontSize.base, marginBottom: Spacing.md },
   separator: { height: 1, marginVertical: Spacing.sm },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, paddingVertical: Spacing.lg },
   actionLabel: { fontSize: FontSize.lg },
-  cancelLabel: { fontSize: FontSize.lg, textAlign: 'center', width: '100%' },
   editSheet: { borderTopLeftRadius: Radius.xxl, borderTopRightRadius: Radius.xxl, padding: Spacing.xl },
   editHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
   editTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.semibold },

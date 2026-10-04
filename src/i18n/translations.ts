@@ -316,6 +316,9 @@ export type TranslationKeys =
   | 'comments.write'
   | 'comments.emptyMessages'
   | 'comments.sectionLabel'
+  | 'comments.reply'
+  | 'comments.replyingTo'
+  | 'comments.react'
   | 'comments.dateAtTime'
   | 'date.selectDates'
   | 'date.selectStartEnd'
@@ -874,6 +877,9 @@ const fr: Dictionary = {
   "comments.write": "Écrire un commentaire",
   "comments.emptyMessages": "Aucun message pour le moment.",
   "comments.sectionLabel": "DISCUSSION",
+  "comments.reply": "Répondre",
+  "comments.replyingTo": "Réponse à {name}",
+  "comments.react": "Réagir",
   "comments.dateAtTime": "{date} à {time}",
   "date.selectDates": "Sélectionner les dates",
   "date.selectStartEnd": "Sélectionner début et fin",
@@ -1431,6 +1437,9 @@ const en: Dictionary = {
   "comments.write": "Write a comment",
   "comments.emptyMessages": "No messages yet.",
   "comments.sectionLabel": "DISCUSSION",
+  "comments.reply": "Reply",
+  "comments.replyingTo": "Replying to {name}",
+  "comments.react": "React",
   "comments.dateAtTime": "{date} at {time}",
   "date.selectDates": "Select the dates",
   "date.selectStartEnd": "Select a start and an end",
@@ -1988,6 +1997,9 @@ const de: Dictionary = {
   "comments.write": "Kommentar schreiben",
   "comments.emptyMessages": "Noch keine Nachrichten.",
   "comments.sectionLabel": "DISKUSSION",
+  "comments.reply": "Antworten",
+  "comments.replyingTo": "Antwort an {name}",
+  "comments.react": "Reagieren",
   "comments.dateAtTime": "{date} um {time}",
   "date.selectDates": "Zeitraum auswählen",
   "date.selectStartEnd": "Beginn und Ende auswählen",
@@ -2545,6 +2557,9 @@ const es: Dictionary = {
   "comments.write": "Escribir un comentario",
   "comments.emptyMessages": "Aún no hay mensajes.",
   "comments.sectionLabel": "CONVERSACIÓN",
+  "comments.reply": "Responder",
+  "comments.replyingTo": "Respondiendo a {name}",
+  "comments.react": "Reaccionar",
   "comments.dateAtTime": "{date} a las {time}",
   "date.selectDates": "Seleccionar las fechas",
   "date.selectStartEnd": "Seleccionar inicio y fin",
@@ -3102,6 +3117,9 @@ const it: Dictionary = {
   "comments.write": "Scrivi un commento",
   "comments.emptyMessages": "Nessun messaggio al momento.",
   "comments.sectionLabel": "DISCUSSIONE",
+  "comments.reply": "Rispondi",
+  "comments.replyingTo": "In risposta a {name}",
+  "comments.react": "Reagisci",
   "comments.dateAtTime": "{date} alle {time}",
   "date.selectDates": "Seleziona le date",
   "date.selectStartEnd": "Seleziona inizio e fine",
@@ -3659,6 +3677,9 @@ const pt: Dictionary = {
   "comments.write": "Escrever um comentário",
   "comments.emptyMessages": "Ainda não há mensagens.",
   "comments.sectionLabel": "CONVERSA",
+  "comments.reply": "Responder",
+  "comments.replyingTo": "A responder a {name}",
+  "comments.react": "Reagir",
   "comments.dateAtTime": "{date} às {time}",
   "date.selectDates": "Selecionar as datas",
   "date.selectStartEnd": "Selecionar início e fim",
@@ -4216,6 +4237,9 @@ const tr: Dictionary = {
   "comments.write": "Yorum yaz",
   "comments.emptyMessages": "Henüz mesaj yok.",
   "comments.sectionLabel": "TARTIŞMA",
+  "comments.reply": "Yanıtla",
+  "comments.replyingTo": "{name} kişisine yanıt",
+  "comments.react": "Tepki ver",
   "comments.dateAtTime": "{date} {time}",
   "date.selectDates": "Tarihleri seç",
   "date.selectStartEnd": "Başlangıç ve bitiş seç",
@@ -4773,6 +4797,9 @@ const pl: Dictionary = {
   "comments.write": "Napisz komentarz",
   "comments.emptyMessages": "Brak wiadomości.",
   "comments.sectionLabel": "DYSKUSJA",
+  "comments.reply": "Odpowiedz",
+  "comments.replyingTo": "Odpowiedź dla {name}",
+  "comments.react": "Zareaguj",
   "comments.dateAtTime": "{date}, {time}",
   "date.selectDates": "Wybierz daty",
   "date.selectStartEnd": "Wybierz początek i koniec",

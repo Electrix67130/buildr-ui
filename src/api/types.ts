@@ -188,12 +188,31 @@ export interface UpdateChantierMemberInput {
 
 // --------------- Comment ---------------
 
+/** Le message cite au-dessus d'une reponse. */
+export interface CommentReplyPreview {
+  id: string;
+  content: string;
+  author_id: string;
+  first_name: string;
+  last_name: string;
+}
+
+/** Une reaction agregee : combien de personnes, et si j'en suis. */
+export interface CommentReaction {
+  emoji: string;
+  count: number;
+  mine: boolean;
+}
+
 export interface Comment {
   id: string;
   chantier_id: string;
   step_id: string | null;
   author_id: string;
   content: string;
+  reply_to_id?: string | null;
+  reply_to?: CommentReplyPreview | null;
+  reactions?: CommentReaction[];
   created_at: string;
   updated_at: string;
 }
@@ -201,6 +220,7 @@ export interface Comment {
 export interface CreateCommentInput {
   chantier_id: string;
   step_id?: string | null;
+  reply_to_id?: string | null;
   content: string;
 }
 
