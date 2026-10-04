@@ -11,6 +11,13 @@ interface Options {
   visible?: boolean;
   /** Ratio de la zone visible (ecran - clavier) que la modal peut occuper. Default 0.85. */
   maxHeightRatio?: number;
+  /**
+   * Ou la modal est ancree dans son overlay. `bottom` (defaut) : volet colle en
+   * bas, qu'on remonte de toute la hauteur du clavier. `center` : fenetre
+   * centree, qu'on ne remonte que de la moitie — le centre de la zone restee
+   * visible. La remonter de tout le clavier la plaquait en haut de l'ecran.
+   */
+  anchor?: 'bottom' | 'center';
 }
 
 /**
@@ -34,7 +41,8 @@ interface Options {
  * Le style statique modalContent ne doit PAS contenir maxHeight (ce hook le gere).
  */
 export function useKeyboardAwareModalStyle(opts: Options = {}) {
-  const { visible = true, maxHeightRatio = 0.85 } = opts;
+  const { visible = true, maxHeightRatio = 0.85, anchor = 'bottom' } = opts;
+  const shiftRatio = anchor === 'center' ? 0.5 : 1;
   const { height: screenHeight } = useWindowDimensions();
   // Si le clavier est deja ouvert au moment ou ce hook se mount (ex: la modal s'ouvre
   // alors qu'un input parent a deja deploye le clavier), aucun nouveau willShow ne va
@@ -93,7 +101,7 @@ export function useKeyboardAwareModalStyle(opts: Options = {}) {
       return { transform: [{ translateY: 0 }], maxHeight: screenHeight * maxHeightRatio };
     }
     return {
-      transform: [{ translateY: -animatedKeyboardHeight.value }],
+      transform: [{ translateY: -animatedKeyboardHeight.value * shiftRatio }],
       maxHeight: (screenHeight - animatedKeyboardHeight.value) * maxHeightRatio,
     };
   });

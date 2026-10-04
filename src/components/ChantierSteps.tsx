@@ -128,9 +128,10 @@ export default function ChantierSteps({
   >(null);
   const [draftComment, setDraftComment] = useState('');
   const animatedStepModalStyle = useKeyboardAwareModalStyle({
+    anchor: 'center',
     visible: addingStep || !!editingStep || !!addingSubstepFor || !!editingSubstep,
   });
-  const animatedCommentModalStyle = useKeyboardAwareModalStyle({ visible: !!commentTarget });
+  const animatedCommentModalStyle = useKeyboardAwareModalStyle({ anchor: 'center', visible: !!commentTarget });
   const [reorderModalOpen, setReorderModalOpen] = useState(false);
 
   const isManager = canManage && !readonly;
