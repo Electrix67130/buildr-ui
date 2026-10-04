@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   FlatList,
   Modal,
+  ScrollView,
   Linking,
   Alert,
   Pressable,
@@ -66,7 +67,12 @@ export default function EmergencyDetailScreen() {
   const deleteEmergency = useDeleteEmergency(chantierId ?? '');
 
   const [draft, setDraft] = useState('');
-  const [photoFullscreen, setPhotoFullscreen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null);
+  // Toutes les photos de l'urgence ; les anciennes n'ont que photo_url.
+  const photoUris = useMemo(() => {
+    const list = emergency?.photos?.map((p) => p.url) ?? [];
+    return list.length > 0 ? list : emergency?.photo_url ? [emergency.photo_url] : [];
+  }, [emergency]);
   const [selectedComment, setSelectedComment] = useState<EmergencyComment | null>(null);
   const [editText, setEditText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -244,14 +250,18 @@ export default function EmergencyDetailScreen() {
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           ListHeaderComponent={
             <View style={styles.headerBlock}>
-              {emergency.photo_url ? (
-                <TouchableOpacity
-                  onPress={() => setPhotoFullscreen(true)}
-                  activeOpacity={0.9}
-                  accessibilityLabel={t('photos.zoom')}
-                >
-                  <Image source={{ uri: emergency.photo_url }} style={styles.photo} resizeMode="cover" />
+              {photoUris.length === 1 ? (
+                <TouchableOpacity onPress={() => setPhotoIndex(0)} activeOpacity={0.9} accessibilityLabel={t('photos.zoom')}>
+                  <Image source={{ uri: photoUris[0] }} style={styles.photo} resizeMode="cover" />
                 </TouchableOpacity>
+              ) : photoUris.length > 1 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoStrip}>
+                  {photoUris.map((uri, i) => (
+                    <TouchableOpacity key={uri} onPress={() => setPhotoIndex(i)} activeOpacity={0.9} accessibilityLabel={t('photos.zoom')}>
+                      <Image source={{ uri }} style={styles.photoTile} resizeMode="cover" />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               ) : null}
 
               {hasGps ? (
@@ -423,12 +433,12 @@ export default function EmergencyDetailScreen() {
       {/* Photo en plein ecran : la visionneuse commune (zoom, paysage), dont la
           croix respecte l'encoche. L'ancienne modale lisait des marges nulles,
           un Modal ne recevant pas le contexte des zones sures de l'app. */}
-      {emergency.photo_url ? (
+      {photoUris.length > 0 ? (
         <PhotoViewer
-          images={[{ uri: emergency.photo_url }]}
-          index={0}
-          visible={photoFullscreen}
-          onRequestClose={() => setPhotoFullscreen(false)}
+          images={photoUris.map((uri) => ({ uri }))}
+          index={photoIndex ?? 0}
+          visible={photoIndex !== null}
+          onRequestClose={() => setPhotoIndex(null)}
         />
       ) : null}
     </SafeAreaView>
@@ -460,6 +470,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     backgroundColor: '#000',
   },
+  photoStrip: { gap: Spacing.sm },
+  photoTile: { width: 160, height: 160, borderRadius: Radius.lg, backgroundColor: '#000' },
 
   gpsRow: {
     flexDirection: 'row',

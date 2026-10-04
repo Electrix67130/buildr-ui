@@ -1,12 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 
+export interface EmergencyPhoto {
+  id: string;
+  url: string;
+  thumbnail_url: string | null;
+  created_at: string;
+}
+
 export interface Emergency {
   id: string;
   chantier_id: string;
   created_by: string;
+  /** Premiere photo, conservee pour l'ancien affichage ; `photos` a toutes. */
   photo_url: string | null;
   thumbnail_url: string | null;
+  photos?: EmergencyPhoto[];
   latitude: number | null;
   longitude: number | null;
   description: string | null;
@@ -26,6 +35,7 @@ export interface CreateEmergencyInput {
   chantier_id: string;
   photo_url?: string;
   thumbnail_url?: string;
+  photos?: { url: string; thumbnail_url?: string; file_size?: number; mime_type?: string }[];
   latitude?: number;
   longitude?: number;
   description?: string;

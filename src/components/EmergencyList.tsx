@@ -19,7 +19,7 @@ import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
-import { useEmergencies, useCreateEmergency, EmergencyWithAuthor } from '@/api/hooks/useEmergencies';
+import { useEmergencies, useCreateEmergency, EmergencyWithAuthor, type CreateEmergencyInput } from '@/api/hooks/useEmergencies';
 import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hooks/useChantierViews';
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
@@ -119,15 +119,26 @@ export default function EmergencyList({
           }
         }
 
+        // Depuis la galerie, plusieurs photos : un incident se montre souvent
+        // sous plusieurs angles.
         const result = useCamera
           ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
-          : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false });
-        if (result.canceled || !result.assets[0]) return;
+          : await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              quality: 1,
+              allowsEditing: false,
+              allowsMultipleSelection: true,
+              selectionLimit: 0,
+              orderedSelection: true,
+            });
+        if (result.canceled || result.assets.length === 0) return;
 
-        const asset = result.assets[0];
-        const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
-        const fileName = `emergency-${Date.now()}.jpg`;
-        const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
+        const photos: NonNullable<CreateEmergencyInput['photos']> = [];
+        for (const [i, asset] of result.assets.entries()) {
+          const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
+          const uploaded = await uploadFile(optimized.uri, `emergency-${Date.now()}-${i}.jpg`, optimized.mimeType);
+          photos.push({ url: uploaded.url, thumbnail_url: uploaded.thumbnail_url, file_size: uploaded.file_size, mime_type: uploaded.mime_type });
+        }
 
         // GPS du device au moment de la capture. Accuracy.High vise ~10 m :
         // sur un chantier, il faut pouvoir retrouver le point exact du danger,
@@ -155,8 +166,7 @@ export default function EmergencyList({
 
         await createMutation.mutateAsync({
           chantier_id: chantierId,
-          photo_url: uploaded.url,
-          thumbnail_url: uploaded.thumbnail_url,
+          photos,
           latitude,
           longitude,
         });
