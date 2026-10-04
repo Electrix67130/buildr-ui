@@ -19,6 +19,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Reanimated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
+import PhotoViewer from '@/components/PhotoViewer';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, MapPin, Navigation, Send, Trash2, Pencil, X } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
@@ -419,33 +420,17 @@ export default function EmergencyDetailScreen() {
         </View>
       </Modal>
 
-      {/* Fullscreen photo */}
-      <Modal
-        visible={photoFullscreen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setPhotoFullscreen(false)}
-      >
-        <Pressable style={styles.fullscreenOverlay} onPress={() => setPhotoFullscreen(false)}>
-          {emergency.photo_url ? (
-            <Image
-              source={{ uri: emergency.photo_url }}
-              style={styles.fullscreenImage}
-              resizeMode="contain"
-            />
-          ) : null}
-          <SafeAreaView style={styles.fullscreenClose} pointerEvents="box-none">
-            <TouchableOpacity
-              onPress={() => setPhotoFullscreen(false)}
-              style={[styles.closeBtn, Shadow.md]}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              accessibilityLabel={t('common.close')}
-            >
-              <X size={IconSize.lg} color="#FFFFFF" />
-            </TouchableOpacity>
-          </SafeAreaView>
-        </Pressable>
-      </Modal>
+      {/* Photo en plein ecran : la visionneuse commune (zoom, paysage), dont la
+          croix respecte l'encoche. L'ancienne modale lisait des marges nulles,
+          un Modal ne recevant pas le contexte des zones sures de l'app. */}
+      {emergency.photo_url ? (
+        <PhotoViewer
+          images={[{ uri: emergency.photo_url }]}
+          index={0}
+          visible={photoFullscreen}
+          onRequestClose={() => setPhotoFullscreen(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -559,9 +544,6 @@ const styles = StyleSheet.create({
   },
   saveBtnText: { textAlign: 'center', fontSize: FontSize.lg, fontWeight: FontWeight.semibold },
 
-  fullscreenOverlay: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
-  fullscreenImage: { width: '100%', height: '100%' },
-  fullscreenClose: { position: 'absolute', top: 0, right: 0, padding: Spacing.lg },
   closeBtn: {
     width: 44,
     height: 44,
