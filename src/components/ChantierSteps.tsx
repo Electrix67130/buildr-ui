@@ -246,7 +246,9 @@ export default function ChantierSteps({
     if (!commentTarget) return;
     const comment = skipComment ? null : draftComment.trim() || null;
     const target = commentTarget;
-    const photo = skipComment ? null : draftPhoto;
+    // « Sans commentaire » ne retire que le commentaire : une photo choisie
+    // part avec la validation dans les deux cas.
+    const photo = draftPhoto;
     if (target.kind === 'substep') {
       await toggleSubstep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
     } else {
