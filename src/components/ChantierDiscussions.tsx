@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   togglePillText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 
   // Pastille "non lu" sur l'icone du sous-onglet
-  pillIconWrap: { position: 'relative' },
+  pillIconWrap: { position: 'relative', marginRight: Spacing.sm },
   subUnreadBadge: {
     position: 'absolute',
     top: -6,
