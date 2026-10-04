@@ -17,44 +17,55 @@ export interface UploadedPhoto {
 type T = (key: TranslationKeys, params?: Record<string, string | number>) => string;
 
 /**
- * Prend ou choisit une photo, l'optimise et l'envoie.
+ * Prend une photo, ou en choisit plusieurs dans la galerie, les optimise et
+ * les envoie.
  *
- * Renvoie `null` si la personne annule ou refuse une permission (deja
- * expliquee par une alerte). La photo n'est pas encore enregistree cote API :
- * l'appelant decide a quoi la rattacher. Contrairement a la galerie, pas de
- * file d'attente hors ligne : la validation d'une etape est un geste court,
- * on prefere dire tout de suite que la photo n'est pas partie.
+ * Renvoie une liste vide si la personne annule ou refuse une permission (deja
+ * expliquee par une alerte). Les photos ne sont pas encore enregistrees cote
+ * API : l'appelant decide a quoi les rattacher. Contrairement a la galerie du
+ * chantier, pas de file d'attente hors ligne : la validation d'une etape est
+ * un geste court, on prefere dire tout de suite que la photo n'est pas partie.
  */
-export async function pickAndUploadPhoto(useCamera: boolean, t: T): Promise<UploadedPhoto | null> {
+export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<UploadedPhoto[]> {
   if (useCamera) {
     const camPerm = await ImagePicker.requestCameraPermissionsAsync();
     if (!camPerm.granted) {
       Alert.alert(t('urgence.cameraDenied'), t('urgence.cameraDeniedBody'));
-      return null;
+      return [];
     }
   }
   // iOS : la camera a aussi besoin de la photothèque pour enregistrer la prise.
   const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!libPerm.granted) {
     Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
-    return null;
+    return [];
   }
 
   const result = useCamera
     ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
-    : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false });
-  if (result.canceled || !result.assets[0]) return null;
+    : await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 1,
+        allowsEditing: false,
+        allowsMultipleSelection: true,
+        selectionLimit: 0,
+        orderedSelection: true,
+      });
+  if (result.canceled || result.assets.length === 0) return [];
 
-  const asset = result.assets[0];
   const taken_at = new Date().toISOString();
-  const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
-  const uploaded = await uploadFile(optimized.uri, `photo-${Date.now()}.jpg`, optimized.mimeType);
-  return {
-    url: uploaded.url,
-    thumbnail_url: uploaded.thumbnail_url,
-    file_size: uploaded.file_size,
-    mime_type: uploaded.mime_type,
-    taken_at,
-    local_uri: optimized.uri,
-  };
+  const uploaded: UploadedPhoto[] = [];
+  for (const asset of result.assets) {
+    const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
+    const file = await uploadFile(optimized.uri, `photo-${Date.now()}-${uploaded.length}.jpg`, optimized.mimeType);
+    uploaded.push({
+      url: file.url,
+      thumbnail_url: file.thumbnail_url,
+      file_size: file.file_size,
+      mime_type: file.mime_type,
+      taken_at,
+      local_uri: optimized.uri,
+    });
+  }
+  return uploaded;
 }

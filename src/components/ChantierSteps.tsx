@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import PhotoViewer from '@/components/PhotoViewer';
 import { useCreatePhoto } from '@/api/hooks/usePhotos';
-import { pickAndUploadPhoto, type UploadedPhoto } from '@/utils/pickPhoto';
+import { pickAndUploadPhotos, type UploadedPhoto } from '@/utils/pickPhoto';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
 import DraggableFlatList, {
@@ -226,15 +226,15 @@ export default function ChantierSteps({
   // au moment de valider. Si la personne referme sans valider, la photo reste
   // simplement un fichier orphelin, jamais une photo du chantier.
   const createPhoto = useCreatePhoto();
-  const [draftPhoto, setDraftPhoto] = useState<UploadedPhoto | null>(null);
+  const [draftPhotos, setDraftPhotos] = useState<UploadedPhoto[]>([]);
   const [pickingPhoto, setPickingPhoto] = useState(false);
   const [viewer, setViewer] = useState<{ photos: StepPhoto[]; index: number } | null>(null);
 
   const attachPhoto = async (useCamera: boolean) => {
     setPickingPhoto(true);
     try {
-      const photo = await pickAndUploadPhoto(useCamera, t);
-      if (photo) setDraftPhoto(photo);
+      const photos = await pickAndUploadPhotos(useCamera, t);
+      if (photos.length > 0) setDraftPhotos((cur) => [...cur, ...photos]);
     } catch (err) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     } finally {
@@ -249,24 +249,24 @@ export default function ChantierSteps({
     if (!commentTarget) return;
     const comment = draftComment.trim() || null;
     const target = commentTarget;
-    const photo = draftPhoto;
+    const photos = draftPhotos;
     if (target.kind === 'substep') {
       await toggleSubstep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
     } else {
       await toggleStep.mutateAsync({ id: target.item.id, validated: true, validation_comment: comment });
     }
-    if (photo) {
+    for (const photo of photos) {
       const { local_uri: _local, ...body } = photo;
       await createPhoto.mutateAsync({
         chantier_id: chantierId,
         ...body,
         ...(target.kind === 'substep' ? { substep_id: target.item.id } : { step_id: target.item.id }),
       });
-      refetch();
     }
+    if (photos.length > 0) refetch();
     setCommentTarget(null);
     setDraftComment('');
-    setDraftPhoto(null);
+    setDraftPhotos([]);
   };
 
   /** Rangee de vignettes sous une etape ou une sous-etape. */
@@ -607,7 +607,7 @@ export default function ChantierSteps({
                   onPress={() => {
                     setCommentTarget(null);
                     setDraftComment('');
-                    setDraftPhoto(null);
+                    setDraftPhotos([]);
                   }}
                 >
                   <X size={IconSize.md} color={colors.text2} />
@@ -634,19 +634,25 @@ export default function ChantierSteps({
                 <Camera size={14} color={colors.mutedText} />
                 <Text style={[styles.modalLabel, { color: colors.mutedText, marginTop: 0 }]}>{t('steps.photoOptional')}</Text>
               </View>
-              {draftPhoto ? (
-                <View style={styles.draftPhotoRow}>
-                  <Image source={{ uri: draftPhoto.local_uri }} style={[styles.draftPhoto, { borderColor: colors.border }]} />
-                  <TouchableOpacity
-                    onPress={() => setDraftPhoto(null)}
-                    style={[styles.photoBtn, { borderColor: colors.border }]}
-                    accessibilityRole="button"
-                  >
-                    <X size={IconSize.sm} color={colors.text2} />
-                    <Text style={[styles.photoBtnText, { color: colors.text2 }]}>{t('steps.removePhoto')}</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
+              {draftPhotos.length > 0 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.draftPhotoRow} contentContainerStyle={{ gap: Spacing.sm }}>
+                  {draftPhotos.map((photo, i) => (
+                    <View key={photo.url}>
+                      <Image source={{ uri: photo.local_uri }} style={[styles.draftPhoto, { borderColor: colors.border }]} />
+                      <TouchableOpacity
+                        onPress={() => setDraftPhotos((cur) => cur.filter((_, j) => j !== i))}
+                        style={[styles.draftPhotoRemove, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                        hitSlop={6}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('steps.removePhoto')}
+                      >
+                        <X size={12} color={colors.text2} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : null}
+              {(
                 <View style={styles.photoBtnRow}>
                   <TouchableOpacity
                     onPress={() => attachPhoto(true)}
@@ -1041,8 +1047,9 @@ const styles = StyleSheet.create({
   photoBtnRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.xs, flexWrap: 'wrap' },
   photoBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md, borderRadius: Radius.md, borderWidth: 1 },
   photoBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
-  draftPhotoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.xs },
+  draftPhotoRow: { marginTop: Spacing.xs, flexGrow: 0 },
   draftPhoto: { width: 72, height: 72, borderRadius: Radius.md, borderWidth: 1 },
+  draftPhotoRemove: { position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 
   rowActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   iconBtn: { padding: Spacing.xs, borderRadius: Radius.sm },

@@ -39,7 +39,8 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
   const colors = Colors[colorScheme];
 
   const [showTypeModal, setShowTypeModal] = useState(false);
-  const [pendingFile, setPendingFile] = useState<{ name: string; uri: string; size?: number; mimeType?: string } | null>(null);
+  // Plusieurs fichiers d'un coup : un seul type est demande, applique a tous.
+  const [pendingFiles, setPendingFiles] = useState<{ name: string; uri: string; size?: number; mimeType?: string }[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<(Document & { first_name: string; last_name: string }) | null>(null);
 
   const { data, isLoading, refetch, isRefetching } = useDocuments(chantierId);
@@ -53,18 +54,18 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
     if (isPickingRef.current) return;
     isPickingRef.current = true;
     try {
-      const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true });
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
+      const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true, multiple: true });
+      if (!result.canceled && result.assets.length > 0) {
         const MAX_SIZE = 10 * 1024 * 1024;
-        if (asset.size && asset.size > MAX_SIZE) {
+        const tooLarge = result.assets.find((a) => a.size && a.size > MAX_SIZE);
+        if (tooLarge) {
           Alert.alert(
             t('documents.tooLarge'),
-            t('documents.tooLargeBody', { size: (asset.size / (1024 * 1024)).toFixed(1) }),
+            t('documents.tooLargeBody', { size: ((tooLarge.size ?? 0) / (1024 * 1024)).toFixed(1) }),
           );
           return;
         }
-        setPendingFile({ name: asset.name, uri: asset.uri, size: asset.size, mimeType: asset.mimeType || undefined });
+        setPendingFiles(result.assets.map((asset) => ({ name: asset.name, uri: asset.uri, size: asset.size, mimeType: asset.mimeType || undefined })));
         setShowTypeModal(true);
       }
     } catch (err) {
@@ -88,17 +89,18 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.9,
+        allowsMultipleSelection: true,
+        selectionLimit: 0,
+        orderedSelection: true,
       });
-      if (result.canceled || !result.assets[0]) return;
+      if (result.canceled || result.assets.length === 0) return;
 
-      const asset = result.assets[0];
-      const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
-      const fileName = asset.fileName ?? `photo-${Date.now()}.jpg`;
-      setPendingFile({
-        name: fileName,
-        uri: optimized.uri,
-        mimeType: 'image/jpeg',
-      });
+      const files = [];
+      for (const [i, asset] of result.assets.entries()) {
+        const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
+        files.push({ name: asset.fileName ?? `photo-${Date.now()}-${i}.jpg`, uri: optimized.uri, mimeType: 'image/jpeg' });
+      }
+      setPendingFiles(files);
       setShowTypeModal(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : t('common.error');
@@ -110,22 +112,23 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
 
 
   const handleSelectType = useCallback(async (type: DocumentType) => {
-    if (!pendingFile) return;
+    if (pendingFiles.length === 0) return;
     setShowTypeModal(false);
 
     // Upload file to server first, then create DB entry with the server URL
-    const uploaded = await uploadFile(pendingFile.uri, pendingFile.name, pendingFile.mimeType);
-
-    await createMutation.mutateAsync({
-      chantier_id: chantierId,
-      name: pendingFile.name,
-      type,
-      url: uploaded.url,
-      file_size: uploaded.file_size,
-      mime_type: uploaded.mime_type,
-    });
-    setPendingFile(null);
-  }, [pendingFile, chantierId, createMutation]);
+    for (const file of pendingFiles) {
+      const uploaded = await uploadFile(file.uri, file.name, file.mimeType);
+      await createMutation.mutateAsync({
+        chantier_id: chantierId,
+        name: file.name,
+        type,
+        url: uploaded.url,
+        file_size: uploaded.file_size,
+        mime_type: uploaded.mime_type,
+      });
+    }
+    setPendingFiles([]);
+  }, [pendingFiles, chantierId, createMutation]);
 
   const handleOpen = useCallback(async () => {
     if (!selectedDoc) return;
@@ -288,11 +291,13 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
             <View style={styles.typeModalHeader}>
               <View>
                 <Text style={[styles.typeModalTitle, { color: colors.text }]}>{t('documents.typeTitle')}</Text>
-                {pendingFile && (
-                  <Text style={[styles.typeModalFile, { color: colors.mutedText }]} numberOfLines={1}>{pendingFile.name}</Text>
+                {pendingFiles.length > 0 && (
+                  <Text style={[styles.typeModalFile, { color: colors.mutedText }]} numberOfLines={1}>
+                    {pendingFiles.length === 1 ? pendingFiles[0].name : t('documents.filesSelected', { count: pendingFiles.length })}
+                  </Text>
                 )}
               </View>
-              <TouchableOpacity onPress={() => { setShowTypeModal(false); setPendingFile(null); }} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <TouchableOpacity onPress={() => { setShowTypeModal(false); setPendingFiles([]); }} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
             </View>

@@ -287,6 +287,7 @@ export type TranslationKeys =
   | 'documents.tooLarge'
   | 'documents.tooLargeBody'
   | 'documents.galleryDeniedBody'
+  | 'documents.filesSelected'
   | 'documents.sizeB'
   | 'documents.sizeKb'
   | 'documents.sizeMb'
@@ -848,6 +849,7 @@ const fr: Dictionary = {
   "documents.tooLarge": "Fichier trop volumineux",
   "documents.tooLargeBody": "Ce fichier fait {size} Mo. La taille maximale autorisée est 10 Mo.\n\nConseil : si c’est un PDF, compressez-le (par exemple avec ilovepdf.com) avant de l’importer.",
   "documents.galleryDeniedBody": "Autorise l’accès aux photos dans les réglages de l’app pour pouvoir importer depuis la galerie.",
+  "documents.filesSelected": "{count} fichiers sélectionnés",
   "documents.sizeB": "{size} o",
   "documents.sizeKb": "{size} Ko",
   "documents.sizeMb": "{size} Mo",
@@ -1408,6 +1410,7 @@ const en: Dictionary = {
   "documents.tooLarge": "File too large",
   "documents.tooLargeBody": "This file is {size} MB. The maximum allowed size is 10 MB.\n\nTip: if it is a PDF, compress it (for example with ilovepdf.com) before uploading.",
   "documents.galleryDeniedBody": "Allow access to photos in the app settings to import from the gallery.",
+  "documents.filesSelected": "{count} files selected",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -1968,6 +1971,7 @@ const de: Dictionary = {
   "documents.tooLarge": "Datei zu groß",
   "documents.tooLargeBody": "Diese Datei ist {size} MB groß. Maximal erlaubt sind 10 MB.\n\nTipp: Bei einer PDF komprimiere sie vorher, zum Beispiel mit ilovepdf.com.",
   "documents.galleryDeniedBody": "Erlaube den Zugriff auf Fotos in den App-Einstellungen, um aus der Galerie zu importieren.",
+  "documents.filesSelected": "{count} Dateien ausgewählt",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -2528,6 +2532,7 @@ const es: Dictionary = {
   "documents.tooLarge": "Archivo demasiado grande",
   "documents.tooLargeBody": "Este archivo pesa {size} MB. El tamaño máximo permitido es 10 MB.\n\nConsejo: si es un PDF, comprímelo (por ejemplo con ilovepdf.com) antes de subirlo.",
   "documents.galleryDeniedBody": "Permite el acceso a las fotos en los ajustes de la app para importar desde la galería.",
+  "documents.filesSelected": "{count} archivos seleccionados",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -3088,6 +3093,7 @@ const it: Dictionary = {
   "documents.tooLarge": "File troppo grande",
   "documents.tooLargeBody": "Questo file pesa {size} MB. La dimensione massima consentita è 10 MB.\n\nSuggerimento: se è un PDF, comprimilo (ad esempio con ilovepdf.com) prima di caricarlo.",
   "documents.galleryDeniedBody": "Autorizza l’accesso alle foto nelle impostazioni dell’app per importare dalla galleria.",
+  "documents.filesSelected": "{count} file selezionati",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -3648,6 +3654,7 @@ const pt: Dictionary = {
   "documents.tooLarge": "Ficheiro demasiado grande",
   "documents.tooLargeBody": "Este ficheiro tem {size} MB. O tamanho máximo permitido é 10 MB.\n\nDica: se for um PDF, comprima-o (por exemplo em ilovepdf.com) antes de o importar.",
   "documents.galleryDeniedBody": "Autoriza o acesso às fotos nas definições da app para importar da galeria.",
+  "documents.filesSelected": "{count} ficheiros selecionados",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -4208,6 +4215,7 @@ const tr: Dictionary = {
   "documents.tooLarge": "Dosya çok büyük",
   "documents.tooLargeBody": "Bu dosya {size} MB. İzin verilen en büyük boyut 10 MB.\n\nİpucu: PDF ise yüklemeden önce sıkıştırın (örneğin ilovepdf.com ile).",
   "documents.galleryDeniedBody": "Galeriden içe aktarmak için uygulama ayarlarından fotoğraflara erişime izin verin.",
+  "documents.filesSelected": "{count} dosya seçildi",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",
@@ -4768,6 +4776,7 @@ const pl: Dictionary = {
   "documents.tooLarge": "Plik jest za duży",
   "documents.tooLargeBody": "Ten plik ma {size} MB. Maksymalny dopuszczalny rozmiar to 10 MB.\n\nWskazówka: jeśli to PDF, skompresuj go (np. na ilovepdf.com) przed wysłaniem.",
   "documents.galleryDeniedBody": "Zezwól na dostęp do zdjęć w ustawieniach aplikacji, aby importować z galerii.",
+  "documents.filesSelected": "Wybrano {count} plików",
   "documents.sizeB": "{size} B",
   "documents.sizeKb": "{size} KB",
   "documents.sizeMb": "{size} MB",

@@ -62,25 +62,35 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
         }
       }
 
+      // Depuis la galerie, plusieurs photos d'un coup : un chantier se
+      // documente par rafales, et une selection par une etait un calvaire.
       const result = useCamera
         ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
-        : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false });
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            quality: 1,
+            allowsEditing: false,
+            allowsMultipleSelection: true,
+            selectionLimit: 0,
+            orderedSelection: true,
+          });
 
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        // L'heure de la prise de vue, capturee tout de suite : une photo
-        // enregistree hors ligne et envoyee le soir doit apparaitre a l'heure ou
-        // elle a ete prise, sinon le fil d'avancement du chantier ment.
-        const takenAt = new Date().toISOString();
+      if (result.canceled || result.assets.length === 0) return;
+      // L'heure de la prise de vue, capturee tout de suite : une photo
+      // enregistree hors ligne et envoyee le soir doit apparaitre a l'heure ou
+      // elle a ete prise, sinon le fil d'avancement du chantier ment.
+      const takenAt = new Date().toISOString();
+      let queued = 0;
 
+      for (const asset of result.assets) {
         if (!online) {
           await enqueuePhoto({ chantierId, photo: asset, takenAt });
-          Alert.alert(t('offline.banner'), t('offline.photoQueued'));
-          return;
+          queued += 1;
+          continue;
         }
 
         const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
-        const fileName = `photo-${Date.now()}.jpg`;
+        const fileName = `photo-${Date.now()}-${queued}.jpg`;
         try {
           const uploaded = await uploadFile(optimized.uri, fileName, optimized.mimeType);
           await createMutation.mutateAsync({
@@ -98,9 +108,10 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
           // erreur, et il faut la dire.
           if (await probeApi()) throw err;
           await enqueuePhoto({ chantierId, photo: asset, takenAt });
-          Alert.alert(t('offline.banner'), t('offline.photoQueued'));
+          queued += 1;
         }
       }
+      if (queued > 0) Alert.alert(t('offline.banner'), t('offline.photoQueued'));
     } catch (err) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     }
