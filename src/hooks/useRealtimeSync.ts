@@ -48,7 +48,9 @@ export function useRealtimeSync({ enabled, onSessionReplaced, onAccountDisabled,
   // Les callbacks changent a chaque rendu ; l'effet ne se rebranche que sur
   // `enabled`. Une ref garde toujours la derniere version.
   const callbacks = useRef({ onSessionReplaced, onAccountDisabled, onAccountDeleted });
-  callbacks.current = { onSessionReplaced, onAccountDisabled, onAccountDeleted };
+  useEffect(() => {
+    callbacks.current = { onSessionReplaced, onAccountDisabled, onAccountDeleted };
+  });
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptRef = useRef(0);
