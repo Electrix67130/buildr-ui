@@ -21,8 +21,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Reanimated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
 import PhotoViewer from '@/components/PhotoViewer';
+import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Navigation, Send, Trash2, Pencil, X } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Navigation, Send, Trash2, Pencil, X, Flag } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -74,6 +75,7 @@ export default function EmergencyDetailScreen() {
     return list.length > 0 ? list : emergency?.photo_url ? [emergency.photo_url] : [];
   }, [emergency]);
   const [selectedComment, setSelectedComment] = useState<EmergencyComment | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
   const [editText, setEditText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const animatedEditModalStyle = useKeyboardAwareModalStyle({ visible: isEditing });
@@ -297,7 +299,7 @@ export default function EmergencyDetailScreen() {
               <TouchableOpacity
                 activeOpacity={isOwn ? 0.7 : 1}
                 onPress={() => Keyboard.dismiss()}
-                onLongPress={() => (isOwn ? setSelectedComment(item) : undefined)}
+                onLongPress={() => setSelectedComment(item)}
                 delayLongPress={300}
                 style={[
                   styles.bubble,
@@ -366,14 +368,31 @@ export default function EmergencyDetailScreen() {
                   {selectedComment.content}
                 </Text>
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                {selectedComment.author_id !== user?.id ? (
+                  <TouchableOpacity
+                    style={styles.actionRow}
+                    onPress={() => {
+                      const c = selectedComment;
+                      setSelectedComment(null);
+                      setReportTarget({ type: 'emergency_comment', id: c.id, label: c.content });
+                    }}
+                  >
+                    <Flag size={IconSize.lg} color={colors.red} />
+                    <Text style={[styles.actionLabel, { color: colors.red }]}>{t('report.action')}</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {selectedComment.author_id === user?.id ? (
                 <TouchableOpacity style={styles.actionRow} onPress={handleStartEdit}>
                   <Pencil size={IconSize.lg} color={colors.primary} />
                   <Text style={[styles.actionLabel, { color: colors.text }]}>{t('common.edit')}</Text>
                 </TouchableOpacity>
+                ) : null}
+                {selectedComment.author_id === user?.id ? (
                 <TouchableOpacity style={styles.actionRow} onPress={handleDeleteComment}>
                   <Trash2 size={IconSize.lg} color={colors.red} />
                   <Text style={[styles.actionLabel, { color: colors.red }]}>{t('common.delete')}</Text>
                 </TouchableOpacity>
+                ) : null}
               </>
             )}
           </View>
@@ -433,6 +452,8 @@ export default function EmergencyDetailScreen() {
       {/* Photo en plein ecran : la visionneuse commune (zoom, paysage), dont la
           croix respecte l'encoche. L'ancienne modale lisait des marges nulles,
           un Modal ne recevant pas le contexte des zones sures de l'app. */}
+      <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
+
       {photoUris.length > 0 ? (
         <PhotoViewer
           images={photoUris.map((uri) => ({ uri }))}

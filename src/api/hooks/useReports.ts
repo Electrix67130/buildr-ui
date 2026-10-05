@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 
-export type ReportTarget = 'comment' | 'photo' | 'user';
+export type ReportTarget = 'comment' | 'emergency_comment' | 'photo' | 'user';
 export type ReportReason = 'inappropriate' | 'harassment' | 'off_topic' | 'other';
 export const REPORT_REASONS: ReportReason[] = ['inappropriate', 'harassment', 'off_topic', 'other'];
 
