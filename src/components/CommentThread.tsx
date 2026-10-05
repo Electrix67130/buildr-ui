@@ -51,19 +51,24 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const inputRef = useRef<TextInput>(null);
   const keyboardPadding = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
-  // Auto-scroll only quand l'utilisateur est deja proche du bas. Si il a scrolle pour relire
-  // d'anciens messages, on respecte sa position (clavier qui s'ouvre, nouveau message, etc.).
+  // Liste inversee : le dernier message est a l'offset 0, donc la liste
+  // s'ouvre dessus sans rien calculer, meme avec des centaines de messages de
+  // hauteurs variables. Un scrollToEnd au premier rendu n'atteignait que la
+  // fin de ce qui etait deja mesure, et laissait au milieu du fil.
   const isNearBottomRef = useRef(true);
-  // Premier rendu : on aligne la liste sur le dernier message peu importe la position.
-  const isFirstContentLayoutRef = useRef(true);
   const NEAR_BOTTOM_THRESHOLD = 80;
 
   const messages = data?.data ?? [];
+  // Du plus recent au plus ancien, pour la liste inversee.
+  const reversed = [...messages].reverse();
 
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
-    isNearBottomRef.current = distanceFromBottom < NEAR_BOTTOM_THRESHOLD;
+    // Inversee : etre « en bas » du fil, c'est etre pres de l'offset 0.
+    isNearBottomRef.current = e.nativeEvent.contentOffset.y < NEAR_BOTTOM_THRESHOLD;
+  }, []);
+
+  const scrollToLatest = useCallback((animated: boolean) => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated });
   }, []);
 
   // Listen to keyboard events and animate padding
@@ -82,7 +87,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
       // Suit la conversation uniquement si on etait deja en bas — sinon on respecte
       // la position de lecture de l'utilisateur.
       if (isNearBottomRef.current) {
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+        setTimeout(() => scrollToLatest(true), 100);
       }
     });
 
@@ -98,7 +103,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
       showSub.remove();
       hideSub.remove();
     };
-  }, [keyboardPadding]);
+  }, [keyboardPadding, scrollToLatest]);
 
   const handleSend = useCallback(async () => {
     if (!text.trim()) return;
@@ -113,8 +118,8 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
     setReplyTo(null);
     // Envoi : on force le scroll pour que l'utilisateur voie son message.
     isNearBottomRef.current = true;
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 200);
-  }, [text, chantierId, stepFilter, createMutation, replyTo]);
+    setTimeout(() => scrollToLatest(true), 200);
+  }, [text, chantierId, stepFilter, createMutation, replyTo, scrollToLatest]);
 
   const handleDelete = useCallback(() => {
     if (!selectedComment) return;
@@ -153,13 +158,13 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   /** Saute au message cite et le met en avant un instant. */
   const scrollToComment = useCallback(
     (id: string) => {
-      const index = messages.findIndex((m) => m.id === id);
+      const index = reversed.findIndex((m) => m.id === id);
       if (index < 0) return;
-      flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 });
+      flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
       setHighlightedId(id);
       setTimeout(() => setHighlightedId((cur) => (cur === id ? null : cur)), 1600);
     },
-    [messages],
+    [reversed],
   );
 
   const formatTime = (date: string) => {
@@ -250,7 +255,8 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
         <Pressable style={styles.flex} onPress={() => Keyboard.dismiss()}>
           <FlatList
             ref={flatListRef}
-            data={messages}
+            data={reversed}
+            inverted
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             extraData={highlightedId}
@@ -264,18 +270,11 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
             onScrollToIndexFailed={({ index }) => {
               // La cible n'est pas encore mesuree : on s'en approche, puis on reessaie.
               flatListRef.current?.scrollToOffset({ offset: index * 80, animated: true });
-              setTimeout(() => flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.3 }), 250);
+              setTimeout(() => flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 }), 250);
             }}
-            onContentSizeChange={() => {
-              // Premier rendu : aligne sur le dernier message. Apres, on suit la conversation
-              // uniquement si l'utilisateur est deja proche du bas — sinon il lit d'anciens
-              // messages, on ne le fait pas sauter.
-              if (isFirstContentLayoutRef.current || isNearBottomRef.current) {
-                flatListRef.current?.scrollToEnd({ animated: false });
-                isFirstContentLayoutRef.current = false;
-              }
-            }}
-            ListHeaderComponent={listHeader as React.ReactElement | null}
+            // Inversee, le contenu rendu au-dessus de la liste passe en pied, qui
+            // s'affiche visuellement en haut, au-dessus du plus ancien message.
+            ListFooterComponent={listHeader as React.ReactElement | null}
             refreshControl={
               <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />
             }
