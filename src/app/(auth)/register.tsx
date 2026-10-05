@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LanguageSwitch from '@/components/LanguageSwitch';
 import { ExternalLink, Mail } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
@@ -70,11 +71,16 @@ export default function RegisterScreen() {
           </TouchableOpacity>
         </Link>
       </View>
+      {/* Changer de langue avant d'etre connecte : le selecteur du profil est derriere l'authentification. */}
+      <View style={styles.langBar}>
+        <LanguageSwitch />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  langBar: { paddingBottom: Spacing.lg, paddingTop: Spacing.sm, alignItems: 'center' },
   container: { flex: 1 },
   content: { flex: 1, padding: Spacing.xxl, justifyContent: 'center' },
   iconBubble: {

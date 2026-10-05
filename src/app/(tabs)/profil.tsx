@@ -676,7 +676,7 @@ export default function ProfilScreen() {
                         accessibilityLabel={loc.label}
                       >
                         <Text style={[styles.langCode, { color: isActive ? colors.primary : colors.mutedText }]}>
-                          {loc.code.toUpperCase()}
+                          {loc.flag}
                         </Text>
                         <Text style={[styles.langLabel, { color: isActive ? colors.primary : colors.text2 }]}>
                           {loc.label}

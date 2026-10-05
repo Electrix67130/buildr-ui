@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LanguageSwitch from '@/components/LanguageSwitch';
 import { ArrowLeft } from 'lucide-react-native';
 import { apiFetch, ApiError } from '@/api/client';
 import { Colors } from '@/constants/Colors';
@@ -117,11 +118,16 @@ export default function ForgotPasswordScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+      {/* Changer de langue avant d'etre connecte : le selecteur du profil est derriere l'authentification. */}
+      <View style={styles.langBar}>
+        <LanguageSwitch />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  langBar: { paddingBottom: Spacing.lg, paddingTop: Spacing.sm, alignItems: 'center' },
   container: { flex: 1 },
   flex: { flex: 1 },
   scrollContent: { flexGrow: 1, paddingHorizontal: Spacing.xxl, paddingTop: Spacing.lg },

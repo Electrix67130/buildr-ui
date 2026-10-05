@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LanguageSwitch from '@/components/LanguageSwitch';
 import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { MailCheck } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
@@ -245,11 +246,16 @@ export default function InviteScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {/* Changer de langue avant d'etre connecte : le selecteur du profil est derriere l'authentification. */}
+      <View style={styles.langBar}>
+        <LanguageSwitch />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  langBar: { paddingBottom: Spacing.lg, paddingTop: Spacing.sm, alignItems: 'center' },
   container: { flex: 1 },
   flex: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, gap: Spacing.md },
