@@ -17,6 +17,9 @@ import TeamManager from '@/components/TeamManager';
 import ChantierDiscussions, { DiscussionSubTab } from '@/components/ChantierDiscussions';
 import EmergencyList, { EmergencySplitTab } from '@/components/EmergencyList';
 import { useChantierMembers } from '@/api/hooks/useMembers';
+import { usePhotos } from '@/api/hooks/usePhotos';
+import { useEmergencies } from '@/api/hooks/useEmergencies';
+import { prefetchImages } from '@/components/FadeImage';
 import { useUnreadCounts, useMarkTabViewed } from '@/api/hooks/useChantierViews';
 import type { TranslationKeys } from '@/i18n/translations';
 import { useTranslation } from '@/contexts/I18nContext';
@@ -94,6 +97,22 @@ export default function ChantierDetailScreen() {
   const canViewDocuments =
     isAdmin || isCreator || !!currentMember?.can_view_documents || isGestionnaireReseau;
   const canViewEmergencies = isAdmin || isCreator || !!currentMember;
+
+  // Photos et urgences sont chargees des l'ouverture du chantier, pas a
+  // l'arrivee dans leur onglet : les listes sont deja en cache, et les
+  // vignettes des premieres photos deja dans le cache d'images. Les onglets
+  // s'ouvrent pleins au lieu de se remplir sous les yeux.
+  const photosPreload = usePhotos(canViewPhotos ? id : undefined);
+  const emergenciesPreload = useEmergencies(canViewEmergencies ? id : undefined);
+  useEffect(() => {
+    const photos = photosPreload.data?.data ?? [];
+    prefetchImages(photos.slice(0, 24).map((p) => p.thumbnail_url || p.url));
+    prefetchImages(photos.slice(0, 6).map((p) => p.url));
+  }, [photosPreload.data]);
+  useEffect(() => {
+    const items = emergenciesPreload.data?.data ?? [];
+    prefetchImages(items.slice(0, 12).map((e) => e.thumbnail_url || e.photo_url));
+  }, [emergenciesPreload.data]);
   // Urgence/Reclamation :
   // - admin / creator / manager → mode split (deux sous-onglets Urgences/Reclamations)
   // - ouvrier → mode urgence (terrain uniquement)
