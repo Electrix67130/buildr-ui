@@ -23,3 +23,6 @@ expo-env.d.ts
 # Credentials EAS telechargees en local : mots de passe du keystore en clair
 credentials.json
 *.keystore
+
+# Cle du compte de service Google Play (eas submit -p android) : jamais versionnee
+google-play-service-account.json

@@ -1,0 +1,24 @@
+# Verification continue Buildr — app mobile.
+# Sur chaque push et pull request : typage et tests Jest. Les mises a jour en
+# direct (eas update) et les builds natifs restent lances a la main : ici on
+# s'assure seulement que ce qui part est vert.
+name: CI mobile
+
+on:
+  push:
+    branches: [master]
+  pull_request: {}
+
+jobs:
+  test:
+    name: Typecheck + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx jest --ci
