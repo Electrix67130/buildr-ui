@@ -16,6 +16,7 @@ import {
 import PhotoViewer from '@/components/PhotoViewer';
 import { useCreatePhoto } from '@/api/hooks/usePhotos';
 import { pickAndUploadPhotos, type UploadedPhoto } from '@/utils/pickPhoto';
+import FadeImage from '@/components/FadeImage';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
 import DraggableFlatList, {
@@ -275,7 +276,7 @@ export default function ChantierSteps({
       <View style={styles.photoStrip} accessibilityLabel={t('steps.stepPhotos')}>
         {photos.map((p, i) => (
           <TouchableOpacity key={p.id} onPress={() => setViewer({ photos, index: i })} accessibilityRole="imagebutton">
-            <Image source={{ uri: p.thumbnail_url ?? p.url }} style={[styles.photoThumb, { borderColor: colors.border }]} />
+            <FadeImage source={{ uri: p.thumbnail_url ?? p.url }} style={[styles.photoThumb, { borderColor: colors.border }]} />
           </TouchableOpacity>
         ))}
       </View>

@@ -1,8 +1,9 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Dimensions, Alert, RefreshControl } from 'react-native';
 import { Camera, ImagePlus, Trash2, Share2, X, CloudOff, RotateCw, Flag } from 'lucide-react-native';
 import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import PhotoViewer from '@/components/PhotoViewer';
+import FadeImage, { prefetchImages } from '@/components/FadeImage';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
@@ -145,7 +146,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
           accessibilityRole="image"
           accessibilityLabel={item.caption || t('photos.ofSite')}
         >
-          <Image source={{ uri: item.thumbnail_url || item.url }} style={styles.photoImage} />
+          <FadeImage source={{ uri: item.thumbnail_url || item.url }} style={styles.photoImage} />
         </TouchableOpacity>
         {!readonly && (
           <TouchableOpacity
@@ -244,6 +245,11 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
 
   const photos = data?.data ?? [];
   const imageSources = useMemo(() => photos.map((p) => ({ uri: p.url, caption: p.caption })), [photos]);
+  // Les originaux des premieres photos sont precharges des que la liste
+  // arrive : ouvrir l'une d'elles en grand est alors immediat.
+  useEffect(() => {
+    prefetchImages(photos.slice(0, 12).map((p) => p.url));
+  }, [photos]);
 
   // Detail overlay — tap the image to open fullscreen with zoom
   if (selectedPhoto) {
@@ -269,7 +275,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
             accessibilityRole="image"
             accessibilityLabel={t('photos.zoom')}
           >
-            <Image source={{ uri: selectedPhoto.url }} style={styles.fullImage} resizeMode="contain" />
+            <FadeImage source={{ uri: selectedPhoto.url }} style={styles.fullImage} resizeMode="contain" />
           </TouchableOpacity>
           <View style={[styles.photoInfo, { backgroundColor: colors.surface }, Shadow.md]}>
             <Text style={[styles.photoAuthor, { color: colors.text }]}>

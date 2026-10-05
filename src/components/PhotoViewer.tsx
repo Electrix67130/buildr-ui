@@ -5,6 +5,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { X } from 'lucide-react-native';
+import { prefetchImages } from '@/components/FadeImage';
 import { IconSize, Spacing, FontSize, FontWeight } from '@/constants/Layout';
 import { useTranslation } from '@/contexts/I18nContext';
 
@@ -67,6 +68,11 @@ function ViewerContent({ images, index, onRequestClose }: Omit<Props, 'visible'>
   useEffect(() => {
     setCurrent(index);
   }, [index]);
+
+  // Les voisines sont prechargees : balayer ne montre plus d'ecran noir.
+  useEffect(() => {
+    prefetchImages([images[current - 1]?.uri, images[current + 1]?.uri]);
+  }, [current, images]);
 
   // Apres une rotation, la liste se recale sur la photo courante. On ne
   // remonte pas la liste (pas de `key` liee a la largeur) : la remonter

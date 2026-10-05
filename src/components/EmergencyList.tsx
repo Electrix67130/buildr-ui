@@ -24,6 +24,7 @@ import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hook
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { extractPhotoMeta } from '@/utils/exif';
+import FadeImage from '@/components/FadeImage';
 
 /** Attente maximale d'un point GPS precis avant d'enregistrer sans coordonnees. */
 const GPS_TIMEOUT_MS = 8_000;
@@ -221,7 +222,7 @@ export default function EmergencyList({
             />
           ) : null}
           {item.photo_url ? (
-            <Image source={{ uri: item.photo_url }} style={styles.thumb} />
+            <FadeImage source={{ uri: item.photo_url }} style={styles.thumb} />
           ) : (
             <View style={[styles.thumb, { backgroundColor: colors.itemBackground, alignItems: 'center', justifyContent: 'center' }]}>
               <AlertTriangle size={IconSize.lg} color={colors.red} />
