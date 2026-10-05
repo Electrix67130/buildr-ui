@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { uploadFile } from '@/api/upload';
+import { extractPhotoMeta } from '@/utils/exif';
 import type { TranslationKeys } from '@/i18n/translations';
 
 export interface UploadedPhoto {
@@ -10,6 +11,9 @@ export interface UploadedPhoto {
   file_size?: number;
   mime_type?: string;
   taken_at: string;
+  /** Position lue dans les metadonnees de la photo, si elle en avait. */
+  latitude?: number;
+  longitude?: number;
   /** Apercu local, affiche en attendant que l'API renvoie la vignette. */
   local_uri: string;
 }
@@ -42,7 +46,7 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
   }
 
   const result = useCamera
-    ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
+    ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false, exif: true })
     : await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         quality: 1,
@@ -50,12 +54,15 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
         allowsMultipleSelection: true,
         selectionLimit: 0,
         orderedSelection: true,
+        exif: true,
       });
   if (result.canceled || result.assets.length === 0) return [];
 
-  const taken_at = new Date().toISOString();
+  const now = new Date().toISOString();
   const uploaded: UploadedPhoto[] = [];
   for (const asset of result.assets) {
+    // Metadonnees lues avant l'optimisation, qui les retire.
+    const meta = extractPhotoMeta(asset);
     const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
     const file = await uploadFile(optimized.uri, `photo-${Date.now()}-${uploaded.length}.jpg`, optimized.mimeType);
     uploaded.push({
@@ -63,7 +70,9 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
       thumbnail_url: file.thumbnail_url,
       file_size: file.file_size,
       mime_type: file.mime_type,
-      taken_at,
+      taken_at: meta.takenAt ?? now,
+      latitude: meta.latitude,
+      longitude: meta.longitude,
       local_uri: optimized.uri,
     });
   }

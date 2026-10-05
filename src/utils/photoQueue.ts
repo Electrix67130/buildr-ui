@@ -42,6 +42,9 @@ export interface QueuedPhoto {
   localUri: string;
   /** Heure reelle de la prise de vue (ISO). */
   takenAt: string;
+  /** Position lue dans les metadonnees de la photo, si elle en avait. */
+  latitude?: number;
+  longitude?: number;
   caption?: string;
   attempts: number;
   status: 'pending' | 'error';
@@ -110,6 +113,8 @@ export async function enqueuePhoto(input: {
   chantierId: string;
   photo: CapturedPhoto;
   takenAt?: string;
+  latitude?: number;
+  longitude?: number;
   caption?: string;
 }): Promise<void> {
   const list = await load();
@@ -120,6 +125,8 @@ export async function enqueuePhoto(input: {
     chantierId: input.chantierId,
     localUri,
     takenAt: input.takenAt ?? new Date().toISOString(),
+    latitude: input.latitude,
+    longitude: input.longitude,
     caption: input.caption,
     attempts: 0,
     status: 'pending',
@@ -189,6 +196,9 @@ async function sendEntry(entry: QueuedPhoto): Promise<void> {
       mime_type: uploaded.mime_type,
       // L'heure de la prise de vue, pas celle de l'envoi.
       taken_at: entry.takenAt,
+      ...(entry.latitude !== undefined && entry.longitude !== undefined
+        ? { latitude: entry.latitude, longitude: entry.longitude }
+        : {}),
       ...(entry.caption ? { caption: entry.caption } : {}),
     },
   });

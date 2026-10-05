@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { usePhotos, useCreatePhoto, useDeletePhoto } from '@/api/hooks/usePhotos';
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
+import { extractPhotoMeta } from '@/utils/exif';
 import { shareFile } from '@/utils/shareFile';
 import { getSignedFileUrl } from '@/api/fileAccess';
 import type { Photo } from '@/api/types';
@@ -65,7 +66,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
       // Depuis la galerie, plusieurs photos d'un coup : un chantier se
       // documente par rafales, et une selection par une etait un calvaire.
       const result = useCamera
-        ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
+        ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false, exif: true })
         : await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             quality: 1,
@@ -73,18 +74,23 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
             allowsMultipleSelection: true,
             selectionLimit: 0,
             orderedSelection: true,
+            exif: true,
           });
 
       if (result.canceled || result.assets.length === 0) return;
-      // L'heure de la prise de vue, capturee tout de suite : une photo
-      // enregistree hors ligne et envoyee le soir doit apparaitre a l'heure ou
-      // elle a ete prise, sinon le fil d'avancement du chantier ment.
-      const takenAt = new Date().toISOString();
+      // L'heure de la prise de vue : celle des metadonnees de la photo quand
+      // elle en a (galerie), sinon maintenant. Une photo enregistree hors
+      // ligne et envoyee le soir doit apparaitre a l'heure ou elle a ete
+      // prise, sinon le fil d'avancement du chantier ment.
+      const now = new Date().toISOString();
       let queued = 0;
 
       for (const asset of result.assets) {
+        // Lues avant l'optimisation, qui retire les metadonnees.
+        const meta = extractPhotoMeta(asset);
+        const takenAt = meta.takenAt ?? now;
         if (!online) {
-          await enqueuePhoto({ chantierId, photo: asset, takenAt });
+          await enqueuePhoto({ chantierId, photo: asset, takenAt, latitude: meta.latitude, longitude: meta.longitude });
           queued += 1;
           continue;
         }
@@ -100,6 +106,8 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
             file_size: uploaded.file_size,
             mime_type: uploaded.mime_type,
             taken_at: takenAt,
+            latitude: meta.latitude,
+            longitude: meta.longitude,
           });
         } catch (err) {
           // Le reseau a pu tomber entre la derniere sonde et maintenant : on
@@ -107,7 +115,7 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
           // en file d'attente plutot que d'etre perdue ; sinon c'est une vraie
           // erreur, et il faut la dire.
           if (await probeApi()) throw err;
-          await enqueuePhoto({ chantierId, photo: asset, takenAt });
+          await enqueuePhoto({ chantierId, photo: asset, takenAt, latitude: meta.latitude, longitude: meta.longitude });
           queued += 1;
         }
       }

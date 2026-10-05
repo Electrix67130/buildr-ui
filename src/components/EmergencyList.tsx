@@ -23,6 +23,7 @@ import { useEmergencies, useCreateEmergency, EmergencyWithAuthor, type CreateEme
 import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hooks/useChantierViews';
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
+import { extractPhotoMeta } from '@/utils/exif';
 
 /** Attente maximale d'un point GPS precis avant d'enregistrer sans coordonnees. */
 const GPS_TIMEOUT_MS = 8_000;
@@ -122,7 +123,7 @@ export default function EmergencyList({
         // Depuis la galerie, plusieurs photos : un incident se montre souvent
         // sous plusieurs angles.
         const result = useCamera
-          ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false })
+          ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false, exif: true })
           : await ImagePicker.launchImageLibraryAsync({
               mediaTypes: ['images'],
               quality: 1,
@@ -130,8 +131,14 @@ export default function EmergencyList({
               allowsMultipleSelection: true,
               selectionLimit: 0,
               orderedSelection: true,
+              exif: true,
             });
         if (result.canceled || result.assets.length === 0) return;
+
+        // Une photo de la galerie a ete prise ailleurs : ses propres
+        // coordonnees valent mieux que l'endroit ou l'on se trouve en
+        // l'envoyant. Lues avant l'optimisation, qui retire les metadonnees.
+        const fromPhoto = result.assets.map((a) => extractPhotoMeta(a)).find((m) => m.latitude !== undefined);
 
         const photos: NonNullable<CreateEmergencyInput['photos']> = [];
         for (const [i, asset] of result.assets.entries()) {
@@ -143,10 +150,10 @@ export default function EmergencyList({
         // GPS du device au moment de la capture. Accuracy.High vise ~10 m :
         // sur un chantier, il faut pouvoir retrouver le point exact du danger,
         // pas seulement la parcelle.
-        let latitude: number | undefined;
-        let longitude: number | undefined;
-        const locPerm = await Location.requestForegroundPermissionsAsync();
-        if (locPerm.granted) {
+        let latitude: number | undefined = fromPhoto?.latitude;
+        let longitude: number | undefined = fromPhoto?.longitude;
+        const locPerm = fromPhoto ? null : await Location.requestForegroundPermissionsAsync();
+        if (locPerm?.granted) {
           try {
             // Un fix precis peut etre long a obtenir (batiment, tranchee, ciel
             // masque). On plafonne l'attente : une urgence sans coordonnees vaut
