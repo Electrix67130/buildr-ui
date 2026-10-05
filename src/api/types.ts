@@ -86,6 +86,8 @@ export interface MeResponse {
   push_enabled: boolean;
   /** Langue des e-mails et des notifications envoyes a ce compte. */
   locale?: string;
+  /** Les personnes que j'ai bloquees : leurs messages et photos me sont caches. */
+  blocked_user_ids?: string[];
   created_at: string;
   updated_at: string;
   /** Id de l'organisation active (l'org dans laquelle l'utilisateur est en train de travailler). */

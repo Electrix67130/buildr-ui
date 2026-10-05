@@ -25,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBlocks, useUnblockUser } from '@/api/hooks/useBlocks';
 import { useTheme, ThemeMode } from '@/contexts/ThemeContext';
 import { useTranslation } from '@/contexts/I18nContext';
 import { LOCALES, Locale } from '@/i18n/translations';
@@ -95,6 +96,8 @@ export default function ProfilScreen() {
   const [retentionSavedFlash, setRetentionSavedFlash] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const blocks = useBlocks();
+  const unblock = useUnblockUser();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -385,6 +388,26 @@ export default function ProfilScreen() {
                     {t('profile.changePassword')}
                   </Text>
                 </TouchableOpacity>
+              </View>
+
+              {/* Blocages */}
+              <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('block.section')}</Text>
+              <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                {(blocks.data ?? []).length === 0 ? (
+                  <Text style={[styles.hint, { color: colors.mutedText }]}>{t('block.empty')}</Text>
+                ) : (
+                  (blocks.data ?? []).map((b) => (
+                    <View key={b.user_id} style={[styles.securityBtn, { borderColor: colors.border, justifyContent: 'space-between' }]}>
+                      <Text style={[styles.securityBtnText, { color: colors.text }]}>
+                        {b.first_name} {b.last_name}
+                      </Text>
+                      <TouchableOpacity onPress={() => unblock.mutate(b.user_id)} accessibilityRole="button" accessibilityLabel={t('block.unblock')}>
+                        <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('block.unblock')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                )}
+                <Text style={[styles.hint, { color: colors.mutedText, marginTop: Spacing.sm }]}>{t('block.hint')}</Text>
               </View>
 
               {/* Notifications */}

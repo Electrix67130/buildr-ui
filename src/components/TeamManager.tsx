@@ -4,6 +4,8 @@ import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
 import { UserPlus, Trash2, Shield, Pencil, X, Mail, Phone, Search, Copy, Check, ShieldCheck, Flag } from 'lucide-react-native';
 import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
+import { useBlockUser, useUnblockUser } from '@/api/hooks/useBlocks';
+import { Ban } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
@@ -104,6 +106,9 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
   const [editingMember, setEditingMember] = useState<MemberWithUser | null>(null);
   const [viewingMember, setViewingMember] = useState<MemberWithUser | null>(null);
   const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
+  const blockMutation = useBlockUser();
+  const unblockMutation = useUnblockUser();
+  const blockedIds = new Set(user?.blocked_user_ids ?? []);
   const [pendingExternalAdd, setPendingExternalAdd] = useState<
     | {
         user_id: string;
@@ -450,6 +455,30 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                       >
                         <Flag size={IconSize.md} color={colors.red} />
                         <Text style={[styles.contactActionText, { color: colors.red }]}>{t('report.action')}</Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {viewingMember.user_id !== user?.id && (
+                      <TouchableOpacity
+                        style={[styles.contactActionBtn, { borderColor: colors.border, marginTop: Spacing.sm }]}
+                        onPress={() => {
+                          const m = viewingMember;
+                          const name = `${m.first_name} ${m.last_name}`;
+                          if (blockedIds.has(m.user_id)) {
+                            unblockMutation.mutate(m.user_id);
+                            setViewingMember(null);
+                            return;
+                          }
+                          Alert.alert(t('block.confirmTitle', { name }), t('block.confirmBody'), [
+                            { text: t('common.cancel'), style: 'cancel' },
+                            { text: t('block.action'), style: 'destructive', onPress: () => { blockMutation.mutate(m.user_id); setViewingMember(null); } },
+                          ]);
+                        }}
+                      >
+                        <Ban size={IconSize.md} color={colors.text2} />
+                        <Text style={[styles.contactActionText, { color: colors.text }]}>
+                          {blockedIds.has(viewingMember.user_id) ? t('block.unblock') : t('block.action')}
+                        </Text>
                       </TouchableOpacity>
                     )}
 

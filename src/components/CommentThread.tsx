@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Pressable, FlatList, StyleSheet, Modal, Keyboard, Platform, Animated, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Pressable, FlatList, StyleSheet, Modal, Keyboard, Platform, Animated, RefreshControl, NativeSyntheticEvent, NativeScrollEvent, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Reanimated, { ZoomIn, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { Send, Trash2, Pencil, X, Reply, Flag } from 'lucide-react-native';
+import { Send, Trash2, Pencil, X, Reply, Flag, Ban } from 'lucide-react-native';
+import { useBlockUser } from '@/api/hooks/useBlocks';
 import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
@@ -38,6 +39,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const updateMutation = useUpdateComment();
   const deleteMutation = useDeleteComment();
   const reactMutation = useToggleReaction(chantierId);
+  const blockMutation = useBlockUser();
 
   const [text, setText] = useState('');
   const [selectedComment, setSelectedComment] = useState<CommentWithAuthor | null>(null);
@@ -384,6 +386,24 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                   >
                     <Flag size={IconSize.lg} color={colors.red} />
                     <Text style={[styles.actionLabel, { color: colors.red }]}>{t('report.action')}</Text>
+                  </TouchableOpacity>
+                ) : null}
+
+                {selectedComment.author_id !== user?.id ? (
+                  <TouchableOpacity
+                    style={styles.actionRow}
+                    onPress={() => {
+                      const c = selectedComment;
+                      const name = `${c.first_name} ${c.last_name}`;
+                      setSelectedComment(null);
+                      Alert.alert(t('block.confirmTitle', { name }), t('block.confirmBody'), [
+                        { text: t('common.cancel'), style: 'cancel' },
+                        { text: t('block.action'), style: 'destructive', onPress: () => blockMutation.mutate(c.author_id) },
+                      ]);
+                    }}
+                  >
+                    <Ban size={IconSize.lg} color={colors.text2} />
+                    <Text style={[styles.actionLabel, { color: colors.text }]}>{t('block.actionNamed', { name: `${selectedComment.first_name} ${selectedComment.last_name}` })}</Text>
                   </TouchableOpacity>
                 ) : null}
 
