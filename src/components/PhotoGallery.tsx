@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Dimensions, Alert, RefreshControl } from 'react-native';
-import { Camera, ImagePlus, Trash2, Share2, X, CloudOff, RotateCw } from 'lucide-react-native';
+import { Camera, ImagePlus, Trash2, Share2, X, CloudOff, RotateCw, Flag } from 'lucide-react-native';
+import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import PhotoViewer from '@/components/PhotoViewer';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/Colors';
@@ -14,6 +15,7 @@ import { shareFile } from '@/utils/shareFile';
 import { getSignedFileUrl } from '@/api/fileAccess';
 import type { Photo } from '@/api/types';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { probeApi } from '@/api/client';
 import { useOnlineStatus } from '@/utils/network';
 import { enqueuePhoto, usePendingPhotos, retryPhoto, discardPhoto } from '@/utils/photoQueue';
@@ -35,11 +37,13 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
 
   const { data, isLoading, refetch, isRefetching } = usePhotos(chantierId);
   const online = useOnlineStatus();
+  const { user } = useAuth();
   const enAttente = usePendingPhotos(chantierId);
   const createMutation = useCreatePhoto();
   const deleteMutation = useDeletePhoto();
   const [selectedPhoto, setSelectedPhoto] = useState<(Photo & { first_name: string; last_name: string }) | null>(null);
   const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
 
   const pickImage = useCallback(async (useCamera: boolean) => {
     try {
@@ -303,8 +307,21 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
               <Trash2 size={IconSize.md} color="#FFFFFF" />
               <Text style={styles.detailBtnText}>{t('common.delete')}</Text>
             </TouchableOpacity>}
+            {selectedPhoto.uploaded_by !== user?.id ? (
+              <TouchableOpacity
+                style={[styles.detailBtn, { backgroundColor: colors.itemBackground, borderWidth: 1, borderColor: colors.border }]}
+                onPress={() => setReportTarget({ type: 'photo', id: selectedPhoto.id, label: `${t('photos.by', { name: `${selectedPhoto.first_name} ${selectedPhoto.last_name}` })}` })}
+                accessibilityRole="button"
+                accessibilityLabel={t('report.action')}
+              >
+                <Flag size={IconSize.md} color={colors.red} />
+                <Text style={[styles.detailBtnText, { color: colors.red }]}>{t('report.action')}</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </View>
+
+        <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
 
         {/* Fullscreen zoom viewer */}
         <PhotoViewer

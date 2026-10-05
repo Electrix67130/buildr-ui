@@ -2,7 +2,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert, Modal, Switch, Linking, RefreshControl } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { UserPlus, Trash2, Shield, Pencil, X, Mail, Phone, Search, Copy, Check, ShieldCheck } from 'lucide-react-native';
+import { UserPlus, Trash2, Shield, Pencil, X, Mail, Phone, Search, Copy, Check, ShieldCheck, Flag } from 'lucide-react-native';
+import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/constants/Layout';
@@ -102,6 +103,7 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
   const animatedModalStyle = useKeyboardAwareModalStyle({ visible: showAddModal });
   const [editingMember, setEditingMember] = useState<MemberWithUser | null>(null);
   const [viewingMember, setViewingMember] = useState<MemberWithUser | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
   const [pendingExternalAdd, setPendingExternalAdd] = useState<
     | {
         user_id: string;
@@ -437,6 +439,20 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
                       </TouchableOpacity>
                     )}
 
+                    {viewingMember.user_id !== user?.id && (
+                      <TouchableOpacity
+                        style={[styles.contactActionBtn, { borderColor: colors.border, marginTop: Spacing.sm }]}
+                        onPress={() => {
+                          const m = viewingMember;
+                          setViewingMember(null);
+                          setTimeout(() => setReportTarget({ type: 'user', id: m.user_id, label: `${m.first_name} ${m.last_name}` }), 300);
+                        }}
+                      >
+                        <Flag size={IconSize.md} color={colors.red} />
+                        <Text style={[styles.contactActionText, { color: colors.red }]}>{t('report.action')}</Text>
+                      </TouchableOpacity>
+                    )}
+
                     {canManage && (
                       <TouchableOpacity
                         style={[styles.contactActionBtn, { borderColor: colors.red, marginTop: Spacing.sm }]}
@@ -457,6 +473,8 @@ const TeamManager: React.FC<Props> = ({ chantierId, readonly }) => {
           </TouchableOpacity>
         </Modal>
       )}
+
+      <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
 
       {/* Permissions editor modal */}
       {editingMember && (

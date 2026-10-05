@@ -3,7 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Pressable, FlatList, StyleShee
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Reanimated, { ZoomIn, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useKeyboardAwareModalStyle } from '@/hooks/useKeyboardAwareModalStyle';
-import { Send, Trash2, Pencil, X, Reply } from 'lucide-react-native';
+import { Send, Trash2, Pencil, X, Reply, Flag } from 'lucide-react-native';
+import ReportSheet, { type ReportTargetRef } from '@/components/ReportSheet';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, IconSize } from '@/constants/Layout';
 import { REACTION_EMOJIS, type ReactionEmoji } from '@/constants/reactions';
@@ -41,6 +42,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const [text, setText] = useState('');
   const [selectedComment, setSelectedComment] = useState<CommentWithAuthor | null>(null);
   const [replyTo, setReplyTo] = useState<CommentWithAuthor | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
   const [editText, setEditText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   // Message brievement mis en avant apres un saut depuis une citation.
@@ -371,6 +373,20 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                   <Text style={[styles.actionLabel, { color: colors.text }]}>{t('comments.reply')}</Text>
                 </TouchableOpacity>
 
+                {selectedComment.author_id !== user?.id ? (
+                  <TouchableOpacity
+                    style={styles.actionRow}
+                    onPress={() => {
+                      const c = selectedComment;
+                      setSelectedComment(null);
+                      setReportTarget({ type: 'comment', id: c.id, label: `${authorName(c)} : ${c.content}` });
+                    }}
+                  >
+                    <Flag size={IconSize.lg} color={colors.red} />
+                    <Text style={[styles.actionLabel, { color: colors.red }]}>{t('report.action')}</Text>
+                  </TouchableOpacity>
+                ) : null}
+
                 {selectedComment.author_id === user?.id ? (
                   <>
                     <TouchableOpacity style={styles.actionRow} onPress={handleStartEdit}>
@@ -389,6 +405,8 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
 
       {/* Edit modal */}
       <Modal visible={isEditing} transparent animationType="slide">
