@@ -45,6 +45,10 @@ interface Options {
 }
 
 export function useRealtimeSync({ enabled, onSessionReplaced, onAccountDisabled, onAccountDeleted }: Options): void {
+  // Les callbacks changent a chaque rendu ; l'effet ne se rebranche que sur
+  // `enabled`. Une ref garde toujours la derniere version.
+  const callbacks = useRef({ onSessionReplaced, onAccountDisabled, onAccountDeleted });
+  callbacks.current = { onSessionReplaced, onAccountDisabled, onAccountDeleted };
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptRef = useRef(0);
@@ -112,7 +116,9 @@ export function useRealtimeSync({ enabled, onSessionReplaced, onAccountDisabled,
     const connect = async () => {
       if (cancelledRef.current) return;
       const token = await getAccessToken();
-      if (!token) return;
+      // Le composant a pu etre demonte pendant la lecture du jeton : on
+      // n'ouvre pas une socket que personne ne fermera.
+      if (!token || cancelledRef.current) return;
 
       const url = `${WS_URL}/ws?token=${encodeURIComponent(token)}&api_key=${encodeURIComponent(API_KEY)}`;
       const ws = new WebSocket(url);
@@ -138,17 +144,17 @@ export function useRealtimeSync({ enabled, onSessionReplaced, onAccountDisabled,
         // et on previent le parent pour qu'il logout.
         if (e.code === 4001) {
           cancelledRef.current = true;
-          onSessionReplaced?.();
+          callbacks.current.onSessionReplaced?.();
           return;
         }
         if (e.code === 4002) {
           cancelledRef.current = true;
-          onAccountDisabled?.();
+          callbacks.current.onAccountDisabled?.();
           return;
         }
         if (e.code === 4003) {
           cancelledRef.current = true;
-          onAccountDeleted?.();
+          callbacks.current.onAccountDeleted?.();
           return;
         }
 

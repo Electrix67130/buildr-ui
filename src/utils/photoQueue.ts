@@ -63,6 +63,8 @@ const EMPTY: QueuedPhoto[] = [];
 let queue: QueuedPhoto[] | null = null;
 let queryClient: QueryClient | null = null;
 let processing = false;
+// Une photo ajoutee pendant un passage : on refait un tour a la fin.
+let rerunRequested = false;
 const listeners = new Set<() => void>();
 
 function emit(): void {
@@ -211,7 +213,11 @@ async function sendEntry(entry: QueuedPhoto): Promise<void> {
  * n'arrete pas les suivantes : elle sera retentee au prochain declenchement.
  */
 export async function processQueue(): Promise<void> {
-  if (processing || !onlineManager.isOnline()) return;
+  if (!onlineManager.isOnline()) return;
+  if (processing) {
+    rerunRequested = true;
+    return;
+  }
   processing = true;
   try {
     const list = await load();
@@ -238,6 +244,10 @@ export async function processQueue(): Promise<void> {
     }
   } finally {
     processing = false;
+    if (rerunRequested) {
+      rerunRequested = false;
+      void processQueue();
+    }
   }
 }
 

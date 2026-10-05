@@ -1,6 +1,6 @@
-import { getAccessToken } from './client';
+import { getAccessToken, refreshAccessToken } from './client';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY || 'change-me-in-production';
 
 interface UploadResult {
@@ -17,23 +17,29 @@ interface UploadResult {
  * Returns a public URL that can be stored in the database.
  */
 export async function uploadFile(fileUri: string, fileName: string, mimeType?: string): Promise<UploadResult> {
-  const token = await getAccessToken();
+  const send = async (token: string | null) => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      name: fileName,
+      type: mimeType || 'application/octet-stream',
+    } as unknown as Blob);
+    return fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': API_KEY,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+  };
 
-  const formData = new FormData();
-  formData.append('file', {
-    uri: fileUri,
-    name: fileName,
-    type: mimeType || 'application/octet-stream',
-  } as unknown as Blob);
-
-  const response = await fetch(`${API_URL}/upload`, {
-    method: 'POST',
-    headers: {
-      'x-api-key': API_KEY,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: formData,
-  });
+  let response = await send(await getAccessToken());
+  // Jeton d'acces perime : on le renouvelle et on rejoue, comme apiFetch.
+  // Sans cela, la file hors ligne finissait en erreur apres cinq essais.
+  if (response.status === 401) {
+    response = await send(await refreshAccessToken());
+  }
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));

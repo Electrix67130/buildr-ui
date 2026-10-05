@@ -334,6 +334,7 @@ export type TranslationKeys =
   | 'report.sentTitle'
   | 'report.sentBody'
   | 'photos.by'
+  | 'photos.partialFailure'
   | 'block.action'
   | 'block.actionNamed'
   | 'block.unblock'
@@ -918,6 +919,7 @@ const fr: Dictionary = {
   "report.sentTitle": "Signalement envoyé",
   "report.sentBody": "Merci. L'administrateur de l'organisation va l'examiner.",
   "photos.by": "Photo de {name}",
+  "photos.partialFailure": "{count} photo(s) n'ont pas pu être envoyées. Les autres sont bien parties.",
   "block.action": "Bloquer",
   "block.actionNamed": "Bloquer {name}",
   "block.unblock": "Débloquer",
@@ -1501,6 +1503,7 @@ const en: Dictionary = {
   "report.sentTitle": "Report sent",
   "report.sentBody": "Thank you. The organisation's administrator will review it.",
   "photos.by": "Photo by {name}",
+  "photos.partialFailure": "{count} photo(s) could not be uploaded. The others went through.",
   "block.action": "Block",
   "block.actionNamed": "Block {name}",
   "block.unblock": "Unblock",
@@ -2084,6 +2087,7 @@ const de: Dictionary = {
   "report.sentTitle": "Meldung gesendet",
   "report.sentBody": "Danke. Der Administrator der Organisation wird sie prüfen.",
   "photos.by": "Foto von {name}",
+  "photos.partialFailure": "{count} Foto(s) konnten nicht hochgeladen werden. Die anderen sind angekommen.",
   "block.action": "Blockieren",
   "block.actionNamed": "{name} blockieren",
   "block.unblock": "Freigeben",
@@ -2667,6 +2671,7 @@ const es: Dictionary = {
   "report.sentTitle": "Denuncia enviada",
   "report.sentBody": "Gracias. El administrador de la organización lo revisará.",
   "photos.by": "Foto de {name}",
+  "photos.partialFailure": "{count} foto(s) no se pudieron enviar. Las demás sí.",
   "block.action": "Bloquear",
   "block.actionNamed": "Bloquear a {name}",
   "block.unblock": "Desbloquear",
@@ -3250,6 +3255,7 @@ const it: Dictionary = {
   "report.sentTitle": "Segnalazione inviata",
   "report.sentBody": "Grazie. L'amministratore dell'organizzazione la esaminerà.",
   "photos.by": "Foto di {name}",
+  "photos.partialFailure": "{count} foto non inviate. Le altre sono partite.",
   "block.action": "Blocca",
   "block.actionNamed": "Blocca {name}",
   "block.unblock": "Sblocca",
@@ -3833,6 +3839,7 @@ const pt: Dictionary = {
   "report.sentTitle": "Denúncia enviada",
   "report.sentBody": "Obrigado. O administrador da organização vai analisá-la.",
   "photos.by": "Foto de {name}",
+  "photos.partialFailure": "{count} foto(s) não puderam ser enviadas. As restantes foram.",
   "block.action": "Bloquear",
   "block.actionNamed": "Bloquear {name}",
   "block.unblock": "Desbloquear",
@@ -4416,6 +4423,7 @@ const tr: Dictionary = {
   "report.sentTitle": "Bildirim gönderildi",
   "report.sentBody": "Teşekkürler. Kuruluşun yöneticisi inceleyecektir.",
   "photos.by": "{name} tarafından fotoğraf",
+  "photos.partialFailure": "{count} fotoğraf gönderilemedi. Diğerleri gönderildi.",
   "block.action": "Engelle",
   "block.actionNamed": "{name} kişisini engelle",
   "block.unblock": "Engeli kaldır",
@@ -4999,6 +5007,7 @@ const pl: Dictionary = {
   "report.sentTitle": "Zgłoszenie wysłane",
   "report.sentBody": "Dziękujemy. Administrator organizacji ją rozpatrzy.",
   "photos.by": "Zdjęcie od {name}",
+  "photos.partialFailure": "Nie udało się wysłać {count} zdjęć. Pozostałe zostały wysłane.",
   "block.action": "Zablokuj",
   "block.actionNamed": "Zablokuj {name}",
   "block.unblock": "Odblokuj",

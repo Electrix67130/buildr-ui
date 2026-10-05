@@ -60,11 +60,20 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
 
   const now = new Date().toISOString();
   const uploaded: UploadedPhoto[] = [];
-  for (const asset of result.assets) {
+  let failed = 0;
+  for (const [i, asset] of result.assets.entries()) {
     // Metadonnees lues avant l'optimisation, qui les retire.
     const meta = extractPhotoMeta(asset);
-    const optimized = await optimizeImage(asset.uri, asset.width, asset.height);
-    const file = await uploadFile(optimized.uri, `photo-${Date.now()}-${uploaded.length}.jpg`, optimized.mimeType);
+    let optimized: Awaited<ReturnType<typeof optimizeImage>>;
+    let file: Awaited<ReturnType<typeof uploadFile>>;
+    try {
+      optimized = await optimizeImage(asset.uri, asset.width, asset.height);
+      file = await uploadFile(optimized.uri, `photo-${Date.now()}-${i}.jpg`, optimized.mimeType);
+    } catch {
+      // Les autres partent quand meme ; l'echec est dit a la fin, en une fois.
+      failed += 1;
+      continue;
+    }
     uploaded.push({
       url: file.url,
       thumbnail_url: file.thumbnail_url,
@@ -76,5 +85,6 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
       local_uri: optimized.uri,
     });
   }
+  if (failed > 0) Alert.alert(t('common.error'), t('photos.partialFailure', { count: failed }));
   return uploaded;
 }

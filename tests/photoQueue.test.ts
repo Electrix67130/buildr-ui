@@ -291,3 +291,103 @@ describe('Reprise en main', () => {
     expect(getSnapshot().filter((e) => e.chantierId === 'c-1')).toHaveLength(1);
   });
 });
+
+describe('Lieu de la prise de vue', () => {
+  // Sur le fil d'avancement, une photo est rattachee a l'endroit ou elle a ete
+  // prise : sans ses coordonnees, une photo de la veille envoyee le soir
+  // depuis le bureau serait localisee... nulle part.
+  it('retient latitude, longitude et heure, et les transmet a /photos', async () => {
+    setOnline(false);
+    const { enqueuePhoto, processQueue, getSnapshot } = chargerFile();
+    await enqueuePhoto({
+      chantierId: 'c-1',
+      photo: PHOTO,
+      latitude: 48.5734,
+      longitude: 7.7521,
+      takenAt: '2026-09-14T08:30:00.000Z',
+      caption: 'Ferraillage dalle',
+    });
+
+    expect(getSnapshot()[0]).toMatchObject({ latitude: 48.5734, longitude: 7.7521, takenAt: '2026-09-14T08:30:00.000Z' });
+
+    setOnline(true);
+    await processQueue();
+
+    expect(mockApiFetch).toHaveBeenCalledWith('/photos', {
+      method: 'POST',
+      body: {
+        chantier_id: 'c-1',
+        url: 'https://api/files/a.jpg',
+        thumbnail_url: 'https://api/files/a-thumb.jpg',
+        file_size: 1234,
+        mime_type: 'image/jpeg',
+        taken_at: '2026-09-14T08:30:00.000Z',
+        latitude: 48.5734,
+        longitude: 7.7521,
+        caption: 'Ferraillage dalle',
+      },
+    });
+  });
+
+  it('survit au redemarrage avec ses coordonnees', async () => {
+    setOnline(false);
+    await chargerFile().enqueuePhoto({ chantierId: 'c-1', photo: PHOTO, latitude: 48.5734, longitude: 7.7521 });
+
+    const apres = chargerFile();
+    setOnline(true);
+    await apres.processQueue();
+
+    expect(mockApiFetch.mock.calls[0][1].body).toMatchObject({ latitude: 48.5734, longitude: 7.7521 });
+  });
+
+  it("n'envoie aucune coordonnee quand la photo n'en avait pas", async () => {
+    setOnline(false);
+    const { enqueuePhoto, processQueue } = chargerFile();
+    await enqueuePhoto({ chantierId: 'c-1', photo: PHOTO });
+
+    setOnline(true);
+    await processQueue();
+
+    const corps = mockApiFetch.mock.calls[0][1].body as Record<string, unknown>;
+    expect(corps).not.toHaveProperty('latitude');
+    expect(corps).not.toHaveProperty('longitude');
+    expect(corps).not.toHaveProperty('caption');
+  });
+
+  it("n'envoie pas une latitude seule, sans longitude", async () => {
+    setOnline(false);
+    const { enqueuePhoto, processQueue } = chargerFile();
+    await enqueuePhoto({ chantierId: 'c-1', photo: PHOTO, latitude: 48.5734 });
+
+    setOnline(true);
+    await processQueue();
+
+    expect(mockApiFetch.mock.calls[0][1].body).not.toHaveProperty('latitude');
+  });
+});
+
+describe('Comportements suspects connus', () => {
+  // `it.failing` : ce test decrit le comportement attendu et echoue
+  // aujourd'hui ; la suite reste verte tant que le defaut existe. Le jour ou
+  // il est corrige, jest le signale : retirer alors `.failing`.
+  it("envoie aussi une photo prise pendant qu'un envoi est deja en cours", async () => {
+    // Un ouvrier prend deux photos coup sur coup, en ligne. La seconde arrive
+    // pendant l'envoi de la premiere : `processQueue` la voit deja occupee et
+    // repart aussitot, et la boucle en cours ne parcourt que la liste lue au
+    // depart. La seconde photo attend alors le prochain declencheur (retour du
+    // reseau, nouvelle photo, redemarrage), parfois des heures.
+    const { enqueuePhoto, getSnapshot } = chargerFile();
+    let liberer!: () => void;
+    mockUploadFile.mockImplementationOnce(
+      () => new Promise((resolve) => { liberer = () => resolve({ url: 'https://api/files/a.jpg' }); }),
+    );
+    await enqueuePhoto({ chantierId: 'c-1', photo: PHOTO, takenAt: 'A' });
+    await laisserFinir();
+    await enqueuePhoto({ chantierId: 'c-1', photo: PHOTO, takenAt: 'B' });
+
+    liberer();
+    await laisserFinir();
+
+    expect(getSnapshot()).toHaveLength(0);
+  });
+});

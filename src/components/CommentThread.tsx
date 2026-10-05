@@ -112,18 +112,24 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const handleSend = useCallback(async () => {
     if (!text.trim()) return;
     const step_id = stepFilter && stepFilter !== 'general' ? stepFilter : null;
-    await createMutation.mutateAsync({
-      chantier_id: chantierId,
-      step_id,
-      content: text.trim(),
-      reply_to_id: replyTo?.id ?? null,
-    });
+    try {
+      await createMutation.mutateAsync({
+        chantier_id: chantierId,
+        step_id,
+        content: text.trim(),
+        reply_to_id: replyTo?.id ?? null,
+      });
+    } catch (err) {
+      // Le texte reste dans le champ pour reessayer ; l'erreur est dite.
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
+      return;
+    }
     setText('');
     setReplyTo(null);
     // Envoi : on force le scroll pour que l'utilisateur voie son message.
     isNearBottomRef.current = true;
     setTimeout(() => scrollToLatest(true), 200);
-  }, [text, chantierId, stepFilter, createMutation, replyTo, scrollToLatest]);
+  }, [text, chantierId, stepFilter, createMutation, replyTo, scrollToLatest, t]);
 
   const handleDelete = useCallback(() => {
     if (!selectedComment) return;
@@ -139,11 +145,16 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
 
   const handleSaveEdit = useCallback(async () => {
     if (!selectedComment || !editText.trim()) return;
-    await updateMutation.mutateAsync({ id: selectedComment.id, content: editText.trim() });
+    try {
+      await updateMutation.mutateAsync({ id: selectedComment.id, content: editText.trim() });
+    } catch (err) {
+      Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
+      return;
+    }
     setIsEditing(false);
     setSelectedComment(null);
     setEditText('');
-  }, [selectedComment, editText, updateMutation]);
+  }, [selectedComment, editText, updateMutation, t]);
 
   const handleStartReply = useCallback(() => {
     if (!selectedComment) return;
