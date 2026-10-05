@@ -33,6 +33,27 @@ Envoie le build a App Store Connect : il apparait dans TestFlight apres
 traitement par Apple. La **mise en vente** reste manuelle dans App Store
 Connect : creer la version, choisir le build, soumettre a la revue.
 
+### Fiche App Store Connect (choix faits le 2026-10-05, premiere publication 1.1.0)
+
+A ne pas refaire a chaque version, mais a savoir si Apple demande une mise a
+jour ou si quelqu'un d'autre reprend la fiche :
+
+- **Confidentialite** : sept types declares (nom, e-mail, telephone, position
+  precise, photos ou videos, autre contenu utilisateur, identifiant
+  utilisateur), tous lies a l'identite, aucun suivi, usage « fonctionnalites de
+  l'app » seulement. Aucun SDK d'analyse ni de plantage dans l'app : si l'un
+  d'eux arrive un jour, la declaration doit changer.
+- **Classification** : 4+ calcule, **remplace par 18+** parce que les CGU
+  reservent le service aux professionnels majeurs. Capacites : messagerie oui,
+  contenu genere par les utilisateurs non (pas de large diffusion, les contenus
+  restent dans l'equipe du chantier), publicite non.
+- **Categorie** : Entreprise, secondaire Productivite. Droits de contenu : pas
+  de contenu tiers. Gratuit. Disponible en France, Belgique, Luxembourg et
+  Suisse, le perimetre des CGU.
+- **Revue** : compte `demo@getbuildr.fr` (organisation « Buildr Demo »), notes
+  en francais decrivant le parcours, la moderation (signalement, blocage) et
+  l'usage des permissions position et notifications.
+
 ## Soumission Android
 
 Google exige que le **premier** envoi d'une app soit fait a la main dans la Play
