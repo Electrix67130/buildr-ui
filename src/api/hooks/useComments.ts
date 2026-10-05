@@ -55,7 +55,7 @@ export function useDeleteComment() {
 type CommentsPage = PaginatedResponse<Comment & { first_name: string; last_name: string; avatar_url?: string }>;
 
 /** Bascule ma reaction, en mettant a jour la liste tout de suite ; le serveur confirme ensuite. */
-function toggleLocally(reactions: CommentReaction[] | undefined, emoji: ReactionEmoji): CommentReaction[] {
+export function toggleLocally(reactions: CommentReaction[] | undefined, emoji: ReactionEmoji): CommentReaction[] {
   const list = reactions ?? [];
   const existing = list.find((r) => r.emoji === emoji);
   if (!existing) return [...list, { emoji, count: 1, mine: true }];
