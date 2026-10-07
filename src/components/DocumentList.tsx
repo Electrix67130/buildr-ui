@@ -14,6 +14,7 @@ import { optimizeImage } from '@/utils/optimizeImage';
 import type { DocumentType, Document } from '@/api/types';
 import type { TranslationKeys } from '@/i18n/translations';
 import { useTranslation } from '@/contexts/I18nContext';
+import { hasPhotoLibraryAccess } from '@/utils/pickPhoto';
 
 // Le tableau est defini hors composant : il porte des cles de traduction, le rendu appelle t().
 const DOC_TYPES: { key: DocumentType; labelKey: TranslationKeys; icon: typeof File; color: string; descKey: TranslationKeys }[] = [
@@ -80,8 +81,7 @@ const DocumentList: React.FC<Props> = ({ chantierId, readonly }) => {
     if (isPickingRef.current) return;
     isPickingRef.current = true;
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) {
+      if (!(await hasPhotoLibraryAccess())) {
         Alert.alert(t('urgence.galleryDenied'), t('documents.galleryDeniedBody'));
         return;
       }

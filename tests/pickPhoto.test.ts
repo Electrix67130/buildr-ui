@@ -7,7 +7,7 @@
  * reviendrait a les perdre, en silence. Annuler ou refuser une permission ne
  * doit rien envoyer.
  */
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { pickAndUploadPhotos } from '@/utils/pickPhoto';
 
@@ -123,6 +123,21 @@ describe('Galerie', () => {
     await expect(pickAndUploadPhotos(false, t)).resolves.toEqual([]);
     expect(Alert.alert).toHaveBeenCalledWith('urgence.galleryDenied', 'urgence.galleryDeniedBody');
     expect(picker.launchImageLibraryAsync).not.toHaveBeenCalled();
+  });
+
+  it('sur Android, ouvre le selecteur photo sans demander la phototheque', async () => {
+    // Google Play refuse READ_MEDIA_IMAGES aux apps qui ne sont pas des
+    // galeries : la demander bloquerait la publication.
+    const os = Platform.OS;
+    Platform.OS = 'android';
+    try {
+      picker.launchImageLibraryAsync.mockResolvedValue({ canceled: false, assets: [asset('file:///a.jpg')] });
+
+      await expect(pickAndUploadPhotos(false, t)).resolves.toHaveLength(1);
+      expect(picker.requestMediaLibraryPermissionsAsync).not.toHaveBeenCalled();
+    } finally {
+      Platform.OS = os;
+    }
   });
 });
 

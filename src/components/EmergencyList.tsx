@@ -24,6 +24,7 @@ import { useUnreadCounts, useMarkTabViewed, useMarkItemViewed } from '@/api/hook
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { extractPhotoMeta } from '@/utils/exif';
+import { hasPhotoLibraryAccess } from '@/utils/pickPhoto';
 import FadeImage from '@/components/FadeImage';
 
 /** Attente maximale d'un point GPS precis avant d'enregistrer sans coordonnees. */
@@ -99,26 +100,16 @@ export default function EmergencyList({
       isPickingRef.current = true;
       setSubmitting(true);
       try {
-        // Permissions
-        // iOS : launchCameraAsync requiert AUSSI la permission MediaLibrary
-        // pour pouvoir sauvegarder la photo prise. On demande les deux.
         if (useCamera) {
           const camPerm = await ImagePicker.requestCameraPermissionsAsync();
           if (!camPerm.granted) {
             Alert.alert(t('urgence.cameraDenied'), t('urgence.cameraDeniedBody'));
             return;
           }
-          const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (!libPerm.granted) {
-            Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
-            return;
-          }
-        } else {
-          const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (!libPerm.granted) {
-            Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
-            return;
-          }
+        }
+        if (!(await hasPhotoLibraryAccess())) {
+          Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
+          return;
         }
 
         // Depuis la galerie, plusieurs photos : un incident se montre souvent

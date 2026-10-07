@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { uploadFile } from '@/api/upload';
@@ -21,6 +21,20 @@ export interface UploadedPhoto {
 type T = (key: TranslationKeys, params?: Record<string, string | number>) => string;
 
 /**
+ * Acces a la photothèque avant d'ouvrir la galerie ou l'appareil photo.
+ *
+ * iOS le demande (la camera y enregistre aussi la prise). Android n'en a pas
+ * besoin : la galerie passe par le selecteur photo du systeme, sans
+ * permission. Google Play refuse READ_MEDIA_IMAGES aux apps qui ne sont pas
+ * des galeries, la demander rendrait l'app impubliable.
+ */
+export async function hasPhotoLibraryAccess(): Promise<boolean> {
+  if (Platform.OS !== 'ios') return true;
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  return perm.granted;
+}
+
+/**
  * Prend une photo, ou en choisit plusieurs dans la galerie, les optimise et
  * les envoie.
  *
@@ -38,9 +52,7 @@ export async function pickAndUploadPhotos(useCamera: boolean, t: T): Promise<Upl
       return [];
     }
   }
-  // iOS : la camera a aussi besoin de la photothèque pour enregistrer la prise.
-  const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!libPerm.granted) {
+  if (!(await hasPhotoLibraryAccess())) {
     Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
     return [];
   }

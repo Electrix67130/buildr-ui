@@ -12,6 +12,7 @@ import { usePhotos, useCreatePhoto, useDeletePhoto } from '@/api/hooks/usePhotos
 import { uploadFile } from '@/api/upload';
 import { optimizeImage } from '@/utils/optimizeImage';
 import { extractPhotoMeta } from '@/utils/exif';
+import { hasPhotoLibraryAccess } from '@/utils/pickPhoto';
 import { shareFile } from '@/utils/shareFile';
 import { getSignedFileUrl } from '@/api/fileAccess';
 import type { Photo } from '@/api/types';
@@ -48,24 +49,16 @@ const PhotoGallery: React.FC<Props> = ({ chantierId, readonly }) => {
 
   const pickImage = useCallback(async (useCamera: boolean) => {
     try {
-      // iOS : launchCameraAsync requiert AUSSI MediaLibrary pour sauvegarder la photo.
       if (useCamera) {
         const camPerm = await ImagePicker.requestCameraPermissionsAsync();
         if (!camPerm.granted) {
           Alert.alert(t('urgence.cameraDenied'), t('urgence.cameraDeniedBody'));
           return;
         }
-        const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!libPerm.granted) {
-          Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
-          return;
-        }
-      } else {
-        const libPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!libPerm.granted) {
-          Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
-          return;
-        }
+      }
+      if (!(await hasPhotoLibraryAccess())) {
+        Alert.alert(t('urgence.galleryDenied'), t('urgence.galleryDeniedBody'));
+        return;
       }
 
       // Depuis la galerie, plusieurs photos d'un coup : un chantier se
