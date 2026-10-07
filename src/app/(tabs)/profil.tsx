@@ -388,6 +388,21 @@ export default function ProfilScreen() {
                     {t('profile.changePassword')}
                   </Text>
                 </TouchableOpacity>
+                {/* Suppression de compte — requise par l'App Store (guideline
+                    5.1.1(v)) et par Google Play. Elle etait en petit texte gris
+                    tout en bas de l'ecran, apres une dizaine de sections : la
+                    revue Apple demande qu'on la trouve sans chercher. */}
+                <TouchableOpacity
+                  style={[styles.securityBtn, styles.deleteAccountBtn, { borderColor: colors.red }]}
+                  onPress={() => { setDeleteError(''); setDeletePassword(''); setShowDeleteModal(true); }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('profile.deleteAccount')}
+                >
+                  <Trash2 size={IconSize.md} color={colors.red} />
+                  <Text style={[styles.securityBtnText, { color: colors.red }]}>
+                    {t('profile.deleteAccount')}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Blocages */}
@@ -696,19 +711,6 @@ export default function ProfilScreen() {
               >
                 <LogOut size={IconSize.md} color={colors.red} />
                 <Text style={[styles.logoutText, { color: colors.red }]}>{t('profile.logout')}</Text>
-              </TouchableOpacity>
-
-              {/* Suppression de compte — requis par l'App Store (guideline 5.1.1(v)) */}
-              <TouchableOpacity
-                style={styles.deleteAccountBtn}
-                onPress={() => { setDeleteError(''); setDeletePassword(''); setShowDeleteModal(true); }}
-                accessibilityRole="button"
-                accessibilityLabel={t('profile.deleteAccount')}
-              >
-                <Trash2 size={IconSize.sm} color={colors.mutedText} />
-                <Text style={[styles.deleteAccountText, { color: colors.mutedText }]}>
-                  {t('profile.deleteAccount')}
-                </Text>
               </TouchableOpacity>
 
               {/* Version affichee pour le support : savoir si un correctif OTA
@@ -1029,17 +1031,9 @@ const styles = StyleSheet.create({
   },
   logoutText: { fontSize: FontSize.base, fontWeight: FontWeight.medium },
 
-  // Suppression de compte : volontairement discrete (pas de bordure rouge), pour ne pas
-  // rivaliser visuellement avec la deconnexion tout en restant accessible.
-  deleteAccountBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    height: 44,
-    marginTop: Spacing.sm,
-  },
-  deleteAccountText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  // Suppression de compte : bouton de la section Securite, borde de rouge pour qu'on
+  // le trouve sans chercher (exigence de la revue Apple).
+  deleteAccountBtn: { marginTop: Spacing.sm },
   deleteWarningBubble: {
     height: 56,
     width: 56,
