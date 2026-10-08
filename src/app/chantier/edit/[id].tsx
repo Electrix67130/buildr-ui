@@ -177,7 +177,7 @@ export default function EditChantierScreen() {
             onCityChange={setCity}
             onSelect={(c, cp, lat, lng) => { setCity(c); setPostalCode(cp); setLatitude(lat); setLongitude(lng); }}
             onAddressChange={setAddress}
-            onAddressSelect={(addr, lat, lng) => { setAddress(addr); setLatitude(lat); setLongitude(lng); }}
+            onAddressSelect={(addr, lat, lng, cp) => { setAddress(addr); setLatitude(lat); setLongitude(lng); if (cp) setPostalCode(cp); }}
           />
 
           <DateRangePicker

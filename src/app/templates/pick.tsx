@@ -177,10 +177,11 @@ export default function PickTemplateScreen() {
                   setLongitude(lng);
                 }}
                 onAddressChange={setAddress}
-                onAddressSelect={(addr, lat, lng) => {
+                onAddressSelect={(addr, lat, lng, cp) => {
                   setAddress(addr);
                   setLatitude(lat);
                   setLongitude(lng);
+                  if (cp) setPostalCode(cp);
                 }}
               />
 

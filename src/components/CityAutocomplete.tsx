@@ -6,10 +6,14 @@ import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/const
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCitySearch, CitySuggestion } from '@/hooks/useCitySearch';
 import { useAddressSearch, AddressSuggestion } from '@/hooks/useAddressSearch';
+import type { Country } from '@/utils/geocoding';
 import { useKeyboardScroll } from './KeyboardAwareScroll';
 import { useTranslation } from '@/contexts/I18nContext';
 
 const DROPDOWN_CLEARANCE = 240;
+
+/** Drapeau devant les villes hors de France, pour distinguer Luxembourg (BE) et Luxembourg (LU). */
+const FOREIGN_FLAGS: Partial<Record<Country, string>> = { BE: '🇧🇪', LU: '🇱🇺', CH: '🇨🇭' };
 
 interface Props {
   city: string;
@@ -17,7 +21,8 @@ interface Props {
   address: string;
   onSelect: (city: string, postalCode: string, latitude: number, longitude: number) => void;
   onCityChange: (text: string) => void;
-  onAddressSelect: (address: string, latitude: number, longitude: number) => void;
+  /** Le code postal de l'adresse est plus precis que celui de la ville, et c'est le seul hors de France. */
+  onAddressSelect: (address: string, latitude: number, longitude: number, postalCode: string) => void;
   onAddressChange: (text: string) => void;
 }
 
@@ -31,18 +36,18 @@ const CityAutocomplete: React.FC<Props> = ({
   const ks = useKeyboardScroll();
   const [cityFocused, setCityFocused] = useState(false);
   const [addressFocused, setAddressFocused] = useState(false);
-  const [selectedCityCode, setSelectedCityCode] = useState('');
+  const [selectedCity, setSelectedCity] = useState<CitySuggestion | null>(null);
 
   const { suggestions: citySuggestions, isLoading: cityLoading } = useCitySearch(city);
-  const { suggestions: addressSuggestions, isLoading: addressLoading } = useAddressSearch(address, selectedCityCode);
+  const { suggestions: addressSuggestions, isLoading: addressLoading } = useAddressSearch(address, selectedCity);
 
   const showCitySuggestions = cityFocused && citySuggestions.length > 0 && city.length >= 2;
-  const showAddressSuggestions = addressFocused && addressSuggestions.length > 0 && address.length >= 3 && !!selectedCityCode;
+  const showAddressSuggestions = addressFocused && addressSuggestions.length > 0 && address.length >= 3 && !!selectedCity;
 
   const handleCitySelect = useCallback(
     (item: CitySuggestion) => {
       onSelect(item.name, item.postalCode, item.latitude, item.longitude);
-      setSelectedCityCode(item.cityCode);
+      setSelectedCity(item);
       setCityFocused(false);
     },
     [onSelect],
@@ -50,7 +55,7 @@ const CityAutocomplete: React.FC<Props> = ({
 
   const handleAddressSelect = useCallback(
     (item: AddressSuggestion) => {
-      onAddressSelect(item.name, item.latitude, item.longitude);
+      onAddressSelect(item.name, item.latitude, item.longitude, item.postalCode);
       setAddressFocused(false);
     },
     [onAddressSelect],
@@ -95,15 +100,17 @@ const CityAutocomplete: React.FC<Props> = ({
           {cityLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loader} />}
           {citySuggestions.slice(0, 8).map((item, i) => (
             <TouchableOpacity
-              key={`${item.name}-${item.postalCode}-${i}`}
+              key={`${item.country}-${item.name}-${item.postalCode}-${i}`}
               style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
               onPress={() => handleCitySelect(item)}
             >
               <MapPin size={IconSize.sm} color={colors.primary} />
               <View style={styles.suggestionText}>
-                <Text style={[styles.suggestionMain, { color: colors.text }]}>{item.name}</Text>
+                <Text style={[styles.suggestionMain, { color: colors.text }]}>
+                  {FOREIGN_FLAGS[item.country] ? `${FOREIGN_FLAGS[item.country]} ` : ''}{item.name}
+                </Text>
                 <Text style={[styles.suggestionSub, { color: colors.mutedText }]}>
-                  {item.postalCode} — {item.department}
+                  {[item.postalCode, item.region].filter(Boolean).join(' — ')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -111,8 +118,9 @@ const CityAutocomplete: React.FC<Props> = ({
         </View>
       )}
 
-      {/* Row 2: Address (shown after city is selected) */}
-      {!!postalCode && (
+      {/* Row 2: Address (shown after city is selected). Hors de France la ville
+          n'a souvent pas de code postal : c'est l'adresse qui le donne. */}
+      {(!!postalCode || !!selectedCity) && (
         <View style={{ zIndex: 10 }}>
           <Text style={[styles.label, { color: colors.text }]}>{t('chantier.address')}</Text>
           <TextInput
@@ -135,7 +143,7 @@ const CityAutocomplete: React.FC<Props> = ({
               {addressLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loader} />}
               {addressSuggestions.slice(0, 8).map((item, i) => (
                 <TouchableOpacity
-                  key={`${item.label}-${i}`}
+                  key={`${item.name}-${item.postalCode}-${i}`}
                   style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
                   onPress={() => handleAddressSelect(item)}
                 >
@@ -143,6 +151,9 @@ const CityAutocomplete: React.FC<Props> = ({
                   <View style={styles.suggestionText}>
                     <Text style={[styles.suggestionMain, { color: colors.text }]}>
                       {item.name}
+                    </Text>
+                    <Text style={[styles.suggestionSub, { color: colors.mutedText }]}>
+                      {[item.postalCode, item.city].filter(Boolean).join(' ')}
                     </Text>
                   </View>
                 </TouchableOpacity>
