@@ -141,6 +141,40 @@ export type TranslationKeys =
   | 'profile.wrongCurrentPassword'
   | 'profile.onlyAdminCompany'
   | 'profile.securitySection'
+  | 'mentions.suggestions'
+  | 'mentions.mention'
+  | 'notifPrefs.title'
+  | 'notifPrefs.entryHint'
+  | 'notifPrefs.byType'
+  | 'notifPrefs.byChantier'
+  | 'notifPrefs.byChantierHint'
+  | 'notifPrefs.noMutedChantier'
+  | 'notifPrefs.pushOffHint'
+  | 'notifPrefs.reset'
+  | 'notifPrefs.resetNamed'
+  | 'notifPrefs.chantierTitle'
+  | 'notifPrefs.mentions'
+  | 'notifPrefs.mentionsHint'
+  | 'notifPrefs.messages'
+  | 'notifPrefs.messagesHint'
+  | 'notifPrefs.emergencies'
+  | 'notifPrefs.emergenciesHint'
+  | 'notifPrefs.steps'
+  | 'notifPrefs.stepsHint'
+  | 'notifPrefs.photos'
+  | 'notifPrefs.photosHint'
+  | 'notifPrefs.documents'
+  | 'notifPrefs.documentsHint'
+  | 'notifPrefs.membership'
+  | 'notifPrefs.membershipHint'
+  | 'notifPrefs.reports'
+  | 'notifPrefs.reportsHint'
+  | 'notifPrefs.levelAll'
+  | 'notifPrefs.levelAllHint'
+  | 'notifPrefs.levelImportant'
+  | 'notifPrefs.levelImportantHint'
+  | 'notifPrefs.levelNone'
+  | 'notifPrefs.levelNoneHint'
   | 'profile.changePassword'
   | 'profile.currentPassword'
   | 'profile.updatePassword'
@@ -1044,6 +1078,40 @@ const fr: Dictionary = {
   "photo.uploadFailed": "Envoi impossible",
   "photo.retryUpload": "Réessayer",
   "photo.discardPending": "Abandonner",
+  "mentions.suggestions": "Personnes à mentionner",
+  "mentions.mention": "Mentionner {name}",
+  "notifPrefs.title": "Réglages des notifications",
+  "notifPrefs.entryHint": "Choisir quoi recevoir, par type et par chantier",
+  "notifPrefs.byType": "Par type",
+  "notifPrefs.byChantier": "Chantiers en sourdine",
+  "notifPrefs.byChantierHint": "Pour régler un chantier, touchez la cloche en haut de sa page.",
+  "notifPrefs.noMutedChantier": "Vous recevez les notifications de tous vos chantiers.",
+  "notifPrefs.pushOffHint": "Les notifications sont désactivées : réactivez-les pour choisir ce que vous recevez.",
+  "notifPrefs.reset": "Tout recevoir",
+  "notifPrefs.resetNamed": "Tout recevoir pour {name}",
+  "notifPrefs.chantierTitle": "Notifications de ce chantier",
+  "notifPrefs.mentions": "Mentions",
+  "notifPrefs.mentionsHint": "Quand quelqu'un vous mentionne avec @, même si les messages sont coupés",
+  "notifPrefs.messages": "Messages",
+  "notifPrefs.messagesHint": "Nouveaux messages dans les discussions des chantiers et des étapes",
+  "notifPrefs.emergencies": "Urgences et réclamations",
+  "notifPrefs.emergenciesHint": "Nouvelle urgence ou réclamation, et les messages de leur fil",
+  "notifPrefs.steps": "Étapes",
+  "notifPrefs.stepsHint": "Étapes et sous-étapes validées",
+  "notifPrefs.photos": "Photos",
+  "notifPrefs.photosHint": "Nouvelles photos ajoutées à un chantier",
+  "notifPrefs.documents": "Documents",
+  "notifPrefs.documentsHint": "Nouveaux documents ajoutés à un chantier",
+  "notifPrefs.membership": "Ajout à un chantier",
+  "notifPrefs.membershipHint": "Quand on vous ajoute à l'équipe d'un chantier",
+  "notifPrefs.reports": "Signalements",
+  "notifPrefs.reportsHint": "Contenus ou membres signalés dans votre organisation",
+  "notifPrefs.levelAll": "Tout",
+  "notifPrefs.levelAllHint": "Toutes les notifications de ce chantier, selon vos réglages",
+  "notifPrefs.levelImportant": "L'important",
+  "notifPrefs.levelImportantHint": "Seulement les mentions et les urgences",
+  "notifPrefs.levelNone": "Rien",
+  "notifPrefs.levelNoneHint": "Aucune notification pour ce chantier",
 };
 
 const en: Dictionary = {
@@ -1628,6 +1696,40 @@ const en: Dictionary = {
   "photo.uploadFailed": "Sending failed",
   "photo.retryUpload": "Try again",
   "photo.discardPending": "Discard",
+  "mentions.suggestions": "People to mention",
+  "mentions.mention": "Mention {name}",
+  "notifPrefs.title": "Notification settings",
+  "notifPrefs.entryHint": "Choose what you receive, by type and by site",
+  "notifPrefs.byType": "By type",
+  "notifPrefs.byChantier": "Muted sites",
+  "notifPrefs.byChantierHint": "To adjust a site, tap the bell at the top of its page.",
+  "notifPrefs.noMutedChantier": "You receive notifications from all your sites.",
+  "notifPrefs.pushOffHint": "Notifications are turned off: turn them back on to choose what you receive.",
+  "notifPrefs.reset": "Receive everything",
+  "notifPrefs.resetNamed": "Receive everything for {name}",
+  "notifPrefs.chantierTitle": "Notifications for this site",
+  "notifPrefs.mentions": "Mentions",
+  "notifPrefs.mentionsHint": "When someone mentions you with @, even if messages are off",
+  "notifPrefs.messages": "Messages",
+  "notifPrefs.messagesHint": "New messages in site and step discussions",
+  "notifPrefs.emergencies": "Emergencies and claims",
+  "notifPrefs.emergenciesHint": "New emergency or claim, and the messages in its thread",
+  "notifPrefs.steps": "Steps",
+  "notifPrefs.stepsHint": "Validated steps and sub-steps",
+  "notifPrefs.photos": "Photos",
+  "notifPrefs.photosHint": "New photos added to a site",
+  "notifPrefs.documents": "Documents",
+  "notifPrefs.documentsHint": "New documents added to a site",
+  "notifPrefs.membership": "Added to a site",
+  "notifPrefs.membershipHint": "When you are added to a site team",
+  "notifPrefs.reports": "Reports",
+  "notifPrefs.reportsHint": "Content or members reported in your organisation",
+  "notifPrefs.levelAll": "Everything",
+  "notifPrefs.levelAllHint": "All notifications from this site, according to your settings",
+  "notifPrefs.levelImportant": "Important only",
+  "notifPrefs.levelImportantHint": "Only mentions and emergencies",
+  "notifPrefs.levelNone": "Nothing",
+  "notifPrefs.levelNoneHint": "No notifications from this site",
 };
 
 const de: Dictionary = {
@@ -2212,6 +2314,40 @@ const de: Dictionary = {
   "photo.uploadFailed": "Senden fehlgeschlagen",
   "photo.retryUpload": "Erneut versuchen",
   "photo.discardPending": "Verwerfen",
+  "mentions.suggestions": "Personen zum Erwähnen",
+  "mentions.mention": "{name} erwähnen",
+  "notifPrefs.title": "Benachrichtigungseinstellungen",
+  "notifPrefs.entryHint": "Wählen Sie, was Sie erhalten – nach Art und nach Baustelle",
+  "notifPrefs.byType": "Nach Art",
+  "notifPrefs.byChantier": "Stummgeschaltete Baustellen",
+  "notifPrefs.byChantierHint": "Um eine Baustelle einzustellen, tippen Sie oben auf ihrer Seite auf die Glocke.",
+  "notifPrefs.noMutedChantier": "Sie erhalten Benachrichtigungen von allen Ihren Baustellen.",
+  "notifPrefs.pushOffHint": "Benachrichtigungen sind deaktiviert: Aktivieren Sie sie wieder, um zu wählen, was Sie erhalten.",
+  "notifPrefs.reset": "Alles erhalten",
+  "notifPrefs.resetNamed": "Alles erhalten für {name}",
+  "notifPrefs.chantierTitle": "Benachrichtigungen dieser Baustelle",
+  "notifPrefs.mentions": "Erwähnungen",
+  "notifPrefs.mentionsHint": "Wenn Sie jemand mit @ erwähnt, auch wenn Nachrichten ausgeschaltet sind",
+  "notifPrefs.messages": "Nachrichten",
+  "notifPrefs.messagesHint": "Neue Nachrichten in den Diskussionen der Baustellen und Schritte",
+  "notifPrefs.emergencies": "Notfälle und Reklamationen",
+  "notifPrefs.emergenciesHint": "Neuer Notfall oder neue Reklamation und die Nachrichten dazu",
+  "notifPrefs.steps": "Schritte",
+  "notifPrefs.stepsHint": "Abgeschlossene Schritte und Teilschritte",
+  "notifPrefs.photos": "Fotos",
+  "notifPrefs.photosHint": "Neue Fotos auf einer Baustelle",
+  "notifPrefs.documents": "Dokumente",
+  "notifPrefs.documentsHint": "Neue Dokumente auf einer Baustelle",
+  "notifPrefs.membership": "Zu einer Baustelle hinzugefügt",
+  "notifPrefs.membershipHint": "Wenn Sie zum Team einer Baustelle hinzugefügt werden",
+  "notifPrefs.reports": "Meldungen",
+  "notifPrefs.reportsHint": "Gemeldete Inhalte oder Mitglieder in Ihrer Organisation",
+  "notifPrefs.levelAll": "Alles",
+  "notifPrefs.levelAllHint": "Alle Benachrichtigungen dieser Baustelle, gemäß Ihren Einstellungen",
+  "notifPrefs.levelImportant": "Nur Wichtiges",
+  "notifPrefs.levelImportantHint": "Nur Erwähnungen und Notfälle",
+  "notifPrefs.levelNone": "Nichts",
+  "notifPrefs.levelNoneHint": "Keine Benachrichtigungen von dieser Baustelle",
 };
 
 const es: Dictionary = {
@@ -2796,6 +2932,40 @@ const es: Dictionary = {
   "photo.uploadFailed": "Error al enviar",
   "photo.retryUpload": "Reintentar",
   "photo.discardPending": "Descartar",
+  "mentions.suggestions": "Personas para mencionar",
+  "mentions.mention": "Mencionar a {name}",
+  "notifPrefs.title": "Ajustes de notificaciones",
+  "notifPrefs.entryHint": "Elija qué recibir, por tipo y por obra",
+  "notifPrefs.byType": "Por tipo",
+  "notifPrefs.byChantier": "Obras silenciadas",
+  "notifPrefs.byChantierHint": "Para ajustar una obra, toque la campana en la parte superior de su página.",
+  "notifPrefs.noMutedChantier": "Recibe las notificaciones de todas sus obras.",
+  "notifPrefs.pushOffHint": "Las notificaciones están desactivadas: vuelva a activarlas para elegir qué recibe.",
+  "notifPrefs.reset": "Recibir todo",
+  "notifPrefs.resetNamed": "Recibir todo de {name}",
+  "notifPrefs.chantierTitle": "Notificaciones de esta obra",
+  "notifPrefs.mentions": "Menciones",
+  "notifPrefs.mentionsHint": "Cuando alguien le menciona con @, aunque los mensajes estén desactivados",
+  "notifPrefs.messages": "Mensajes",
+  "notifPrefs.messagesHint": "Nuevos mensajes en las conversaciones de las obras y las etapas",
+  "notifPrefs.emergencies": "Urgencias y reclamaciones",
+  "notifPrefs.emergenciesHint": "Nueva urgencia o reclamación, y los mensajes de su hilo",
+  "notifPrefs.steps": "Etapas",
+  "notifPrefs.stepsHint": "Etapas y subetapas validadas",
+  "notifPrefs.photos": "Fotos",
+  "notifPrefs.photosHint": "Nuevas fotos añadidas a una obra",
+  "notifPrefs.documents": "Documentos",
+  "notifPrefs.documentsHint": "Nuevos documentos añadidos a una obra",
+  "notifPrefs.membership": "Añadido a una obra",
+  "notifPrefs.membershipHint": "Cuando le añaden al equipo de una obra",
+  "notifPrefs.reports": "Denuncias",
+  "notifPrefs.reportsHint": "Contenidos o miembros denunciados en su organización",
+  "notifPrefs.levelAll": "Todo",
+  "notifPrefs.levelAllHint": "Todas las notificaciones de esta obra, según sus ajustes",
+  "notifPrefs.levelImportant": "Solo lo importante",
+  "notifPrefs.levelImportantHint": "Solo menciones y urgencias",
+  "notifPrefs.levelNone": "Nada",
+  "notifPrefs.levelNoneHint": "Ninguna notificación de esta obra",
 };
 
 const it: Dictionary = {
@@ -3380,6 +3550,40 @@ const it: Dictionary = {
   "photo.uploadFailed": "Invio non riuscito",
   "photo.retryUpload": "Riprova",
   "photo.discardPending": "Annulla",
+  "mentions.suggestions": "Persone da menzionare",
+  "mentions.mention": "Menziona {name}",
+  "notifPrefs.title": "Impostazioni delle notifiche",
+  "notifPrefs.entryHint": "Scelga cosa ricevere, per tipo e per cantiere",
+  "notifPrefs.byType": "Per tipo",
+  "notifPrefs.byChantier": "Cantieri silenziati",
+  "notifPrefs.byChantierHint": "Per regolare un cantiere, tocchi la campanella in alto nella sua pagina.",
+  "notifPrefs.noMutedChantier": "Riceve le notifiche di tutti i suoi cantieri.",
+  "notifPrefs.pushOffHint": "Le notifiche sono disattivate: le riattivi per scegliere cosa ricevere.",
+  "notifPrefs.reset": "Ricevi tutto",
+  "notifPrefs.resetNamed": "Ricevi tutto per {name}",
+  "notifPrefs.chantierTitle": "Notifiche di questo cantiere",
+  "notifPrefs.mentions": "Menzioni",
+  "notifPrefs.mentionsHint": "Quando qualcuno la menziona con @, anche se i messaggi sono disattivati",
+  "notifPrefs.messages": "Messaggi",
+  "notifPrefs.messagesHint": "Nuovi messaggi nelle discussioni dei cantieri e delle fasi",
+  "notifPrefs.emergencies": "Emergenze e reclami",
+  "notifPrefs.emergenciesHint": "Nuova emergenza o reclamo, e i messaggi della loro discussione",
+  "notifPrefs.steps": "Fasi",
+  "notifPrefs.stepsHint": "Fasi e sottofasi convalidate",
+  "notifPrefs.photos": "Foto",
+  "notifPrefs.photosHint": "Nuove foto aggiunte a un cantiere",
+  "notifPrefs.documents": "Documenti",
+  "notifPrefs.documentsHint": "Nuovi documenti aggiunti a un cantiere",
+  "notifPrefs.membership": "Aggiunta a un cantiere",
+  "notifPrefs.membershipHint": "Quando qualcuno la aggiunge al team di un cantiere",
+  "notifPrefs.reports": "Segnalazioni",
+  "notifPrefs.reportsHint": "Contenuti o membri segnalati nella sua organizzazione",
+  "notifPrefs.levelAll": "Tutto",
+  "notifPrefs.levelAllHint": "Tutte le notifiche di questo cantiere, secondo le sue impostazioni",
+  "notifPrefs.levelImportant": "Solo l'importante",
+  "notifPrefs.levelImportantHint": "Solo menzioni ed emergenze",
+  "notifPrefs.levelNone": "Niente",
+  "notifPrefs.levelNoneHint": "Nessuna notifica da questo cantiere",
 };
 
 const pt: Dictionary = {
@@ -3964,6 +4168,40 @@ const pt: Dictionary = {
   "photo.uploadFailed": "Falha no envio",
   "photo.retryUpload": "Tentar novamente",
   "photo.discardPending": "Descartar",
+  "mentions.suggestions": "Pessoas a mencionar",
+  "mentions.mention": "Mencionar {name}",
+  "notifPrefs.title": "Definições de notificações",
+  "notifPrefs.entryHint": "Escolha o que recebe, por tipo e por obra",
+  "notifPrefs.byType": "Por tipo",
+  "notifPrefs.byChantier": "Obras silenciadas",
+  "notifPrefs.byChantierHint": "Para ajustar uma obra, toque no sino no topo da respetiva página.",
+  "notifPrefs.noMutedChantier": "Recebe as notificações de todas as suas obras.",
+  "notifPrefs.pushOffHint": "As notificações estão desativadas: volte a ativá-las para escolher o que recebe.",
+  "notifPrefs.reset": "Receber tudo",
+  "notifPrefs.resetNamed": "Receber tudo de {name}",
+  "notifPrefs.chantierTitle": "Notificações desta obra",
+  "notifPrefs.mentions": "Menções",
+  "notifPrefs.mentionsHint": "Quando alguém o menciona com @, mesmo com as mensagens desativadas",
+  "notifPrefs.messages": "Mensagens",
+  "notifPrefs.messagesHint": "Novas mensagens nas conversas das obras e das etapas",
+  "notifPrefs.emergencies": "Urgências e reclamações",
+  "notifPrefs.emergenciesHint": "Nova urgência ou reclamação, e as mensagens da respetiva conversa",
+  "notifPrefs.steps": "Etapas",
+  "notifPrefs.stepsHint": "Etapas e subetapas validadas",
+  "notifPrefs.photos": "Fotos",
+  "notifPrefs.photosHint": "Novas fotos adicionadas a uma obra",
+  "notifPrefs.documents": "Documentos",
+  "notifPrefs.documentsHint": "Novos documentos adicionados a uma obra",
+  "notifPrefs.membership": "Adição a uma obra",
+  "notifPrefs.membershipHint": "Quando o adicionam à equipa de uma obra",
+  "notifPrefs.reports": "Denúncias",
+  "notifPrefs.reportsHint": "Conteúdos ou membros denunciados na sua organização",
+  "notifPrefs.levelAll": "Tudo",
+  "notifPrefs.levelAllHint": "Todas as notificações desta obra, conforme as suas definições",
+  "notifPrefs.levelImportant": "Só o importante",
+  "notifPrefs.levelImportantHint": "Apenas menções e urgências",
+  "notifPrefs.levelNone": "Nada",
+  "notifPrefs.levelNoneHint": "Nenhuma notificação desta obra",
 };
 
 const tr: Dictionary = {
@@ -4548,6 +4786,40 @@ const tr: Dictionary = {
   "photo.uploadFailed": "Gönderilemedi",
   "photo.retryUpload": "Yeniden dene",
   "photo.discardPending": "Vazgeç",
+  "mentions.suggestions": "Bahsedilecek kişiler",
+  "mentions.mention": "{name} kişisinden bahset",
+  "notifPrefs.title": "Bildirim ayarları",
+  "notifPrefs.entryHint": "Neyi alacağınızı türe ve şantiyeye göre seçin",
+  "notifPrefs.byType": "Türe göre",
+  "notifPrefs.byChantier": "Sessize alınan şantiyeler",
+  "notifPrefs.byChantierHint": "Bir şantiyeyi ayarlamak için sayfasının üstündeki zile dokunun.",
+  "notifPrefs.noMutedChantier": "Tüm şantiyelerinizin bildirimlerini alıyorsunuz.",
+  "notifPrefs.pushOffHint": "Bildirimler kapalı: neyi alacağınızı seçmek için tekrar açın.",
+  "notifPrefs.reset": "Hepsini al",
+  "notifPrefs.resetNamed": "{name} için hepsini al",
+  "notifPrefs.chantierTitle": "Bu şantiyenin bildirimleri",
+  "notifPrefs.mentions": "Bahsetmeler",
+  "notifPrefs.mentionsHint": "Biri sizden @ ile bahsettiğinde, mesajlar kapalı olsa bile",
+  "notifPrefs.messages": "Mesajlar",
+  "notifPrefs.messagesHint": "Şantiye ve aşama tartışmalarındaki yeni mesajlar",
+  "notifPrefs.emergencies": "Acil durumlar ve şikâyetler",
+  "notifPrefs.emergenciesHint": "Yeni acil durum veya şikâyet ve bunların mesajları",
+  "notifPrefs.steps": "Aşamalar",
+  "notifPrefs.stepsHint": "Onaylanan aşamalar ve alt aşamalar",
+  "notifPrefs.photos": "Fotoğraflar",
+  "notifPrefs.photosHint": "Bir şantiyeye eklenen yeni fotoğraflar",
+  "notifPrefs.documents": "Belgeler",
+  "notifPrefs.documentsHint": "Bir şantiyeye eklenen yeni belgeler",
+  "notifPrefs.membership": "Şantiyeye eklenme",
+  "notifPrefs.membershipHint": "Bir şantiye ekibine eklendiğinizde",
+  "notifPrefs.reports": "Bildirilen içerikler",
+  "notifPrefs.reportsHint": "Kuruluşunuzda bildirilen içerikler veya üyeler",
+  "notifPrefs.levelAll": "Hepsi",
+  "notifPrefs.levelAllHint": "Ayarlarınıza göre bu şantiyenin tüm bildirimleri",
+  "notifPrefs.levelImportant": "Yalnızca önemli olanlar",
+  "notifPrefs.levelImportantHint": "Yalnızca bahsetmeler ve acil durumlar",
+  "notifPrefs.levelNone": "Hiçbiri",
+  "notifPrefs.levelNoneHint": "Bu şantiyeden bildirim yok",
 };
 
 const pl: Dictionary = {
@@ -5132,6 +5404,40 @@ const pl: Dictionary = {
   "photo.uploadFailed": "Nie udało się wysłać",
   "photo.retryUpload": "Spróbuj ponownie",
   "photo.discardPending": "Odrzuć",
+  "mentions.suggestions": "Osoby do oznaczenia",
+  "mentions.mention": "Oznacz: {name}",
+  "notifPrefs.title": "Ustawienia powiadomień",
+  "notifPrefs.entryHint": "Wybierz, co otrzymywać – według typu i budowy",
+  "notifPrefs.byType": "Według typu",
+  "notifPrefs.byChantier": "Wyciszone budowy",
+  "notifPrefs.byChantierHint": "Aby ustawić budowę, dotknij dzwonka u góry jej strony.",
+  "notifPrefs.noMutedChantier": "Otrzymujesz powiadomienia ze wszystkich swoich budów.",
+  "notifPrefs.pushOffHint": "Powiadomienia są wyłączone: włącz je ponownie, aby wybrać, co otrzymywać.",
+  "notifPrefs.reset": "Otrzymuj wszystko",
+  "notifPrefs.resetNamed": "Otrzymuj wszystko dla {name}",
+  "notifPrefs.chantierTitle": "Powiadomienia z tej budowy",
+  "notifPrefs.mentions": "Oznaczenia",
+  "notifPrefs.mentionsHint": "Gdy ktoś oznaczy Cię przez @, nawet przy wyłączonych wiadomościach",
+  "notifPrefs.messages": "Wiadomości",
+  "notifPrefs.messagesHint": "Nowe wiadomości w dyskusjach budów i etapów",
+  "notifPrefs.emergencies": "Awarie i reklamacje",
+  "notifPrefs.emergenciesHint": "Nowa awaria lub reklamacja oraz wiadomości w jej wątku",
+  "notifPrefs.steps": "Etapy",
+  "notifPrefs.stepsHint": "Zatwierdzone etapy i podetapy",
+  "notifPrefs.photos": "Zdjęcia",
+  "notifPrefs.photosHint": "Nowe zdjęcia dodane do budowy",
+  "notifPrefs.documents": "Dokumenty",
+  "notifPrefs.documentsHint": "Nowe dokumenty dodane do budowy",
+  "notifPrefs.membership": "Dodanie do budowy",
+  "notifPrefs.membershipHint": "Gdy ktoś doda Cię do zespołu budowy",
+  "notifPrefs.reports": "Zgłoszenia",
+  "notifPrefs.reportsHint": "Treści lub członkowie zgłoszeni w Twojej organizacji",
+  "notifPrefs.levelAll": "Wszystko",
+  "notifPrefs.levelAllHint": "Wszystkie powiadomienia z tej budowy, zgodnie z Twoimi ustawieniami",
+  "notifPrefs.levelImportant": "Tylko ważne",
+  "notifPrefs.levelImportantHint": "Tylko oznaczenia i awarie",
+  "notifPrefs.levelNone": "Nic",
+  "notifPrefs.levelNoneHint": "Brak powiadomień z tej budowy",
 };
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = { fr, en, de, es, it, pt, tr, pl };

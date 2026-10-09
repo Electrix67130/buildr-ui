@@ -301,3 +301,32 @@ export interface CreateDocumentInput {
   file_size?: number;
   mime_type?: string;
 }
+
+// --- Mentions et notifications ---
+
+/** Une personne qu'on peut mentionner dans un fil : son nom seulement. */
+export interface MentionableUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export type NotificationCategory =
+  | 'messages'
+  | 'mentions'
+  | 'emergencies'
+  | 'steps'
+  | 'photos'
+  | 'documents'
+  | 'membership'
+  | 'reports';
+
+/** 'important' : mentions et urgences seulement. */
+export type ChantierNotificationLevel = 'all' | 'important' | 'none';
+
+export interface NotificationPreferences {
+  push_enabled: boolean;
+  categories: Record<NotificationCategory, boolean>;
+  /** Les chantiers dont le reglage n'est pas « tout ». */
+  chantiers: { chantier_id: string; chantier_name: string; level: Exclude<ChantierNotificationLevel, 'all'> }[];
+}

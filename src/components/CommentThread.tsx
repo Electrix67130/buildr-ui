@@ -14,6 +14,9 @@ import { useComments, useCreateComment, useUpdateComment, useDeleteComment, useT
 import { useAuth } from '@/contexts/AuthContext';
 import type { Comment } from '@/api/types';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useMentionComposer } from '@/hooks/useMentionComposer';
+import { MentionSuggestions, MentionText } from '@/components/Mentions';
+import { mentionsToText } from '@/utils/mentions';
 
 type CommentWithAuthor = Comment & { first_name: string; last_name: string; avatar_url?: string };
 
@@ -41,11 +44,13 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
   const reactMutation = useToggleReaction(chantierId);
   const blockMutation = useBlockUser();
 
-  const [text, setText] = useState('');
+  const composer = useMentionComposer(chantierId, 'comments');
+  const editor = useMentionComposer(chantierId, 'comments');
+  const text = composer.text;
   const [selectedComment, setSelectedComment] = useState<CommentWithAuthor | null>(null);
   const [replyTo, setReplyTo] = useState<CommentWithAuthor | null>(null);
   const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
-  const [editText, setEditText] = useState('');
+  const editText = editor.text;
   const [isEditing, setIsEditing] = useState(false);
   // Message brievement mis en avant apres un saut depuis une citation.
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
@@ -116,7 +121,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
       await createMutation.mutateAsync({
         chantier_id: chantierId,
         step_id,
-        content: text.trim(),
+        content: composer.serialize(),
         reply_to_id: replyTo?.id ?? null,
       });
     } catch (err) {
@@ -124,12 +129,12 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
       return;
     }
-    setText('');
+    composer.reset();
     setReplyTo(null);
     // Envoi : on force le scroll pour que l'utilisateur voie son message.
     isNearBottomRef.current = true;
     setTimeout(() => scrollToLatest(true), 200);
-  }, [text, chantierId, stepFilter, createMutation, replyTo, scrollToLatest, t]);
+  }, [text, chantierId, stepFilter, createMutation, replyTo, scrollToLatest, t, composer]);
 
   const handleDelete = useCallback(() => {
     if (!selectedComment) return;
@@ -139,22 +144,22 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
 
   const handleStartEdit = useCallback(() => {
     if (!selectedComment) return;
-    setEditText(selectedComment.content);
+    editor.load(selectedComment.content);
     setIsEditing(true);
-  }, [selectedComment]);
+  }, [selectedComment, editor]);
 
   const handleSaveEdit = useCallback(async () => {
     if (!selectedComment || !editText.trim()) return;
     try {
-      await updateMutation.mutateAsync({ id: selectedComment.id, content: editText.trim() });
+      await updateMutation.mutateAsync({ id: selectedComment.id, content: editor.serialize() });
     } catch (err) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
       return;
     }
     setIsEditing(false);
     setSelectedComment(null);
-    setEditText('');
-  }, [selectedComment, editText, updateMutation, t]);
+    editor.reset();
+  }, [selectedComment, editText, updateMutation, t, editor]);
 
   const handleStartReply = useCallback(() => {
     if (!selectedComment) return;
@@ -227,12 +232,12 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                   {authorName(item.reply_to)}
                 </Text>
                 <Text style={[styles.quoteText, { color: colors.text2 }]} numberOfLines={2}>
-                  {item.reply_to.content}
+                  {mentionsToText(item.reply_to.content)}
                 </Text>
               </Pressable>
             ) : null}
 
-            <Text style={[styles.content, { color: colors.text }]}>{item.content}</Text>
+            <MentionText content={item.content} style={[styles.content, { color: colors.text }]} />
           </TouchableOpacity>
 
           {reactions.length > 0 ? (
@@ -311,7 +316,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                     {t('comments.replyingTo', { name: authorName(replyTo) })}
                   </Text>
                   <Text style={[styles.quoteText, { color: colors.text2 }]} numberOfLines={1}>
-                    {replyTo.content}
+                    {mentionsToText(replyTo.content)}
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => setReplyTo(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityLabel={t('common.cancel')}>
@@ -319,14 +324,14 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                 </TouchableOpacity>
               </Reanimated.View>
             ) : null}
+            <MentionSuggestions people={composer.suggestions} onPick={composer.pick} />
             <View style={styles.inputRow}>
               <TextInput
                 ref={inputRef}
                 style={[styles.input, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
                 placeholder={t('comments.placeholder')}
                 placeholderTextColor={colors.placeholder}
-                value={text}
-                onChangeText={setText}
+                {...composer.inputProps}
                 onFocus={onInputFocus}
                 multiline
                 accessibilityLabel={t('comments.write')}
@@ -377,7 +382,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                 </View>
 
                 <Text style={[styles.actionSheetPreview, { color: colors.text }]} numberOfLines={2}>
-                  {selectedComment.content}
+                  {mentionsToText(selectedComment.content)}
                 </Text>
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
@@ -392,7 +397,7 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                     onPress={() => {
                       const c = selectedComment;
                       setSelectedComment(null);
-                      setReportTarget({ type: 'comment', id: c.id, label: `${authorName(c)} : ${c.content}` });
+                      setReportTarget({ type: 'comment', id: c.id, label: `${authorName(c)} : ${mentionsToText(c.content)}` });
                     }}
                   >
                     <Flag size={IconSize.lg} color={colors.red} />
@@ -449,10 +454,10 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
             </View>
+            <MentionSuggestions people={editor.suggestions} onPick={editor.pick} />
             <TextInput
               style={[styles.editInput, { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border }]}
-              value={editText}
-              onChangeText={setEditText}
+              {...editor.inputProps}
               multiline
               autoFocus
               accessibilityLabel={t('comments.editTitle')}

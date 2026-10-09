@@ -29,6 +29,9 @@ import { Spacing, Radius, FontSize, FontWeight, IconSize, Shadow } from '@/const
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMentionComposer } from '@/hooks/useMentionComposer';
+import { MentionSuggestions, MentionText } from '@/components/Mentions';
+import { mentionsToText } from '@/utils/mentions';
 import { useEmergencies, useDeleteEmergency, EmergencyWithAuthor } from '@/api/hooks/useEmergencies';
 import {
   useEmergencyComments,
@@ -67,7 +70,10 @@ export default function EmergencyDetailScreen() {
   const deleteComment = useDeleteEmergencyComment(id ?? '');
   const deleteEmergency = useDeleteEmergency(chantierId ?? '');
 
-  const [draft, setDraft] = useState('');
+  // Le fil d'une urgence est ouvert a tous les participants du chantier.
+  const composer = useMentionComposer(chantierId, 'emergency');
+  const editor = useMentionComposer(chantierId, 'emergency');
+  const draft = composer.text;
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
   // Toutes les photos de l'urgence ; les anciennes n'ont que photo_url.
   const photoUris = useMemo(() => {
@@ -76,7 +82,7 @@ export default function EmergencyDetailScreen() {
   }, [emergency]);
   const [selectedComment, setSelectedComment] = useState<EmergencyComment | null>(null);
   const [reportTarget, setReportTarget] = useState<ReportTargetRef | null>(null);
-  const [editText, setEditText] = useState('');
+  const editText = editor.text;
   const [isEditing, setIsEditing] = useState(false);
   const animatedEditModalStyle = useKeyboardAwareModalStyle({ visible: isEditing });
 
@@ -119,30 +125,30 @@ export default function EmergencyDetailScreen() {
   }, [comments.length]);
 
   const handleSend = useCallback(async () => {
-    const trimmed = draft.trim();
-    if (!trimmed || !id) return;
-    setDraft('');
+    if (!draft.trim() || !id) return;
+    const content = composer.serialize();
+    composer.reset();
     try {
-      await createComment.mutateAsync({ emergency_id: id, content: trimmed });
+      await createComment.mutateAsync({ emergency_id: id, content });
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 200);
     } catch (err) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : t('common.failed'));
     }
-  }, [draft, id, createComment, t]);
+  }, [draft, id, createComment, t, composer]);
 
   const handleStartEdit = useCallback(() => {
     if (!selectedComment) return;
-    setEditText(selectedComment.content);
+    editor.load(selectedComment.content);
     setIsEditing(true);
-  }, [selectedComment]);
+  }, [selectedComment, editor]);
 
   const handleSaveEdit = useCallback(async () => {
     if (!selectedComment || !editText.trim()) return;
-    await updateComment.mutateAsync({ id: selectedComment.id, content: editText.trim() });
+    await updateComment.mutateAsync({ id: selectedComment.id, content: editor.serialize() });
     setIsEditing(false);
     setSelectedComment(null);
-    setEditText('');
-  }, [selectedComment, editText, updateComment]);
+    editor.reset();
+  }, [selectedComment, editText, updateComment, editor]);
 
   const handleDeleteComment = useCallback(() => {
     if (!selectedComment) return;
@@ -314,7 +320,7 @@ export default function EmergencyDetailScreen() {
                     {formatTime(item.created_at)}
                   </Text>
                 </View>
-                <Text style={[styles.content, { color: colors.text }]}>{item.content}</Text>
+                <MentionText content={item.content} style={[styles.content, { color: colors.text }]} />
               </TouchableOpacity>
             );
           }}
@@ -326,6 +332,9 @@ export default function EmergencyDetailScreen() {
         />
         </Pressable>
 
+        <View style={{ backgroundColor: colors.surface }}>
+          <MentionSuggestions people={composer.suggestions} onPick={composer.pick} />
+        </View>
         <View style={[styles.inputRow, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
           <TextInput
             style={[
@@ -334,8 +343,7 @@ export default function EmergencyDetailScreen() {
             ]}
             placeholder={t('comments.placeholder')}
             placeholderTextColor={colors.placeholder}
-            value={draft}
-            onChangeText={setDraft}
+            {...composer.inputProps}
             multiline
             accessibilityLabel={t('comments.write')}
           />
@@ -365,7 +373,7 @@ export default function EmergencyDetailScreen() {
             {selectedComment && (
               <>
                 <Text style={[styles.actionSheetPreview, { color: colors.text }]} numberOfLines={2}>
-                  {selectedComment.content}
+                  {mentionsToText(selectedComment.content)}
                 </Text>
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
                 {selectedComment.author_id !== user?.id ? (
@@ -374,7 +382,7 @@ export default function EmergencyDetailScreen() {
                     onPress={() => {
                       const c = selectedComment;
                       setSelectedComment(null);
-                      setReportTarget({ type: 'emergency_comment', id: c.id, label: c.content });
+                      setReportTarget({ type: 'emergency_comment', id: c.id, label: mentionsToText(c.content) });
                     }}
                   >
                     <Flag size={IconSize.lg} color={colors.red} />
@@ -415,13 +423,13 @@ export default function EmergencyDetailScreen() {
                 <X size={IconSize.lg} color={colors.text} />
               </TouchableOpacity>
             </View>
+            <MentionSuggestions people={editor.suggestions} onPick={editor.pick} />
             <TextInput
               style={[
                 styles.editInput,
                 { backgroundColor: colors.itemBackground, color: colors.text, borderColor: colors.border },
               ]}
-              value={editText}
-              onChangeText={setEditText}
+              {...editor.inputProps}
               multiline
               autoFocus
               accessibilityLabel={t('comments.editTitle')}

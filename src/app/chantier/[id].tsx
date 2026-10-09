@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MapPin, Navigation, Archive, ArchiveRestore, Pencil, MessageSquare, Camera, FileText, Users, ChevronDown, ChevronUp, Copy, Check, Trash2, AlertTriangle, Clock, Save, ListChecks } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
+import ChantierNotificationButton from '@/components/ChantierNotificationButton';
 import { Colors } from '@/constants/Colors';
 import { Spacing, Radius, FontSize, FontWeight, Shadow, IconSize } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -44,7 +45,8 @@ export default function ChantierDetailScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // `tab` : onglet a ouvrir, quand on arrive depuis une notification.
+  const { id, tab } = useLocalSearchParams<{ id: string; tab?: string }>();
 
   const { data: chantier, isLoading } = chantierHooks.useById(id);
   const queryClient = useQueryClient();
@@ -64,7 +66,13 @@ export default function ChantierDetailScreen() {
   const deleteMutation = chantierHooks.useRemove();
   const [showRetentionModal, setShowRetentionModal] = useState(false);
   const [retentionInput, setRetentionInput] = useState('');
-  const [activeTab, setActiveTab] = useState<TabKey>('steps');
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    TABS.some((t) => t.key === tab) ? (tab as TabKey) : 'steps',
+  );
+  // L'ecran peut deja etre ouvert quand une notification y ramene.
+  useEffect(() => {
+    if (TABS.some((t) => t.key === tab)) setActiveTab(tab as TabKey);
+  }, [tab]);
   const [showInfo, setShowInfo] = useState(true);
   const [addressCopied, setAddressCopied] = useState(false);
   // Sous-onglets persistes au-dessus des unmounts des sections.
@@ -291,6 +299,7 @@ export default function ChantierDetailScreen() {
           {chantier.name}
         </Text>
         <View style={styles.headerActions}>
+          {id ? <ChantierNotificationButton chantierId={id} /> : null}
           {user?.role === 'admin' && (
             <>
               {chantier.archived_at ? (

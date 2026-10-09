@@ -85,6 +85,8 @@ interface PushNotificationData {
   type?: string;
   chantier_id?: string;
   feedback_id?: string;
+  emergency_id?: string;
+  step_id?: string;
 }
 
 /**
@@ -99,6 +101,16 @@ function destination(data: PushNotificationData | undefined): Href | null {
   // Reponse du support a un signalement : l'ecran liste tous les siens, avec
   // les reponses recues.
   if (data.type === 'feedback') return '/support';
+  // Le fil d'une urgence, pour l'urgence elle-meme ou un message (mention
+  // comprise) ecrit dedans.
+  if (data.emergency_id && data.chantier_id) {
+    return { pathname: '/emergency/[id]', params: { id: data.emergency_id, chantierId: data.chantier_id } };
+  }
+  // Un message ou une mention : l'onglet des discussions, ou celui des etapes
+  // pour la discussion d'une etape.
+  if ((data.type === 'comment' || data.type === 'mention') && data.chantier_id) {
+    return { pathname: '/chantier/[id]', params: { id: data.chantier_id, tab: data.step_id ? 'steps' : 'comments' } };
+  }
   if (data.chantier_id) return `/chantier/${data.chantier_id}`;
   return null;
 }

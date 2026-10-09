@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'react-native';
-import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle, LifeBuoy } from 'lucide-react-native';
+import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle, LifeBuoy, SlidersHorizontal } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DASHBOARD_CREATE_ORG_URL } from '@/constants/Urls';
@@ -449,6 +449,22 @@ export default function ProfilScreen() {
                     accessibilityLabel={t('profile.enablePush')}
                   />
                 </View>
+                {/* Reglages fins : par type d'evenement, et chantiers en sourdine. */}
+                <TouchableOpacity
+                  style={styles.notifRow}
+                  onPress={() => router.push('/notification-preferences')}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('notifPrefs.title')}
+                >
+                  <View style={[styles.notifIcon, { backgroundColor: colors.primary + '15' }]}>
+                    <SlidersHorizontal size={IconSize.md} color={colors.primary} />
+                  </View>
+                  <View style={styles.notifInfo}>
+                    <Text style={[styles.notifTitle, { color: colors.text }]}>{t('notifPrefs.title')}</Text>
+                    <Text style={[styles.notifHint, { color: colors.mutedText }]}>{t('notifPrefs.entryHint')}</Text>
+                  </View>
+                  <ChevronRight size={IconSize.md} color={colors.mutedText} />
+                </TouchableOpacity>
               </View>
 
               {/* Mes organisations */}
