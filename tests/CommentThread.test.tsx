@@ -67,12 +67,13 @@ describe('CommentThread', () => {
     expect(screen.queryByText('Supprimer')).toBeNull();
   });
 
-  it('propose Modifier et Supprimer sur son propre message, ni Signaler ni Bloquer', async () => {
+  it('propose Modifier et Supprimer sur son propre message, ni Repondre, ni Signaler, ni Bloquer', async () => {
     await rendre(<CommentThread chantierId="chantier-1" />);
     await ouvrirMenu('Je commande le beton');
 
     expect(await screen.findByText('Modifier')).toBeTruthy();
     expect(screen.getByText('Supprimer')).toBeTruthy();
+    expect(screen.queryByText('Répondre')).toBeNull();
     expect(screen.queryByText('Signaler')).toBeNull();
     expect(screen.queryByText(/^Bloquer/)).toBeNull();
   });

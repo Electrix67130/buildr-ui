@@ -10,11 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'react-native';
-import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle, LifeBuoy, SlidersHorizontal } from 'lucide-react-native';
+import { LogOut, User, Sun, Moon, Smartphone, Save, Mail, Phone, Building2, Check, Globe, Lock, KeyRound, X, Camera, Plus, ArrowRightLeft, Bell, FileText, ChevronRight, ExternalLink, Trash2, AlertTriangle, LifeBuoy } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DASHBOARD_CREATE_ORG_URL } from '@/constants/Urls';
@@ -30,7 +29,7 @@ import { useTheme, ThemeMode } from '@/contexts/ThemeContext';
 import { useTranslation } from '@/contexts/I18nContext';
 import { LOCALES, Locale } from '@/i18n/translations';
 import { useQueryClient } from '@tanstack/react-query';
-import { useUpdateProfile, useUpdatePassword, useSwitchOrganization, useCreateOrganization, useUpdatePushPreference } from '@/api/hooks/useAuth';
+import { useUpdateProfile, useUpdatePassword, useSwitchOrganization, useCreateOrganization } from '@/api/hooks/useAuth';
 import { useUnreadSummary } from '@/api/hooks/useChantierViews';
 import * as Updates from 'expo-updates';
 import { Colors } from '@/constants/Colors';
@@ -77,7 +76,6 @@ export default function ProfilScreen() {
   const updatePassword = useUpdatePassword();
   const switchOrg = useSwitchOrganization();
   const createOrg = useCreateOrganization();
-  const updatePushPref = useUpdatePushPreference();
   const unreadSummary = useUnreadSummary(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
@@ -428,28 +426,7 @@ export default function ProfilScreen() {
               {/* Notifications */}
               <Text style={[styles.sectionTitle, { color: colors.text2 }]}>{t('profile.notificationsSection')}</Text>
               <View style={[styles.settingsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <View style={styles.notifRow}>
-                  <View style={[styles.notifIcon, { backgroundColor: colors.primary + '15' }]}>
-                    <Bell size={IconSize.md} color={colors.primary} />
-                  </View>
-                  <View style={styles.notifInfo}>
-                    <Text style={[styles.notifTitle, { color: colors.text }]}>
-                      {t('profile.pushTitle')}
-                    </Text>
-                    <Text style={[styles.notifHint, { color: colors.mutedText }]}>
-                      {t('profile.pushHint')}
-                    </Text>
-                  </View>
-                  <Switch
-                    value={user.push_enabled}
-                    onValueChange={(value) => updatePushPref.mutate(value)}
-                    disabled={updatePushPref.isPending}
-                    trackColor={{ false: colors.border, true: colors.primary }}
-                    thumbColor="#FFFFFF"
-                    accessibilityLabel={t('profile.enablePush')}
-                  />
-                </View>
-                {/* Reglages fins : par type d'evenement, et chantiers en sourdine. */}
+                {/* L'interrupteur general et les reglages fins vivent sur leur propre ecran. */}
                 <TouchableOpacity
                   style={styles.notifRow}
                   onPress={() => router.push('/notification-preferences')}
@@ -457,7 +434,7 @@ export default function ProfilScreen() {
                   accessibilityLabel={t('notifPrefs.title')}
                 >
                   <View style={[styles.notifIcon, { backgroundColor: colors.primary + '15' }]}>
-                    <SlidersHorizontal size={IconSize.md} color={colors.primary} />
+                    <Bell size={IconSize.md} color={colors.primary} />
                   </View>
                   <View style={styles.notifInfo}>
                     <Text style={[styles.notifTitle, { color: colors.text }]}>{t('notifPrefs.title')}</Text>

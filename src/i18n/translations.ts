@@ -178,7 +178,6 @@ export type TranslationKeys =
   | 'profile.changePassword'
   | 'profile.currentPassword'
   | 'profile.updatePassword'
-  | 'profile.enablePush'
   | 'profile.pushHint'
   | 'profile.cannotSwitch'
   | 'profile.switchAccount'
@@ -763,7 +762,6 @@ const fr: Dictionary = {
   "profile.changePassword": "Changer le mot de passe",
   "profile.currentPassword": "Mot de passe actuel",
   "profile.updatePassword": "Modifier le mot de passe",
-  "profile.enablePush": "Activer les notifications push",
   "profile.pushHint": "Recevoir une alerte sur ce mobile pour les nouveaux commentaires, photos, urgences…",
   "profile.cannotSwitch": "Impossible de changer",
   "profile.switchAccount": "Changer de compte",
@@ -1381,7 +1379,6 @@ const en: Dictionary = {
   "profile.changePassword": "Change password",
   "profile.currentPassword": "Current password",
   "profile.updatePassword": "Update password",
-  "profile.enablePush": "Enable push notifications",
   "profile.pushHint": "Get an alert on this phone for new comments, photos and emergencies…",
   "profile.cannotSwitch": "Unable to switch",
   "profile.switchAccount": "Switch account",
@@ -1999,7 +1996,6 @@ const de: Dictionary = {
   "profile.changePassword": "Passwort ändern",
   "profile.currentPassword": "Aktuelles Passwort",
   "profile.updatePassword": "Passwort aktualisieren",
-  "profile.enablePush": "Push-Benachrichtigungen aktivieren",
   "profile.pushHint": "Auf diesem Gerät bei neuen Kommentaren, Fotos und Notfällen benachrichtigt werden…",
   "profile.cannotSwitch": "Wechsel nicht möglich",
   "profile.switchAccount": "Konto wechseln",
@@ -2617,7 +2613,6 @@ const es: Dictionary = {
   "profile.changePassword": "Cambiar la contraseña",
   "profile.currentPassword": "Contraseña actual",
   "profile.updatePassword": "Actualizar la contraseña",
-  "profile.enablePush": "Activar las notificaciones push",
   "profile.pushHint": "Recibir un aviso en este móvil para nuevos comentarios, fotos y urgencias…",
   "profile.cannotSwitch": "No se puede cambiar",
   "profile.switchAccount": "Cambiar de cuenta",
@@ -3235,7 +3230,6 @@ const it: Dictionary = {
   "profile.changePassword": "Cambia password",
   "profile.currentPassword": "Password attuale",
   "profile.updatePassword": "Aggiorna password",
-  "profile.enablePush": "Attiva le notifiche push",
   "profile.pushHint": "Ricevere un avviso su questo telefono per nuovi commenti, foto ed emergenze…",
   "profile.cannotSwitch": "Impossibile cambiare",
   "profile.switchAccount": "Cambia account",
@@ -3853,7 +3847,6 @@ const pt: Dictionary = {
   "profile.changePassword": "Alterar palavra-passe",
   "profile.currentPassword": "Palavra-passe atual",
   "profile.updatePassword": "Atualizar palavra-passe",
-  "profile.enablePush": "Ativar as notificações push",
   "profile.pushHint": "Receber um alerta neste telemóvel para novos comentários, fotos e urgências…",
   "profile.cannotSwitch": "Não foi possível mudar",
   "profile.switchAccount": "Mudar de conta",
@@ -4471,7 +4464,6 @@ const tr: Dictionary = {
   "profile.changePassword": "Şifreyi değiştir",
   "profile.currentPassword": "Mevcut şifre",
   "profile.updatePassword": "Şifreyi güncelle",
-  "profile.enablePush": "Anlık bildirimleri etkinleştir",
   "profile.pushHint": "Yeni yorumlar, fotoğraflar ve acil durumlar için bu telefonda uyarı alın…",
   "profile.cannotSwitch": "Değiştirilemedi",
   "profile.switchAccount": "Hesap değiştir",
@@ -5089,7 +5081,6 @@ const pl: Dictionary = {
   "profile.changePassword": "Zmień hasło",
   "profile.currentPassword": "Bieżące hasło",
   "profile.updatePassword": "Zaktualizuj hasło",
-  "profile.enablePush": "Włącz powiadomienia push",
   "profile.pushHint": "Otrzymuj powiadomienia na tym telefonie o nowych komentarzach, zdjęciach i awariach…",
   "profile.cannotSwitch": "Nie można przełączyć",
   "profile.switchAccount": "Zmień konto",

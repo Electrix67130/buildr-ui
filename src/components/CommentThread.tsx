@@ -386,10 +386,13 @@ const CommentThread: React.FC<Props> = ({ chantierId, stepFilter, readonly, list
                 </Text>
                 <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
-                <TouchableOpacity style={styles.actionRow} onPress={handleStartReply}>
-                  <Reply size={IconSize.lg} color={colors.primary} />
-                  <Text style={[styles.actionLabel, { color: colors.text }]}>{t('comments.reply')}</Text>
-                </TouchableOpacity>
+                {/* On repond aux autres ; son propre message, on le modifie. */}
+                {selectedComment.author_id !== user?.id ? (
+                  <TouchableOpacity style={styles.actionRow} onPress={handleStartReply}>
+                    <Reply size={IconSize.lg} color={colors.primary} />
+                    <Text style={[styles.actionLabel, { color: colors.text }]}>{t('comments.reply')}</Text>
+                  </TouchableOpacity>
+                ) : null}
 
                 {selectedComment.author_id !== user?.id ? (
                   <TouchableOpacity
