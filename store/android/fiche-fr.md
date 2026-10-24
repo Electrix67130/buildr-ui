@@ -2,7 +2,10 @@
 
 ## Nom de l'app (30 caracteres max)
 
-Buildr
+Buildr Chantiers
+
+Meme nom que sur l'App Store. Sous l'icone du telephone, l'app reste « Buildr »
+(`name` dans app.json).
 
 ## Description courte (80 caracteres max)
 
